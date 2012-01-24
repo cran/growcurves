@@ -241,13 +241,16 @@ dpgrowmult.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.ra
   {
 	poscar 		= which(option == "mmcar")
 	numcar 		= length(poscar)
-	omega.plus	= vector("list",numcar) ## row sums of Omega[[i]]
-	for(i in 1:numcar)
+	if( numcar > 0 ) ## allow for possibility "mmcar" not selected as an option
 	{
-		if( ncol(W.subj.aff[[poscar[i]]]) != ncol(Omega[[i]]) ) stop("\nNumber of columns of respective matrices in 'W.subj.aff' and 'Omega' must be equal (to the number of effects) under the 'mmcar' option choice.\n")
-		if( ncol(Omega[[i]]) != nrow(Omega[[i]]) ) stop("Each adjacency matrix in Omega must be a square matrix dimensioned by number of multi-mbrship random effects under the 'mmcar' option choice.")
-		omega.plus[[i]]		= rowSums(Omega[[i]])
+		omega.plus	= vector("list",numcar) ## row sums of Omega[[i]]
+		for(i in 1:numcar)
+		{
+			if( ncol(W.subj.aff[[poscar[i]]]) != ncol(Omega[[i]]) ) stop("\nNumber of columns of respective matrices in 'W.subj.aff' and 'Omega' must be equal (to the number of effects) under the 'mmcar' option choice.\n")
+			if( ncol(Omega[[i]]) != nrow(Omega[[i]]) ) stop("Each adjacency matrix in Omega must be a square matrix dimensioned by number of multi-mbrship random effects under the 'mmcar' option choice.")
+			omega.plus[[i]]		= rowSums(Omega[[i]])
 		
+		}
 	}
 
 	posicar = which(option == "mmcar" | option == "mmigrp")
@@ -482,6 +485,7 @@ dpgrowmult.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.ra
   subject		<- subject[o]
   map.subject		<- map.subject[o,]
   map.trt		<- map.trt[o,]
+  time			<- time[o] ## used for growth curve plotting
 
   ## capture number of fixed effects
   Nfixed		= ncol(X)
@@ -551,6 +555,7 @@ dpgrowmult.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.ra
   summary.results$Z			<- Z
   summary.results$n.fix_degree		<- n.fix_degree
   summary.results$map.subject		<- map.subject
+  summary.results$time			<- time ## not used in accessor functions; just reporting back to user to let them know that sorted by subject
   summary.results$map.trt		<- map.trt
   summary.results$model 		<- option
   summary.results$group.i		<- group.i

@@ -1,4 +1,4 @@
-Version 0.2.3.2
+Version 0.2.3.3
 -------------------------------------------------------------------------
 
 FEATURES
@@ -50,3 +50,9 @@ decomposition of precision matrix.
 12/11/2012
 ----------
 * updated all engine functions to pre-compute quadratic products of data matrices and their slices for more efficient computation.
+
+1/24/2013
+----------
+* fixed an error when checking user input under function dpgrowmult that accounts for the user not selecting option "mmcar" for any groups.
+* fixed error in checking for duplicate columns between Z.n and Z.c for generation of random effects design matrix, Z.
+* fixed an error to reorder "time" variable to be consistent with contiguous by-subject order for growth curve plotting.

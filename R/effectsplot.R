@@ -396,9 +396,9 @@ effectsplot <- function(objects, mm.terms = NULL, prior.labs = NULL, center = TR
    	f				= facet_wrap(~block,scales="free",ncol=2)
 	if( smoother == TRUE )
 	{
-   		p.all		 		= p.all + l + l.2 + f + axis
+   		p.all		 		= p.all + l + l.2 + f + axis ## + scale_x_continuous( breaks = seq(1:max(dat.all$session)) )
 	}else{
-		p.all		 		= p.all + l + f + axis
+		p.all		 		= p.all + l + f + axis ## + scale_x_continuous( breaks = seq(1:max(dat.all$session)) )
 	}
 	dev.new()
   	print(p.all)
@@ -419,6 +419,6 @@ effectsplot <- function(objects, mm.terms = NULL, prior.labs = NULL, center = TR
 
   session <- session_groups <- session_block <- group <- block <- ordern.i <- ordering <- session.i <- Nsessionn.i <- sessions.i <- group.i <- order.i <- low <- mean <- high <- prior <- NULL; rm(session); rm(group); rm(low); rm(mean); rm(high); rm(prior); rm(block)
 
-  gc()
+  ## gc()
 
 } ## end of function effectsplot

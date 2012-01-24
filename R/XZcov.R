@@ -114,7 +114,25 @@ XZcov = function(time = NULL , trt = NULL, trt.lab = NULL, subject = NULL, n.ran
     	## check for redundant Z.n, assuming it is non-NULL
     	if( !is.null(Z.n) )
 	{
-		if(Z.n == Z.c) Z.n = NULL
+		## check to see if Z.n is identical to Z.c
+		if( (nrow(Z.n) == nrow(Z.c)) & (ncol(Z.n) == ncol(Z.c))  )
+			{ if( all( (Z.n - Z.c) == 0 ) ) Z.n = NULL }
+
+		## check to see if any columns of Z.n are identical to Z.c
+		remove = c()
+		for( j in 1:ncol(Z.n) )
+		{
+			for( k in 1:ncol(Z.c) )
+			if( all( (Z.n[,j] - Z.c[,k]) == 0 ) ) {remove = c(remove,j)}
+		}
+		if( !is.null(remove) ) 
+		{
+			zn.names		= colnames(Z.n)
+			Z.n 			= as.matrix(Z.n[,-remove]) 
+			zn.names		= zn.names[-remove]
+			colnames(Z.n)	= zn.names
+		}
+	
 	}
 
     	## check for redundancy between X.c and X.n and remove redundant columns from X.n
@@ -181,7 +199,7 @@ XZcov = function(time = NULL , trt = NULL, trt.lab = NULL, subject = NULL, n.ran
       	X <- X[,-as.vector(v)]
   }
 
-  out 	= list(X = X, X.c = X.c, X.n = X.n, Z = Z, Z.c = Z.c, y = y)
+  out 	= list(X = X, X.c = X.c, X.n = X.n, Z.n = Z.n, Z = Z, Z.c = Z.c, y = y)
   return(out)
 
 } ## end function XZcov.R

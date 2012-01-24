@@ -48,8 +48,14 @@ getmf <- function(formula, random.only, data, na.action)
 			Z <- model.matrix(f,data = mf, rhs = 1)
 		}
 	} 
- 
-	X 		<- X[,-1] ## remove intercept since model has global intercept
+	
+	if( !is.null(X) )
+	{
+		names.x		<- colnames(X)
+		X 			<- as.matrix(X[,-1]) ## remove intercept since model has global intercept
+		colnames(X)		<- names.x[-1]
+	}
+
      	res 		<- list(y = y, X = X, Z = Z, m = m, mf = mf)
 
 	return(res)

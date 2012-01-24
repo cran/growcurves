@@ -35,7 +35,7 @@ test_that("mmi option of dpgrowmm returns expected objects under multivariate MM
 	## evaluating class
 	expect_that(MMI,is_a("dpgrowmm"))
 	## evaluating summary output
-	expect_that(length(names(srm)), equals(25))
+	expect_that(length(names(srm)), equals(26))
 	expect_that(nrow(srm$u.summary), is_equivalent_to((Nmv*nsessions)))
 	expect_that(srm$bmat.summary, is_a("list"))
 	expect_that(names(srm)[17], matches("lpml"))

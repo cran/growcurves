@@ -134,7 +134,7 @@ growthCurve	= function(y.case, B, Alpha, Beta, U = NULL, aff.clients = NULL, W.s
   z.c			= as.matrix(0,num.ran.time,1)
   xc.trt_gen		= as.matrix(0,(n.fix_degree+1),1)
 
-  if(!is.null(X.n) )  ## there exists extra non-time-based columns of X that must be expanded
+  if(!is.null(X.n) | !is.null(Z.n) )  ## there exists extra non-time-based columns of X that must be expanded
   { 
     #############################################################
     ## expand X from P*n.waves to P*T - allows different values for X.e, Z.e by wave, but holds those values constants for added time points
@@ -143,7 +143,12 @@ growthCurve	= function(y.case, B, Alpha, Beta, U = NULL, aff.clients = NULL, W.s
     markers		= matrix(0,n.waves,1)
     wave		= as.integer(as.factor(time.case)) 
     wave.u		= 1:n.waves
-    X.look		= as.data.frame(cbind(subject.case,wave,1:nrow(X.n)))
+    if( !is.null(X.n) )
+    {
+    		X.look		= as.data.frame(cbind(subject.case,wave,1:nrow(X.n)))
+    }else{ ## !is.null(Z.n)
+		X.look		= as.data.frame(cbind(subject.case,wave,1:nrow(Z.n)))
+    }
     names(X.look) 	= c("subject","wave","row")
 
     ## Fill in missing rows of X.look (for missing waves)
@@ -192,8 +197,8 @@ growthCurve	= function(y.case, B, Alpha, Beta, U = NULL, aff.clients = NULL, W.s
       	} ## end loop t over time grid
     } ## end loop i over subjects
 
-    X.e		= X.n[expander,] ## P*T version of X
-    if ( !is.null(Z.n) ) Z.e = Z.n[expander,] ## P*T version of Z; Xlook applies here because Z is not time-based and nrow(Z) = nrow(X) = Ncase
+    if( !is.null(X.n) ) X.e		= as.matrix(X.n[expander,]) ## P*T version of X
+    if ( !is.null(Z.n) ) Z.e	 	= as.matrix(Z.n[expander,]) ## P*T version of Z; Xlook applies here because Z is not time-based and nrow(Z) = nrow(X) = Ncase
   } ## end conditional statement on whether there are non-time-based (extra) X predictors that need to be expanded
 
   ## capture common fixed effects coefficients, beta, for all subjects (non-treatment covariates)

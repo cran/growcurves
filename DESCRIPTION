@@ -2,10 +2,10 @@ Package: growcurves
 Type: Package
 Title: Bayesian semi and nonparametric growth curve models that
         additionally include multiple membership random effects.
-Version: 0.2.3.2
-Date: 2012-12-11
+Version: 0.2.3.3
+Date: 2012-01-24
 Author: Terrance Savitsky
-Maintainer: "Savitsky, Terrance" <tds151@gmail.com>
+Maintainer: "terrance savitsky" <tds151@gmail.com>
 Description: Employs a non-parametric formulation for by-subject random
         effect parameters to borrow strength over a constrained number
         of repeated measurement waves in a fashion that permits
@@ -30,6 +30,6 @@ Collate: 'summary_quantiles.R' 'mcmcPlots.R' 'relabel.R' 'getmf.R'
         'datsimmult.R' 'dpgrowmult.R' 'effectsplot.R' 'ddp_quantiles.R'
         'ddpeffectsplot.R' 'ddpMCMCplots.R' 'ddpgrow.R'
         'datbrghtterms.R' 'dateduc.R' 'datbrghtmodterms.R'
-Packaged: 2012-12-26 21:02:15 UTC; savitsky
+Packaged: 2013-02-08 17:14:26 UTC; savitsky
 Repository: CRAN
-Date/Publication: 2012-12-27 06:24:40
+Date/Publication: 2013-02-08 19:55:07

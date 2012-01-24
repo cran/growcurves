@@ -400,6 +400,7 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
   subject		<- subject[o]
   map.subject		<- map.subject[o,]
   map.trt		<- map.trt[o,]
+  time			<- time[o] ## used for growth curve plotting
 
   ## capture number of fixed effects
   Nfixed		= ncol(X)
@@ -489,6 +490,7 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
   summary.results$X			<- X
   summary.results$Z			<- Z
   summary.results$map.subject		<- map.subject
+  summary.results$time			<- time ## not used in accessor functions; just reporting back to user to let them know that sorted by subject
   summary.results$map.trt		<- map.trt
   summary.results$map.grp		<- map.grp
   summary.results$model 		<- option

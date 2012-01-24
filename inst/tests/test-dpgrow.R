@@ -32,7 +32,7 @@ test_that("dp option of dpgrow returns expect objects", {
 	## evaluating class
 	expect_that(DP,is_a("dpgrow"))
 	## evaluating summary output
-	expect_that(length(names(srm)), equals(21))
+	expect_that(length(names(srm)), equals(22))
 	expect_that(srm$bmat.summary, is_a("list"))
 	expect_that(names(srm)[15], matches("lpml"))
 	expect_that(ncol(srm$X),equals(5))
@@ -62,7 +62,7 @@ test_that("lgm option of dpgrow returns expect objects", {
 	## evaluating class
 	expect_that(LGM,is_a("dpgrow"))
 	## evaluating summary output
-	expect_that(length(names(srm)), equals(21))
+	expect_that(length(names(srm)), equals(22))
 	expect_that(srm$bmat.summary, is_a("list"))
 	expect_that(names(srm)[15], matches("lpml"))
 	expect_that(ncol(srm$X),equals(5))
@@ -97,7 +97,7 @@ test_that("dpgrow runs correctly with nuisance fixed effects", {
 	## evaluating class
 	expect_that(DP,is_a("dpgrow"))
 	## evaluating summary output
-	expect_that(length(names(srm)), equals(21))
+	expect_that(length(names(srm)), equals(22))
 	expect_that(srm$bmat.summary, is_a("list"))
 	expect_that(names(srm)[15], matches("lpml"))
 	expect_that(ncol(srm$X),equals(7))

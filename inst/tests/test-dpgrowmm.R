@@ -34,7 +34,7 @@ test_that("mmcar option of dpgrowmm returns expected objects", {
 	## evaluating class
 	expect_that(MMCAR, is_a("dpgrowmm"))
 	## evaluating summary output
-	expect_that(length(names(srm)), equals(24))
+	expect_that(length(names(srm)), equals(25))
 	expect_that(nrow(srm$u.summary), is_equivalent_to(nsessions))
 	expect_that(srm$bmat.summary, is_a("list"))
 	expect_that(names(srm)[16], matches("lpml"))
@@ -66,7 +66,7 @@ test_that("mmigrp option of dpgrowmm returns expect objects", {
 	## evaluating class
 	expect_that(MMIGRP,is_a("dpgrowmm"))
 	## evaluating summary output
-	expect_that(length(names(srm)), equals(24))
+	expect_that(length(names(srm)), equals(25))
 	expect_that(nrow(srm$u.summary), is_equivalent_to(nsessions))
 	expect_that(srm$bmat.summary, is_a("list"))
 	expect_that(names(srm)[16], matches("lpml"))
@@ -99,7 +99,7 @@ test_that("mmi option of dpgrowmm returns expect objects", {
 	## evaluating class
 	expect_that(MMI,is_a("dpgrowmm"))
 	## evaluating summary output
-	expect_that(length(names(srm)), equals(24))
+	expect_that(length(names(srm)), equals(25))
 	expect_that(nrow(srm$u.summary), is_equivalent_to(nsessions))
 	expect_that(srm$bmat.summary, is_a("list"))
 	expect_that(names(srm)[16], matches("lpml"))
