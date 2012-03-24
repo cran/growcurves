@@ -108,14 +108,14 @@
   \code{(1,1,1,2,2,...)}.  If excluded, it is assumed there
   is a single group.}
 
-  \item{subj.aff}{A \emph{Paff x 1} vector subset of
+  \item{subj.aff}{A \emph{n.aff x 1} vector subset of
   \code{subject} composed with unique subject identifiers
   that are linked to the multiple membership effects; e.g.
   one or more treatment cohorts.  If all subjects are to
   receive the mapping of multiple membership effects,
   \code{subj.aff} may be left blank.}
 
-  \item{W.subj.aff}{An \emph{P.aff x S} numeric matrix that
+  \item{W.subj.aff}{An \emph{n.aff x S} numeric matrix that
   maps a set of random effects to affected subjects, where
   \code{P.aff} is the length of the unique subjects to whom
   the multiple membership random effects applies.  It is
@@ -242,7 +242,7 @@ data(datsim)
 ## in a multiple membership construction communicated with the N x S matrix, W.subj.aff.
 ## Returns object, res.mm, of class "dpgrowmm".
 shape.dp		= 3
-strength.mm		= 0.001
+strength.mm		= 0.01
 res.mm			= dpgrowmm(y = datsim$y, subject = datsim$subject, trt = datsim$trt, time = datsim$time, n.random = datsim$n.random,
 						n.fix_degree = 2, Omega = datsim$Omega, group = datsim$group, subj.aff = datsim$subj.aff,
 						W.subj.aff = datsim$W.subj.aff, n.iter = 10000, n.burn = 2000, n.thin = 10,

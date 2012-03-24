@@ -267,11 +267,11 @@ effectsplot <- function(objects, mm.terms = NULL, prior.labs = NULL, center = TR
 
 	dat.all						= as.data.frame(do.call("rbind",dat.all))
 	## plot
-   	p.all		 		= ggplot(data=dat.all,aes(x=session, y=mean, shape=factor(prior)))
+   	p.all		 		= ggplot(data=dat.all,aes(x=session, y=mean, shape=factor(prior), colour = factor(prior)))
    	l 				= geom_point(size = 2.3)
 	l.2				= geom_smooth(aes(group=prior), method = "loess", span = 1.0, size = 1.1, se = FALSE)
    	f				= facet_wrap(~block,scales="free",ncol=2)
-	axis	 			= labs(x = axis.labs[1], y = axis.labs[2], shape = "Prior")
+	axis	 			= labs(x = axis.labs[1], y = axis.labs[2], shape = "Prior", colour = "Prior")
 	if( smoother == TRUE )
 	{
    		p.all		 		= p.all + l + l.2 + f + axis

@@ -369,7 +369,7 @@ END_RCPP
             // construct posterior mean, hs, and precision, phis
             colvec ytilde = y - c;
             /* nv x 1 */
-            es = trans( taue*trans(ytilde)*hws + omegaplus(s)*umatsbar*L );
+	    es = trans( taue*(trans(ytilde)*hws) + omegaplus(s)*umatsbar*L );
             phis = taue*trans(hws)*hws + omegaplus(s)*L; /* nv x nv */
             hs = inv(phis)*es; /* nv x 1*/
             us = umat.row(s);

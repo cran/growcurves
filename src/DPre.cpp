@@ -481,7 +481,7 @@ END_RCPP
         log_det(val,sign,phib);
         double p = hb.n_rows;
         double c = log(2*M_PI)*(-0.5*p);
-        double logdens = c + 0.5*val + as_scalar( -0.5*trans(hb)*phib*hb );
+        double logdens = c + 0.5*val - 0.5*as_scalar( trans(hb)*phib*hb );
         return(logdens);
     }
 

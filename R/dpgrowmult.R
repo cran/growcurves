@@ -569,8 +569,8 @@ dpgrowmult.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.ra
    }else{ ## other fixed effects besides time-based covariates. Note: Either X.n or Z.n may be NULL (but not both), which is handled in the growthCurve function
 	gc.plot		= growthCurve(y.case = y, B = res$B, Alpha = res$Alpha, Beta = res$Beta, U = res$U, aff.clients = subj.aff, W.subj = W.subj, X.n = X.n, Z.n = Z.n, 
 				trt.case = trt, trt.lab = trti.u, subject.case = subject, subject.lab = subjecti.u, T = T, min.T = min.T, max.T = max.T, n.thin = n.thin, 
-				n.waves = n.waves, time.case = time, n.fix_degree = n.fix_degree, Nrandom = Nrandom)
-			## memo: if have nuisance covariates, need input of Nrandom to construct time-based random effects since Q > Nrandom
+				n.waves = n.waves, time.case = time, n.fix_degree = n.fix_degree, Nrandom = n.random)
+			## memo: if have nuisance covariates, need input of Nrandom = n.random to construct time-based random effects since Q > Nrandom
    }
 
  } ## end conditional statement on creating growth curves

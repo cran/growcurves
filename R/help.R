@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #' Package: \tab growcurves\cr
 #' Type: \tab Package\cr
-#' Version: \tab 0.1\cr
-#' Date: \tab 2011-10-03\cr
+#' Version: \tab 0.1.1\cr
+#' Date: \tab 2012-04-11\cr
 #' License: \tab GPL (>= 2) \cr
 #' LazyLoad: \tab yes\cr
 #' }
@@ -54,13 +54,18 @@
 #' \code{\link{datsim}} Simulated dataset with two treatment arms (treatment and control) composed from a 
 #' model with a Dirichlet process (DP) prior on the set of client effects and a single MM term under a 
 #' \code{"mmcar"} formulation.  Structured to express similar properties as the case example in both 
-#' Savitsky and Paddock (2011) references, below.
+#' Savitsky and Paddock (2012) references, below.
 #'
 #' \code{\link{datsimcov}} Of similar structre to \code{simdat}, only the data generating model now
 #' additionally employs 2 nuisance fixed effects.
 #'
 #' \code{\link{datsimmult}} Simulated data under 4 treatment arms generated from a model with now
 #' 4 multiple membership terms.   The terms are generated under \code{c("mmi","mmcar","mmi","mmcar")} prior formulations.  
+#'
+#' BENCHMARK DATA SETS
+#' \code{\link{datbrghtterms}} Data derived from BRIGHT study reviewed in reference and includes
+#' BDI-II depressive symptom scores for client experimental units.  Associated data objects
+#' are included to facilitate runs under engine functions \code{dpgrow}, \code{dpgrowmm} and \code{dpgrowmult}.
 #'
 #' @examples 
 #' \dontrun{

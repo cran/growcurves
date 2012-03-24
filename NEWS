@@ -1,9 +1,9 @@
-Version 0.1.0
+Version 0.1.1
 -------------------------------------------------------------------------
 
 NEW FEATURES
 
-* first release on CRAN.
+* Minor syntax change to accommodate RcppArmadillo 0.3.0; otherwise identical to version 0.1.0
 
 * performs Bayesian semi-parametric mixed effects modeling on repeated measures data.
 

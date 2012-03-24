@@ -91,7 +91,7 @@ growthCurve	= function(y.case, B, Alpha, Beta, U = NULL, aff.clients = NULL, W.s
   }else{
 	if( is.null(Nrandom) )
         {
-		stop("Must input 'Nrandom', total number of random effects, because have additional random effects.")
+		stop("Must input 'Nrandom', number of time-indexed random effects, because have additional nuisance random effects.")
 	}else{ ## user inputs Nrandom
 		num.ran.time 	= Nrandom
 	}

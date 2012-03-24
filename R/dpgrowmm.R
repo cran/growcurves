@@ -61,10 +61,10 @@ NULL
 #'	This input applies only to \code{option = "mmcar"}.
 #' @param group	A numeric or character vector of length \code{S}, providing group identifiers for each of \code{S} multiple membership effects
 #'	(e.g. \code{(1,1,1,2,2,...)}.  If excluded, it is assumed there is a single group.
-#' @param subj.aff A \emph{Paff x 1} vector subset of \code{subject} composed with unique subject identifiers that are linked to the multiple
+#' @param subj.aff A \emph{n.aff x 1} vector subset of \code{subject} composed with unique subject identifiers that are linked to the multiple
 #'	membership effects; e.g. one or more treatment cohorts.  If all subjects are to receive the mapping of multiple membership effects,
 #'	\code{subj.aff} may be left blank.
-#' @param W.subj.aff An \emph{P.aff x S} numeric matrix that maps a set of random effects to affected subjects, where \code{P.aff} is the length
+#' @param W.subj.aff An \emph{n.aff x S} numeric matrix that maps a set of random effects to affected subjects, where \code{P.aff} is the length
 #'	of the unique subjects to whom the multiple membership random effects applies.  It is assumed that the row order is the same
 #'	as the order of \code{subj.aff} (or \code{unique(subject)} if \code{subj.aff} is not input).  If \code{W.subj.aff} is a multiple membership
 #'	weight matrix, then the rows will sum to 1.  The form and therefore, interpretation of output is dependent on form of input; for example, 
@@ -123,7 +123,7 @@ NULL
 #' ## in a multiple membership construction communicated with the N x S matrix, W.subj.aff.
 #' ## Returns object, res.mm, of class "dpgrowmm".
 #' shape.dp		= 3
-#' strength.mm		= 0.001
+#' strength.mm		= 0.01
 #' res.mm			= dpgrowmm(y = datsim$y, subject = datsim$subject, trt = datsim$trt, time = datsim$time, n.random = datsim$n.random, 
 #'						n.fix_degree = 2, Omega = datsim$Omega, group = datsim$group, subj.aff = datsim$subj.aff,
 #'						W.subj.aff = datsim$W.subj.aff, n.iter = 10000, n.burn = 2000, n.thin = 10,
@@ -150,7 +150,7 @@ dpgrowmm			<- function(y, subject, trt, time, n.random, n.fix_degree, formula, r
 ################################################
 dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.random = NULL, n.fix_degree = NULL, formula = NULL, 
 						random.only = FALSE, data = NULL, Omega = NULL, group = NULL, subj.aff = NULL, W.subj.aff, 
-					 	n.iter, n.burn, n.thin = 1, strength.mm = 0.01, shape.dp = 1, plot.out = TRUE, option = "mmcar")
+					 	n.iter, n.burn, n.thin = 1, strength.mm = 0.1, shape.dp = 1, plot.out = TRUE, option = "mmcar")
 { ## start function dpgrowmm.default
 
   ############################
@@ -467,8 +467,8 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
    }else{ ## other fixed effects besides time-based covariates. Note: Either X.n or Z.n may be NULL (but not both), which is handled in the growthCurve function
 	gc.plot		= growthCurve(y.case = y, B = res$B, Alpha = res$Alpha, Beta = res$Beta, U = res$U, aff.clients = subj.aff, W.subj = W.subj, X.n = X.n, Z.n = Z.n, 
 				trt.case = trt, trt.lab = trti.u, subject.case = subject, subject.lab = subjecti.u, T = T, min.T = min.T, max.T = max.T, n.thin = n.thin, 
-				n.waves = n.waves, time.case = time, n.fix_degree = n.fix_degree, Nrandom = Nrandom)
-			## memo: if have nuisance covariates, need input of Nrandom to construct time-based random effects since Q > Nrandom
+				n.waves = n.waves, time.case = time, n.fix_degree = n.fix_degree, Nrandom = n.random)
+			## memo: if have nuisance covariates, need input of Nrandom = n.random to construct time-based random effects since Q > Nrandom
    }
 
  } ## end conditional statement on creating growth curves

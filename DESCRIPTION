@@ -2,7 +2,7 @@ Package: growcurves
 Type: Package
 Title: Bayesian semiparametric growth curve models that additionally
         include multiple membership random effects.
-Version: 0.1
+Version: 0.1.1
 Date: 2012-03-24
 Author: Terrance Savitsky
 Maintainer: <tds151@gmail.com>
@@ -27,6 +27,6 @@ Collate: 'summary_quantiles.R' 'mcmcPlots.R' 'relabel.R' 'getmf.R'
         'XZcov.R' 'growthCurve.R' 'dpgrowmm.R' 'dpgrow.R' 'help.R'
         'growplot.R' 'trtplot.R' 'datsim.R' 'datsimcov.R'
         'datsimmult.R' 'dpgrowmult.R' 'effectsplot.R' 'datbrghtterms.R'
-Packaged: 2012-03-25 14:58:47 UTC; savitsky
+Packaged: 2012-04-11 18:53:51 UTC; savitsky
 Repository: CRAN
-Date/Publication: 2012-03-25 14:59:14
+Date/Publication: 2012-04-12 11:14:50
