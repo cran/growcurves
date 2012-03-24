@@ -1,0 +1,86 @@
+\name{mmmultPost}
+\alias{mmmultPost}
+\title{Bayesian mixed effects model with a DP prior on by-subject effects and more than one multiple membership random effects term}
+\usage{
+  mmmultPost(y, X, Z, Wcases, Mmats, Omegas, omegapluses,
+    ngs, subjects, typet, niter, nburn, nthin, shapealph,
+    strength.mm)
+}
+\arguments{
+  \item{y}{An \emph{N x 1} response (of subject-measure
+  cases)}
+
+  \item{X}{Fixed effects design matrix}
+
+  \item{Z}{Random effects design matrix.  Assumed grouped
+  by \code{subjects}}
+
+  \item{Wcases}{A list object containing \code{N x 1}
+  multiple membership (MM) weight matrices; one for each MM
+  term.}
+
+  \item{Mmats}{A list object containing \code{S[i] x G[i]}
+  matrices, where \code{S[i]} are the number of effects for
+  MM term \code{i} and \code{G[i]} is the number of
+  (unique) groups for the \code{S[i]} effects.  The length
+  of this list is equal to the number of terms under prior
+  option set to \code{"mmigrp"}}
+
+  \item{Omegas}{A list object containing \code{S[i] x S[i]}
+  unnormalized adjacency matrices for MM term \code{i},
+  each with entries equal to 1 where two effects
+  communicate and 0, otherwise.  Diagonal elements are
+  zero.  The length of this list is equal to the number
+  terms with prior option set to \code{"mmcar"}}
+
+  \item{omegapluses}{A list object containing \code{S x 1}
+  vector of row sums of \code{Omega[[i]]}.  The length of
+  \code{omegaplus} should equal \code{Omega}.}
+
+  \item{ngs}{A numeric vector containing the number of
+  total groups for each MM term under prior option
+  \code{"mmcar"}.}
+
+  \item{subjects}{An \emph{N x 1} set of subject
+  identifiers.}
+
+  \item{typet}{A numeric vector of length equal to the
+  number of MM terms, where each entry specifies the prior
+  formulation for that effect term (block).  Prior
+  formulation options are \code{1 = "mmcar", 2 = "mmi", 3 =
+  "mmigrp", 4 = "mmdp"}.}
+
+  \item{niter}{The number of MCMC iterations}
+
+  \item{nburn}{The number of MCMC burn-in iterations to
+  discard}
+
+  \item{nthin}{The step increment of MCMC samples to
+  return}
+
+  \item{shapealph}{The shape parameter for the \eqn{\Gamma}
+  prior on the DP concentration parameter.  The rate
+  parameter is set of \code{1}.}
+
+  \item{strength.mm}{The shape and rate parameters for the
+  \eqn{\Gamma} prior on the CAR precision parameter,
+  \eqn{\tau_{\gamma}}}
+}
+\value{
+  res A list object containing MCMC runs for all model
+  parameters.
+}
+\description{
+  An internal function to \code{\link{dpgrowmult}}
+}
+\note{
+  Intended as an internal function for
+  \code{\link{dpgrowmult}}
+}
+\author{
+  Terrance Savitsky \email{tds151@gmail.com}
+}
+\seealso{
+  \code{\link{dpgrowmm}}
+}
+

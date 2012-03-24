@@ -1,0 +1,29 @@
+Version 0.1.0
+-------------------------------------------------------------------------
+
+NEW FEATURES
+
+* first release on CRAN.
+
+* performs Bayesian semi-parametric mixed effects modeling on repeated measures data.
+
+* allows a DP prior on a set of subject random effects to borrow strength across subjects for estimation.
+
+* simultaneously supports definition of random effects under other than subject groupings with one or more multiple membership (MM) terms.
+
+* package functions are constructed to promote intuitive structures for data input and ease-of-use for model outputs.
+
+* the dpgrow function performs mixed effects modeling without an MM term (but with a DP prior on the set of subject random effects).
+
+* the dpgrowmm function extends dpgrow by allowing for a single MM term under one of three prior formulation options = c("mmi","mmigrp","mmcar").
+
+* the dpgrowmult function extends dpgrowmm by allowing for any number of MM terms, each under one of four prior formulation options = c("mmi","mmigrp","mmcar","mmdp").
+
+* there are also 3 accompanying graphical accessor functions for the 3 sampling functions to promote easy analysis:
+
+* the growplot function produces and plots by-subject growth curves under any user defined grouping.
+
+* the trtplot function compares the distribution for the difference in fixed effects means between any two treatment arms.
+
+* the effectsplot function compares the mean effect values for an MM term under different prior and model formulations.
+

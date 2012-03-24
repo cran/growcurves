@@ -1,0 +1,74 @@
+\name{XZcov}
+\alias{XZ}
+\alias{XZcov}
+\title{generate fixed and random design matrices, X and Z}
+\usage{
+  XZcov(time = NULL, trt = NULL, trt.lab = NULL,
+    subject = NULL, n.random = NULL, n.fix_degree = NULL,
+    formula = NULL, random.only = NULL, data = NULL)
+}
+\arguments{
+  \item{time}{A vector of length{N} (number of subject-time
+  cases) providing times for associated subject-measure
+  observations.  Identical to \code{time} from
+  \code{\link{dpgrowmm}}.}
+
+  \item{trt}{The treatment group membership vector of
+  length \code{N}.  Assumed numeric and sequential. (e.g.
+  \code{(0,0,1,1,1,2,2,...)}.}
+
+  \item{trt.lab}{Associated labels for the numeric
+  treatment groups.  Each distinct treatment group assumed
+  to have a unique label.}
+
+  \item{subject}{Vector of length \code{N} providing
+  subject-measure cases.  Identical to \code{subject} from
+  \code{\link{dpgrowmm}}.  \code{P} = number of subjects,
+  \code{q} = number of random effect parameters, per
+  subject.}
+
+  \item{n.random}{A scalar input providing the number of
+  by-subject time-based random effect parameters.}
+
+  \item{n.fix_degree}{The highest polynomial degree to
+  employ for constructing time-based fixed effects
+  covariates.}
+
+  \item{formula}{A formula of format \code{y ~ x_1 +
+  x_2*x_3 | z_1*z_2 } where \code{|} separates fixed (to
+  the left of \code{|}) and random effects.}
+
+  \item{random.only}{A boolean scalar used in the case that
+  either fixed or random effects are entered in
+  \code{formula}, but not both, which case the \code{|} is
+  not entered (e.g. \code{y ~ x_1 + x_2*x_3 }.  Then, if
+  \code{random.only == TRUE} the variables on the
+  right-hand side are interpreted to be random effects;
+  otherwise fixed for use in \code{\link{dpgrow}} and
+  \code{\link{dpgrowmm}}.}
+
+  \item{data}{Associated data.frame containing names
+  variables in \code{formula}}
+}
+\value{
+  A list object containing composed fixed and random effect
+  design matrices, \code{X} and \code{Z}, with column names
+  and subsets: \code{c(X.n, Z.n)} nuisance and \code{c(X.c,
+  Z.c)} growth curve design matrices.  Also returns data
+  output, y, if included with formula; otherwise returns y
+  = NULL.
+}
+\description{
+  Constructs fixed and random design matrices compromised
+  of either or both growth curve (time-based) components
+  and user-defined nuisance fixed or random effects (input
+  via a formula).  Used to conduct Bayesian mixed effects
+  modeling and to produce growth curve output.
+}
+\author{
+  Terrance Savitsky \email{tds151@gmail.com}
+}
+\seealso{
+  \code{\link{dpgrowmm}}, \code{\link{dpgrow}}
+}
+

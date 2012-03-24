@@ -1,0 +1,66 @@
+\name{mmIgroupDpPost}
+\alias{mmIgroup}
+\alias{mmIgroupDpPost}
+\title{Bayesian mixed effects model with a DP prior on by-subject effects and use of group means for multiple membership effects}
+\usage{
+  mmIgroupDpPost(y, X, Z, Wcase, Wsubject, M, subjects,
+    niter, nburn, nthin, strength.mm, shapealph)
+}
+\arguments{
+  \item{y}{An \emph{N x 1} response (of subject-measure
+  cases)}
+
+  \item{X}{Fixed effects design matrix}
+
+  \item{Z}{Random effects design matrix.  Assumed grouped
+  by \code{subjects}}
+
+  \item{Wcase}{An \emph{N x 1} multiple membership weight
+  matrix to map supplemental random effects}
+
+  \item{Wsubject}{An \emph{P.aff x S} multiple membership
+  weight matrix with rows equal to number of unique
+  affected subjects}
+
+  \item{M}{An \emph{S x G} design matrix mapping (G) group
+  means to the multiple membership effects Posterior
+  samples are centered on each iteration to identify the
+  global mean parameter.}
+
+  \item{subjects}{An \emph{N x 1} set of subject
+  identifiers}
+
+  \item{niter}{The number of MCMC iterations}
+
+  \item{nburn}{The number of MCMC burn-in iterations to
+  discard}
+
+  \item{nthin}{The step increment of MCMC samples to
+  return}
+
+  \item{strength.mm}{The shape and rate parameters for the
+  \eqn{\Gamma} prior on the CAR precision parameter,
+  \eqn{\tau_{\gamma}}}
+
+  \item{shapealph}{The shape parameter for the \eqn{\Gamma}
+  prior on the DP concentration parameter.  The rate
+  parameter is set of \code{1}.}
+}
+\value{
+  res A list object containing MCMC runs for all model
+  parameters.
+}
+\description{
+  An internal function to \code{\link{dpgrowmm}}
+}
+\note{
+  Intended as an internal function for
+  \code{\link{dpgrowmm}}
+}
+\author{
+  Terrance Savitsky \email{tds151@gmail.com}
+}
+\seealso{
+  \code{\link{dpgrowmm}}
+}
+

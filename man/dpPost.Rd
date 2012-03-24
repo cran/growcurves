@@ -1,0 +1,47 @@
+\name{dpPost}
+\alias{dpPost}
+\title{Run a Bayesian mixed effects model for by-subject random effects with DP prior}
+\usage{
+  dpPost(y, X, Z, subjects, niter, nburn, nthin, shapealph)
+}
+\arguments{
+  \item{y}{An \emph{N x 1} response (of subject-measure
+  cases)}
+
+  \item{X}{Fixed effects design matrix}
+
+  \item{Z}{Random effects design matrix.  Assumed grouped
+  by \code{subjects}}
+
+  \item{subjects}{An \emph{N x 1} set of subject
+  identifiers}
+
+  \item{niter}{The number of MCMC iterations}
+
+  \item{nburn}{The number of MCMC burn-in iterations to
+  discard}
+
+  \item{nthin}{The step increment of MCMC samples to
+  return}
+
+  \item{shapealph}{The shape parameter for the \eqn{\Gamma}
+  prior on the DP concentration parameter.  The rate
+  parameter is set of \code{1}.}
+}
+\value{
+  res A list object containing MCMC runs for all model
+  parameters.
+}
+\description{
+  An internal function to \code{\link{dpgrow}}
+}
+\note{
+  Intended as an internal function for \code{\link{dpgrow}}
+}
+\author{
+  Terrance Savitsky \email{tds151@gmail.com}
+}
+\seealso{
+  \code{\link{dpgrow}}
+}
+

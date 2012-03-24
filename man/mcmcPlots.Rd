@@ -1,0 +1,122 @@
+\name{mcmcPlots}
+\alias{mcmcPlots}
+\alias{plotmcmc}
+\title{generate plots of model(s) posterior results}
+\usage{
+  mcmcPlots(subjecti.u, subj.aff = NULL,
+    subjaff.input = NULL, bmat.summary, group = NULL,
+    groupi.u = NULL, u.summary = NULL, ulabs = NULL,
+    mm.summary = NULL, M = NULL, Tauu = NULL, Taub, Taue,
+    Deviance)
+}
+\arguments{
+  \item{subjecti.u}{A vector of length \code{P}, number of
+  unique subjects, containing unique set of user input
+  values for \code{subject}.}
+
+  \item{subj.aff}{A vector of length \code{P.aff}
+  identifying the unique subjects (which are a subset of
+  variable, subject) receiving multiple membership random
+  effects.  Applies only to case of a single set of
+  multiple membership random effects.}
+
+  \item{subjaff.input}{User input version of
+  \code{subj.aff} that may be character or numeric format.
+  (Again, this is a strict subset of subjecti.u).  Applies
+  only to case of a single set of multiple membership
+  random effects.}
+
+  \item{bmat.summary}{A list object of \code{q} elements,
+  each containing an \code{P x 3} matrix of
+  c(2.5\%,50\%,97.5\%) quantile summaries for each subject
+  of the applicable subject random effect parameter.
+  \code{P} = number of subjects, \code{q} = number of
+  random effect parameters, per subject.}
+
+  \item{group}{An \code{S x 1} vector of group identifiers
+  for the multiple membership random effects, where
+  \code{S} is the number of multiple membership random
+  effects.  The format is sequential numeric, starting at
+  1.  Applies only to case of a single set of multiple
+  membership effects.}
+
+  \item{groupi.u}{A vector of user input unique values for
+  the multiple membership effect group identifiers where
+  employ 1 multiple membership term.  Input as a list of
+  \code{S x 1} vectors in the case of more than one set of
+  multiple membership effects.}
+
+  \item{u.summary}{An \code{S x 3} matrix of of quantile
+  summaries for each multiple membership session effect
+  where employ 1 multiple membership term.  Input as list
+  of \code{S x 3} quantiles in the case of more than one
+  set of multiple membership effects.}
+
+  \item{ulabs}{An \code{nty} vector of labels for each term
+  (block) in the case of more than one set of multiple
+  membership effects.}
+
+  \item{mm.summary}{A \code{P.aff x 3} matrix of quantile
+  summaries.  \code{mm} was created by multiple the set of
+  \code{S} multiple membership effects, \code{u}, on each
+  MCMC iteration by the multiple membership design matrix,
+  \code{W.subj.aff}.}
+
+  \item{M}{The \code{iter.keep x 1} matrix of posterior
+  samples for the parameter capturing the number of
+  clusters formed under the DP prior on the client
+  effects.}
+
+  \item{Tauu}{\code{iter.keep x 1} matrix of posterior
+  samples capturing the precision parameter for
+  \code{"mmcar", "mmi" and "mmigrp"}.  Input as
+  \code{iter.keep x nty} matrix in the case of \code{nty}
+  multiple membership effect terms.}
+
+  \item{Taub}{\code{iter.keep x Nrandom} matrix of
+  posterior samples capturing the precision parameter for
+  each of the sets of subject random effects.}
+
+  \item{Taue}{\code{iter.keep x 1} matrix of posterior
+  samples capturing the precision parameter for the model
+  error term.}
+
+  \item{Deviance}{\code{iter.keep x 1} matrix of posterior
+  samples for the model deviance.}
+}
+\value{
+  A list of plot objects of class \code{ggplot2} including:
+  \item{p.U}{by group plot of session effects,
+  u[1:Nsession]. Plot is faceted for more than one set of
+  effect terms.} \item{p.Umm}{plot of "mm = W.subj.aff %*%
+  u" for those clients attending assessions.}
+  \item{p.Ub0}{plot of " mm + b0", the total random
+  intercept, for those clients attending sessions.}
+  \item{p.b}{stacked plots of b0,...,b(q-1) - vertical
+  lines for each client span 2.5% - 97.5% values with mean
+  noted.} \item{p.M}{MCMC trace plot of M, number of
+  clusters.} \item{p.tauu}{MCMC trace plots of tau.u. Plot
+  is faceted for more than one set of effect terms.}
+  \item{p.taue}{MCMC trace plots of tau.e.}
+  \item{p.taub}{MCMC faceted trace plot for each of the q
+  components of tau.b.} \item{p.dev}{MCMC trace plots of
+  deviance.}
+}
+\description{
+  Constructs plots of subject and multiple membership
+  effects, as well as traceplots for model precision and
+  clustering parameters.  Returns a list of objects of
+  class \code{ggplot}.
+}
+\note{
+  Intended as an internal function for
+  \code{\link{dpgrow}}, \code{\link{dpgrowmm}}, and
+  \code{\link{dpgrowmult}}
+}
+\author{
+  Terrance Savitsky \email{tds151@gmail.com}
+}
+\seealso{
+  \code{\link{dpgrowmm}}, \code{\link{dpgrow}}
+}
+

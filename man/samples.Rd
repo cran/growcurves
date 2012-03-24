@@ -1,0 +1,21 @@
+\name{samples}
+\alias{samples}
+\alias{samples.dpgrowmm}
+\title{Produce MCMC samples for model parameters}
+\usage{
+  \method{samples}{dpgrowmm} (object, ...)
+}
+\arguments{
+  \item{object}{A \code{dpgrowmm} object}
+
+  \item{...}{Ignored}
+}
+\value{
+  res list object of class \code{samples.dpgrowmm},
+  \code{samples.dpgrowmult}, or \code{samples.dpgrow}
+}
+\description{
+  provides posterior sampled values for every model
+  parameter of a \code{dpgrowmm} object
+}
+
