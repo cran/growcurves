@@ -17,6 +17,8 @@
 #'			Input as a list of \code{S x 1} vectors in the case of more than one set of multiple membership effects.
 #' @param u.summary An \code{S x 3} matrix of of quantile summaries for each multiple membership session effect where employ 1 multiple membership term.
 #'			Input as list of \code{S x 3} quantiles in the case of more than one set of multiple membership effects.
+#' @param Nmv The order for the multiple membership effects.  Defaults to \code{Nmv = 1} for univariate effects.  Otherwise, \code{Nmv > 1}
+#'		indicates that \code{u.summary} is dimensioned as \code{Nmv*S x 3}.
 #' @param ulabs An \code{nty} vector of labels for each term (block) in the case of more than one set of multiple membership effects.
 #' @param mm.summary A \code{P.aff x 3} matrix of quantile summaries.  \code{mm} was created by multiple the set of \code{S} multiple membership
 #'		effects, \code{u}, on each MCMC iteration by the multiple membership design matrix, \code{W.subj.aff}.
@@ -30,6 +32,7 @@
 #'     \item{p.U}{by group plot of session effects, u[1:Nsession]. Plot is faceted for more than one set of effect terms.}
 #'     \item{p.Umm}{plot of "mm = W.subj.aff %*% u" for those clients attending assessions.}
 #'     \item{p.Ub0}{plot of " mm + b0", the total random intercept, for those clients attending sessions.} 
+#'     \item{p.Ub}{plot of "mm + b" for multivariate MM effects with order equal to "Nrandom".}
 #'     \item{p.b}{stacked plots of b0,...,b(q-1) - vertical lines for each client span 2.5% - 97.5% values with mean noted.} 
 #'     \item{p.M}{MCMC trace plot of M, number of clusters.} 
 #'     \item{p.tauu}{MCMC trace plots of tau.u. Plot is faceted for more than one set of effect terms.} 
@@ -41,7 +44,7 @@
 #' @note Intended as an internal function for \code{\link{dpgrow}}, \code{\link{dpgrowmm}}, and \code{\link{dpgrowmult}}
 #' @aliases mcmcPlots plotmcmc
 #' @export
-mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.summary, group = NULL, groupi.u = NULL, u.summary = NULL, 
+mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.summary, group = NULL, groupi.u = NULL, u.summary = NULL, Nmv = 1,
 			ulabs = NULL, mm.summary = NULL, M = NULL, Tauu = NULL, Taub, Taue, Deviance)
 {  
    ##
@@ -49,9 +52,16 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    ##
    if( !is.null(u.summary) ) 
    {
+	if( is.null(group) & is.null(groupi.u) ) stop("\nMust enter group, either through 'group' or 'groupi.u' to plot MM term effects.\n")
+	if( is.null(groupi.u) ) groupi.u = group
 	if( !is.list(u.summary) )
 	{
-		Nsession 	= nrow(u.summary)
+		if( is.null(Nmv) )
+		{
+			Nsession 	= nrow(u.summary)
+		}else{
+			Nsession	= nrow(u.summary)/Nmv
+		}
 		G		= length(unique(group))
 	}else{ ## multiple MM terms
 		nty		= ncol(Tauu)
@@ -116,72 +126,155 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
 		rm(datU); rm(dat); rm(dattauu); rm(dattauu.long)
 	
 	}else{
-   		## construct trt labels for plotting
-   		labs = c()
-		groupi.u = unique(groupi.u) ## in the case entered with length equal to number of sessions
-   		for(g in 1:G)
-   		{
-			labs	= c( labs, paste("Group",groupi.u[g], sep = "_") )
-   		}
+		if( Nmv > 1 ) ## multivariate MM effects
+		{
+			## construct trt labels for plotting
+   			labs = c()
+			groupi.u = unique(groupi.u) ## in the case entered with length equal to number of sessions
+   			for(g in 1:G)
+   			{
+				labs	= c( labs, paste("Group",groupi.u[g], sep = "_") )
+   			}
 
-   		## session effects - by session number - without credible ranges
-   		## data.frame
-   		group				= factor(group,labels = labs)
-   		session 			= 1:Nsession
-   		datU				= as.data.frame(cbind(session,group,u.summary))  ##u.summary is Nsession x 3 (3 statistics for each component of u)
-   		names(datU)			= c("session","group","low","mean","high")
+   			## session effects - by session number - without credible ranges
+   			## data.frame
+   			group				= factor(group,labels = labs)
+			group				= rep(group, times = Nmv)
+   			session 			= rep(1:Nsession, times = Nmv)
+			order				= rep(1:Nmv,each = Nsession)
+   			datU				= data.frame(session,group,order,u.summary)  ##u.summary is Nmv*Nsession x 3 (3 statistics for each component of u)
+   			names(datU)			= c("session","cluster","order","low","mean","high")
  
-   		## plot
-   		p.U		 		= ggplot(data=datU,aes(x=session, y=mean, colour=factor(group)))
-   		l 				= geom_point()
-   		f				= facet_wrap(~group,scales="free",ncol=2)
-   		axis	 			= labs(x = "Session", y = "Effect Size", colour = "Group")
-   		options		 		= opts(title="Session Effects (u)")
-   		p.U		 		= p.U + l + f + axis + options
+   			## plot
+   			p.U		 		= ggplot(data=datU,aes(x=session, y=mean, colour=factor(cluster)))
+   			l 				= geom_point(aes(shape=factor(order)))
+   			f				= facet_wrap(~cluster,scales="free",ncol=2)
+   			axis	 			= labs(x = "Session", y = "Effect Size", shape = "Poly Order", colour = "Group")
+   			options		 		= opts(title="Session Effects (u)")
+   			p.U		 		= p.U + l + f + axis + options
 
 
-   		## mm(u) - by client - with credible ranges
-   		## long data.frame
-   		client				= subjaff.input  ## direct correspondence between subj.aff and subjaff.input
-   		datUmm				= as.data.frame(cbind(client,mm.summary))
-   		names(datUmm)			= c("client","low","mean","high")
-   		datUmm.long			= melt(datUmm,id="client",measure = c("low","mean","high"))
+   			## mm(u) - by client - with credible ranges
+   			## long data.frame
+   			client				= rep(subjaff.input,times = Nmv)  ## direct correspondence between subj.aff and subjaff.input
+			order.mm			= rep(1:Nmv,each = length(subjaff.input))
+   			datUmm				= data.frame(client,order.mm,mm.summary)
+   			names(datUmm)			= c("client","order","low","mean","high")
+   			datUmm.long			= melt(datUmm,id.vars=c("client","order"),measure = c("low","mean","high"))
  
-   		## plot
-   		p.Umm 		= ggplot(data=datUmm.long,aes(x=client, y=value , group=factor(client)))
-   		l.1 		= geom_line(colour = "steelblue4")
-   		l.2		= geom_smooth(aes(group=1),method = "loess", span = .2, size = 1.2, colour = "pink")
-   		axis 		= labs(x = "Subject", y = "Effect Size")
-   		options 	= opts(title="Session-induced client effects - mm = (W * u)")
-   		p.Umm 		= p.Umm + l.1 + l.2 + axis + options 
+   			## plot
+   			p.Umm 		= ggplot(data=datUmm.long,aes(x=client, y=value , group=factor(client)))
+   			l.1 		= geom_line(colour = "steelblue4")
+   			l.2		= geom_smooth(aes(group=1),method = "loess", span = .2, size = 1.2, colour = "pink")
+			f		= facet_wrap(~order,scales="free",ncol=2)
+   			axis 		= labs(x = "Subject", y = "Effect Size")
+   			options 	= opts(title="Session-induced client effects - mm = H (W * U)")
+   			p.Umm 		= p.Umm + l.1 + l.2 + f + axis + options 
 
 
-   		## mm(u) + b0 - by client - with credible ranges
-   		## long data.frame
-   		## Note: used subj.aff instead of subjaff.input to select subjects from bmat.summary 
-   		Ub0.summary			= bmat.summary[[1]][subj.aff,] + mm.summary  ## only using subset of clients that attended sessions
-   		datUb0				= as.data.frame(cbind(client,Ub0.summary))
-   		names(datUb0)			= c("client","low","mean","high")
-   		datUb0.long			= melt(datUb0,id="client",measure = c("low","mean","high"))
+   			## mm(u) + b - by client - with credible ranges
+   			## long data.frame
+   			## Note: used subj.aff instead of subjaff.input to select subjects from bmat.summary 
+			num.subject			= length(unique(subjecti.u))
+			sel.subject			= rep(1:num.subject,times=Nmv)
+			b.summary			= do.call("rbind",bmat.summary)
+			b.summary			= b.summary[sel.subject,] ## just in case there are nuisance random effects such that Nrandom > Nmv
+			pos.sel				= which(sel.subject %in% subj.aff)
+   			Ub.summary			= b.summary[pos.sel,] + mm.summary  ## only using subset of clients that attended sessions
+   			datUb				= data.frame(client,order.mm,Ub.summary)
+   			names(datUb)			= c("client","order","low","mean","high")
+   			datUb.long			= melt(datUb,id.vars=c("client","order"),measure = c("low","mean","high"))
 
-   		p.Ub0 	= ggplot(data=datUb0.long,aes(x=client, y=value , group=factor(client)))
-   		l.1 	= geom_line(colour = "steelblue4")
-   		l.2	= geom_smooth(aes(group=1),method = "loess", span = .2, size = 1.2, colour = "pink")
-   		axis 	= labs(x = "Subject", y = "Effect Size")
-   		options = opts(title="Session-induced client effects - mm0 + b0")
-   		p.Ub0 	= p.Ub0 + l.1 + l.2 + axis + options 
+   			p.Ub 	= ggplot(data=datUb.long,aes(x=client, y=value , group=factor(client)))
+   			l.1 	= geom_line(colour = "steelblue4")
+   			l.2	= geom_smooth(aes(group=1),method = "loess", span = .2, size = 1.2, colour = "pink")
+			f	= facet_wrap(~order,scales="free",ncol=2)
+   			axis 	= labs(x = "Subject", y = "Effect Size")
+   			options = opts(title="Session-induced client effects - mm + b")
+   			p.Ub 	= p.Ub + l.1 + l.2 + f + axis + options 
 
 	
-   		## tau.u - MCMC trace
-   		dattauu			= as.data.frame(cbind(1:iter.keep,Tauu))
-   		names(dattauu) 		= c("iteration","value")
-   		p.tauu			= ggplot(data=dattauu,aes(x=iteration,y=value))
-   		l			= geom_line()
-   		axis			= labs(x = "Iterations", y = "Sampled Value")
-   		options			= opts(title="MCMC Trace plot for tau.u")
-   		p.tauu			= p.tauu + l + axis + options
+   			## tau.u - MCMC trace
+   			dattauu			= data.frame(1:iter.keep,Tauu)
+   			names(dattauu) 		= c("iteration",paste("order",1:Nmv,sep="_"))
+			dattauu			= melt(dattauu,id.vars = "iteration")
+			dattauu$order		= dattauu$variable; dattauu$variable <- NULL
+   			p.tauu			= ggplot(data=dattauu,aes(x=iteration,y=value))
+   			l			= geom_line()
+			f			= facet_wrap(~order,scales="free",ncol=2)
+   			axis			= labs(x = "Iterations", y = "Sampled Value")
+   			options			= opts(title="MCMC Trace plot for tau.u")
+   			p.tauu			= p.tauu + l + f + axis + options
 
-		rm(datU); rm(datUmm); rm(datUmm.long); rm(datUb0); rm(datUb0.long);
+			rm(datU); rm(datUmm); rm(datUmm.long); rm(datUb); rm(datUb.long); 
+
+		}else{ ## univariate MM effects
+   			## construct trt labels for plotting
+   			labs = c()
+			groupi.u = unique(groupi.u) ## in the case entered with length equal to number of sessions
+   			for(g in 1:G)
+   			{
+				labs	= c( labs, paste("Group",groupi.u[g], sep = "_") )
+   			}
+
+   			## session effects - by session number - without credible ranges
+   			## data.frame
+   			group				= factor(group,labels = labs)
+   			session 			= 1:Nsession
+   			datU				= as.data.frame(cbind(session,group,u.summary))  ##u.summary is Nsession x 3 (3 statistics for each component of u)
+   			names(datU)			= c("session","group","low","mean","high")
+ 
+   			## plot
+   			p.U		 		= ggplot(data=datU,aes(x=session, y=mean, colour=factor(group)))
+   			l 				= geom_point()
+   			f				= facet_wrap(~group,scales="free",ncol=2)
+   			axis	 			= labs(x = "Session", y = "Effect Size", colour = "Group")
+   			options		 		= opts(title="Session Effects (u)")
+   			p.U		 		= p.U + l + f + axis + options
+
+
+   			## mm(u) - by client - with credible ranges
+   			## long data.frame
+   			client				= subjaff.input  ## direct correspondence between subj.aff and subjaff.input
+   			datUmm				= as.data.frame(cbind(client,mm.summary))
+   			names(datUmm)			= c("client","low","mean","high")
+   			datUmm.long			= melt(datUmm,id="client",measure = c("low","mean","high"))
+ 
+   			## plot
+   			p.Umm 		= ggplot(data=datUmm.long,aes(x=client, y=value , group=factor(client)))
+   			l.1 		= geom_line(colour = "steelblue4")
+   			l.2		= geom_smooth(aes(group=1),method = "loess", span = .2, size = 1.2, colour = "pink")
+   			axis 		= labs(x = "Subject", y = "Effect Size")
+   			options 	= opts(title="Session-induced client effects - mm = (W * u)")
+   			p.Umm 		= p.Umm + l.1 + l.2 + axis + options 
+
+
+   			## mm(u) + b0 - by client - with credible ranges
+   			## long data.frame
+   			## Note: used subj.aff instead of subjaff.input to select subjects from bmat.summary 
+   			Ub0.summary			= bmat.summary[[1]][subj.aff,] + mm.summary  ## only using subset of clients that attended sessions
+   			datUb0				= as.data.frame(cbind(client,Ub0.summary))
+   			names(datUb0)			= c("client","low","mean","high")
+   			datUb0.long			= melt(datUb0,id="client",measure = c("low","mean","high"))
+
+   			p.Ub0 	= ggplot(data=datUb0.long,aes(x=client, y=value , group=factor(client)))
+   			l.1 	= geom_line(colour = "steelblue4")
+   			l.2	= geom_smooth(aes(group=1),method = "loess", span = .2, size = 1.2, colour = "pink")
+   			axis 	= labs(x = "Subject", y = "Effect Size")
+   			options = opts(title="Session-induced client effects - mm0 + b0")
+   			p.Ub0 	= p.Ub0 + l.1 + l.2 + axis + options 
+	
+   			## tau.u - MCMC trace
+   			dattauu			= as.data.frame(cbind(1:iter.keep,Tauu))
+   			names(dattauu) 		= c("iteration","value")
+   			p.tauu			= ggplot(data=dattauu,aes(x=iteration,y=value))
+   			l			= geom_line()
+   			axis			= labs(x = "Iterations", y = "Sampled Value")
+   			options			= opts(title="MCMC Trace plot for tau.u")
+   			p.tauu			= p.tauu + l + axis + options
+
+			rm(datU); rm(datUmm); rm(datUmm.long); rm(datUb0); rm(datUb0.long);
+		}
 
 	} ## end conditional statment on is.list(u.summary) - are there multiple MM terms
 
@@ -269,8 +362,13 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
 	if( is.list(u.summary) ) ## multiple MM terms
 	{
 		return(list(p.U = p.U, p.b = p.b, p.tauu = p.tauu, p.taue = p.taue, p.taub = p.taub, p.dev = p.dev, p.M = p.M))
-	}else{ ## single MM term
-		return(list(p.U = p.U, p.Umm = p.Umm, p.Ub0 = p.Ub0, p.b = p.b, p.tauu = p.tauu, p.taue = p.taue, p.taub = p.taub, p.dev = p.dev, p.M = p.M))
+	}else{ ## univariate or multivariate MM term
+		if( Nmv > 1 ) ## multivariate MM term
+		{
+			return(list(p.U = p.U, p.Umm = p.Umm, p.Ub = p.Ub, p.b = p.b, p.tauu = p.tauu, p.taue = p.taue, p.taub = p.taub, p.dev = p.dev, p.M = p.M))
+		}else{ ## univariate MM term
+			return(list(p.U = p.U, p.Umm = p.Umm, p.Ub0 = p.Ub0, p.b = p.b, p.tauu = p.tauu, p.taue = p.taue, p.taub = p.taub, p.dev = p.dev, p.M = p.M))
+		}
 	}
    }else{ ## either DP or LGM
 	if( !is.null(M) ) ## DP
@@ -281,7 +379,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
 	}
    } ## end conditional fork on returning plot objects
 
-   value <- iteration <- NULL; rm(value); rm(iteration);
+   value <- iteration <- variable <- order <- cluster <- NULL; rm(value); rm(iteration);
 
 
 } ## end function mcmcPlots

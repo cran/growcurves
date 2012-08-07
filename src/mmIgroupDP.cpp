@@ -7,7 +7,7 @@ using namespace std;
 
 SEXP mmIgroupDP(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP Wcase, SEXP Wperson, SEXP Mmat,
         SEXP personsvec, SEXP niterInt, SEXP nburnInt, SEXP nthinInt, SEXP ustrengthd,
-        SEXP shapealph)
+        SEXP shapealph, SEXP ratebeta)
 {
 BEGIN_RCPP
     // Time run
@@ -29,6 +29,7 @@ BEGIN_RCPP
     int nburn = as<int>(nburnInt);
     int nthin = as<int>(nthinInt);
     double ac = as<double>(shapealph);
+    double bc = as<double>(ratebeta);
     double ustrength = as<double>(ustrengthd);
     int nkeep = (niter -  nburn)/nthin;
 
@@ -118,7 +119,7 @@ BEGIN_RCPP
     a2 = b2 = 1; /* taub */
     a4 = b4 = 1; /* taue */
     a7 = b7 = 1; /* taueta*/
-    a8 = ac; b8 = 1; /* c */
+    a8 = ac; b8 = bc; /* c */
 
     // Conduct posterior samples and store results
     int k, l;

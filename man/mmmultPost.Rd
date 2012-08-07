@@ -4,7 +4,7 @@
 \usage{
   mmmultPost(y, X, Z, Wcases, Mmats, Omegas, omegapluses,
     ngs, subjects, typet, niter, nburn, nthin, shapealph,
-    strength.mm)
+    ratebeta, strength.mm)
 }
 \arguments{
   \item{y}{An \emph{N x 1} response (of subject-measure
@@ -61,6 +61,10 @@
   \item{shapealph}{The shape parameter for the \eqn{\Gamma}
   prior on the DP concentration parameter.  The rate
   parameter is set of \code{1}.}
+
+  \item{ratebeta}{The rate parameter for the \eqn{\Gamma}
+  prior on the DP concentration parameter. Default value is
+  \code{1}.}
 
   \item{strength.mm}{The shape and rate parameters for the
   \eqn{\Gamma} prior on the CAR precision parameter,

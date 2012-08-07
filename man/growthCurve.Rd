@@ -24,11 +24,14 @@
   effects parameters, where \code{F} = number of fixed
   effects}
 
-  \item{U}{The \code{M x S} matrix of multiple membership
-  random effects, where \code{S} = number of random
-  effects.  Leave \code{NULL} is don't require the multiple
-  membership effects.  Input as list of \code{M x S}
-  matrices if have more than one mutiple membership term.}
+  \item{U}{The \code{M x S} matrix of univariate multiple
+  membership random effects, where \code{S} = number of
+  random effects.  \code{U} is multivariate, then the input
+  is of dimension \code{M x Nmv*S}, where \code{Nmv} is the
+  multivariate dimension.  Leave \code{NULL} is don't
+  require the multiple membership effects.  Input as list
+  of \code{M x S} matrices if have more than one mutiple
+  membership term.}
 
   \item{aff.clients}{Vector of length \code{P.aff} that
   identifies subjects affected by \code{U}.  Identical to

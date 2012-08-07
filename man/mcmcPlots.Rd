@@ -5,9 +5,9 @@
 \usage{
   mcmcPlots(subjecti.u, subj.aff = NULL,
     subjaff.input = NULL, bmat.summary, group = NULL,
-    groupi.u = NULL, u.summary = NULL, ulabs = NULL,
-    mm.summary = NULL, M = NULL, Tauu = NULL, Taub, Taue,
-    Deviance)
+    groupi.u = NULL, u.summary = NULL, Nmv = 1,
+    ulabs = NULL, mm.summary = NULL, M = NULL, Tauu = NULL,
+    Taub, Taue, Deviance)
 }
 \arguments{
   \item{subjecti.u}{A vector of length \code{P}, number of
@@ -52,6 +52,11 @@
   of \code{S x 3} quantiles in the case of more than one
   set of multiple membership effects.}
 
+  \item{Nmv}{The order for the multiple membership effects.
+  Defaults to \code{Nmv = 1} for univariate effects.
+  Otherwise, \code{Nmv > 1} indicates that \code{u.summary}
+  is dimensioned as \code{Nmv*S x 3}.}
+
   \item{ulabs}{An \code{nty} vector of labels for each term
   (block) in the case of more than one set of multiple
   membership effects.}
@@ -92,15 +97,16 @@
   u" for those clients attending assessions.}
   \item{p.Ub0}{plot of " mm + b0", the total random
   intercept, for those clients attending sessions.}
-  \item{p.b}{stacked plots of b0,...,b(q-1) - vertical
-  lines for each client span 2.5% - 97.5% values with mean
-  noted.} \item{p.M}{MCMC trace plot of M, number of
-  clusters.} \item{p.tauu}{MCMC trace plots of tau.u. Plot
-  is faceted for more than one set of effect terms.}
-  \item{p.taue}{MCMC trace plots of tau.e.}
-  \item{p.taub}{MCMC faceted trace plot for each of the q
-  components of tau.b.} \item{p.dev}{MCMC trace plots of
-  deviance.}
+  \item{p.Ub}{plot of "mm + b" for multivariate MM effects
+  with order equal to "Nrandom".} \item{p.b}{stacked plots
+  of b0,...,b(q-1) - vertical lines for each client span
+  2.5% - 97.5% values with mean noted.} \item{p.M}{MCMC
+  trace plot of M, number of clusters.} \item{p.tauu}{MCMC
+  trace plots of tau.u. Plot is faceted for more than one
+  set of effect terms.} \item{p.taue}{MCMC trace plots of
+  tau.e.} \item{p.taub}{MCMC faceted trace plot for each of
+  the q components of tau.b.} \item{p.dev}{MCMC trace plots
+  of deviance.}
 }
 \description{
   Constructs plots of subject and multiple membership

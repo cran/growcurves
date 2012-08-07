@@ -15,7 +15,8 @@
 #'	\code{P} = number of subjects, \code{q} = number of random effect parameters, per subject.
 #' @param Alpha The \code{M x 1} vector for the model intercept parameter.
 #' @param Beta The \code{M x F} matrix of model fixed effects parameters, where \code{F} = number of fixed effects
-#' @param U The \code{M x S} matrix of multiple membership random effects, where \code{S} = number of random effects.
+#' @param U The \code{M x S} matrix of univariate multiple membership random effects, where \code{S} = number of random effects.
+#'	\code{U} is multivariate, then the input is of dimension \code{M x Nmv*S}, where \code{Nmv} is the multivariate dimension.
 #'	Leave \code{NULL} is don't require the multiple membership effects. 
 #'	Input as list of \code{M x S} matrices if have more than one mutiple membership term.
 #' @param aff.clients Vector of length \code{P.aff} that identifies subjects affected by \code{U}.  Identical to \code{subj.aff} from \code{\link{dpgrowmm}}.
@@ -68,13 +69,19 @@ growthCurve	= function(y.case, B, Alpha, Beta, U = NULL, aff.clients = NULL, W.s
   rm(tmp)
   
   ## capture clients receiving additive session effect term
-  if( is.list(W.subj) ) ## multiple MM terms, so cull unique clients
+  if ( !is.null(W.subj) )
   {
-	nty = length(aff.clients) ## aff.clients is also a list object
-	## aff.clients = do.call("rbind",aff.clients) ## assuming aff.clients is a list of column vectors
-	aff.clients = unlist(aff.clients)
-	aff.clients = unique(aff.clients) ## clients affected by ANY mm term
-  }
+  	if( is.list(W.subj) ) ## multiple MM terms, so cull unique clients
+  	{
+		nty = length(aff.clients) ## aff.clients is also a list object
+		## aff.clients = do.call("rbind",aff.clients) ## assuming aff.clients is a list of column vectors
+		aff.clients = unlist(aff.clients)
+		aff.clients = unique(aff.clients) ## clients affected by ANY mm term
+  	}else{ ## single MM term, either univariate or multivariate
+		S <- ncol(W.subj) ## number of MM (session) effects
+	}
+  } ## end conditional statement on !is.null(W.subj)
+
   mm.clients		= matrix(0,P,1)
   if(!is.null(aff.clients))
   {
@@ -257,8 +264,19 @@ growthCurve	= function(y.case, B, Alpha, Beta, U = NULL, aff.clients = NULL, W.s
 						}
 						Y[((i-1)*T+t),]		= common.term
 					}else{ ## single MM term
-						Y[((i-1)*T+t),]		= Alpha[samps] + Beta[samps,c(pos.common,start.e:end.e)] %*% x + bmati[samps,] %*% z + 
-										U[samps,] %*% W.subj[i,]
+						if( ncol(U) > ncol(W.subj) ) ## U is multivariate
+						{
+							common.term	=  Alpha[samps] + Beta[samps,c(pos.common,start.e:end.e)] %*% x + bmati[samps,] %*% z
+							for( q in 1:num.ran.time ) ## fix Nmv = Nrandom, number of time-indexed random effect terms
+							{
+								indx.q 		<- (q-1)*S + 1:S
+								common.term 	<- common.term + (time[t]^(q-1))*U[samps,indx.q] %*% W.subj[i,]
+							}
+							Y[((i-1)*T+t),]		= common.term
+						}else{ ## U is univariate
+							Y[((i-1)*T+t),]		= Alpha[samps] + Beta[samps,c(pos.common,start.e:end.e)] %*% x +
+								 		bmati[samps,] %*% z + U[samps,] %*% W.subj[i,]
+						}
 					} ## end conditional statement on whether multiple MM effects
 
 				}else{ ## no nuisance covariates
@@ -271,8 +289,19 @@ growthCurve	= function(y.case, B, Alpha, Beta, U = NULL, aff.clients = NULL, W.s
 						}
 						Y[((i-1)*T+t),]		= common.term
 					}else{ ## single MM term
-						Y[((i-1)*T+t),]		= Alpha[samps] + Beta[samps,pos.common] %*% x + bmati[samps,] %*% z + 
-										U[samps,] %*% W.subj[i,]
+						if( ncol(U) > ncol(W.subj) ) ## U is multivariate
+						{
+							common.term	=  Alpha[samps] + Beta[samps,pos.common] %*% x + bmati[samps,] %*% z
+							for( q in 1:num.ran.time )
+							{
+								indx.q 		<- (q-1)*S + 1:S
+								common.term 	<- common.term + (time[t]^(q-1))*U[samps,indx.q] %*% W.subj[i,]
+							}
+							Y[((i-1)*T+t),]		= common.term
+						}else{ ## U is univariate
+							Y[((i-1)*T+t),]		= Alpha[samps] + Beta[samps,pos.common] %*% x +
+								 		bmati[samps,] %*% z + U[samps,] %*% W.subj[i,]
+						}
 					} ## end conditional statement on whether multiple MM effects
 				}
 		
@@ -292,8 +321,19 @@ growthCurve	= function(y.case, B, Alpha, Beta, U = NULL, aff.clients = NULL, W.s
 						}
 						Y[((i-1)*T+t),]		= common.term
 					}else{ ## single MM term
-						Y[((i-1)*T+t),]		= Alpha[samps] + Beta[samps,c(pos.common,start.c:end.c,start.e:end.e)] %*% x +
-								 	bmati[samps,] %*% z + U[samps,] %*% W.subj[i,]
+						if( ncol(U) > ncol(W.subj) ) ## U is multivariate
+						{
+							common.term	=  Alpha[samps] + Beta[samps,c(pos.common,start.c:end.c,start.e:end.e)] %*% x + bmati[samps,] %*% z
+							for( q in 1:num.ran.time )
+							{
+								indx.q 		<- (q-1)*S + 1:S
+								common.term 	<- common.term + (time[t]^(q-1))*U[samps,indx.q] %*% W.subj[i,]
+							}
+							Y[((i-1)*T+t),]		= common.term
+						}else{ ## U is univariate
+							Y[((i-1)*T+t),]		= Alpha[samps] + Beta[samps,c(pos.common,start.c:end.c,start.e:end.e)] %*% x +
+								 		bmati[samps,] %*% z + U[samps,] %*% W.subj[i,]
+						}
 					} ## end conditional statement on whether multiple MM effects
 				}else{ ## no nuisance covariates
 					if( is.list(W.subj) )
@@ -305,8 +345,19 @@ growthCurve	= function(y.case, B, Alpha, Beta, U = NULL, aff.clients = NULL, W.s
 						}
 						Y[((i-1)*T+t),]		= common.term
 					}else{ ## single MM term
-						Y[((i-1)*T+t),]		= Alpha[samps] + Beta[samps,c(pos.common,start.c:end.c)] %*% x +
-								 	bmati[samps,] %*% z + U[samps,] %*% W.subj[i,]
+						if( ncol(U) > ncol(W.subj) ) ## U is multivariate
+						{
+							common.term	=  Alpha[samps] + Beta[samps,c(pos.common,start.c:end.c)] %*% x + bmati[samps,] %*% z 
+							for( q in 1:num.ran.time )
+							{
+								indx.q 		<- (q-1)*S + 1:S
+								common.term 	<- common.term + (time[t]^(q-1))*U[samps,indx.q] %*% W.subj[i,]
+							}
+							Y[((i-1)*T+t),]		= common.term
+						}else{ ## U is univariate
+							Y[((i-1)*T+t),]		= Alpha[samps] + Beta[samps,c(pos.common,start.c:end.c)] %*% x +
+								 			bmati[samps,] %*% z + U[samps,] %*% W.subj[i,]
+						}
 					} ## end conditional statement on whether multiple MM effects
 				} ## end conditional statement on whether nuisance covariates
 			} ## end conditional statement on whether control group or one of treatment groups

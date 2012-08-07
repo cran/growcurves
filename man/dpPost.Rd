@@ -2,7 +2,8 @@
 \alias{dpPost}
 \title{Run a Bayesian mixed effects model for by-subject random effects with DP prior}
 \usage{
-  dpPost(y, X, Z, subjects, niter, nburn, nthin, shapealph)
+  dpPost(y, X, Z, subjects, niter, nburn, nthin, shapealph,
+    ratebeta)
 }
 \arguments{
   \item{y}{An \emph{N x 1} response (of subject-measure
@@ -27,6 +28,10 @@
   \item{shapealph}{The shape parameter for the \eqn{\Gamma}
   prior on the DP concentration parameter.  The rate
   parameter is set of \code{1}.}
+
+  \item{ratebeta}{The rate parameter for the \eqn{\Gamma}
+  prior on the DP concentration parameter. Default value is
+  \code{1}.}
 }
 \value{
   res A list object containing MCMC runs for all model

@@ -4,7 +4,7 @@
 \title{Bayesian mixed effects model with a DP prior on by-subject effects and use of group means for multiple membership effects}
 \usage{
   mmIgroupDpPost(y, X, Z, Wcase, Wsubject, M, subjects,
-    niter, nburn, nthin, strength.mm, shapealph)
+    niter, nburn, nthin, strength.mm, shapealph, ratebeta)
 }
 \arguments{
   \item{y}{An \emph{N x 1} response (of subject-measure
@@ -45,6 +45,10 @@
   \item{shapealph}{The shape parameter for the \eqn{\Gamma}
   prior on the DP concentration parameter.  The rate
   parameter is set of \code{1}.}
+
+  \item{ratebeta}{The rate parameter for the \eqn{\Gamma}
+  prior on the DP concentration parameter. Default value is
+  \code{1}.}
 }
 \value{
   res A list object containing MCMC runs for all model

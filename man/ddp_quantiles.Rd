@@ -1,14 +1,19 @@
-\name{summary_quantiles}
-\alias{quantiles}
-\alias{summary_quantiles}
+\name{ddp_quantiles}
+\alias{ddp_quantiles}
 \title{Produce quantile summaries of model posterior samples}
 \usage{
-  summary_quantiles(model.output, Nfixed, Nrandom,
-    Nsubject, Nsubj.aff = NULL, Nmv = 1, Nsession = NULL)
+  ddp_quantiles(model.output, dosemat, Nfixed, Nrandom,
+    Nsubject, typet)
 }
 \arguments{
-  \item{model.output}{An output object of class within
-  \code{c("dpgrow", "dpgrowmm")}}
+  \item{model.output}{A list vector of objects returned by
+  MCMC sampling functions.  e.g. mmCplusDpPost for
+  \code{option = "mmcar"}.}
+
+  \item{dosemat}{An \code{P x (T+1)} \code{matrix} object
+  that maps \code{subjects} to treatment dosages.  The
+  first column should be an intercept column (filled with
+  1's).}
 
   \item{Nfixed}{Number of total fixed effects, both
   time-based and nuisance.}
@@ -19,15 +24,10 @@
   \item{Nsubject}{Number of unique subjects (on which
   repeated measures are observed).}
 
-  \item{Nsubj.aff}{Number of subjects, \code{P.aff},
-  receiving multiple membership effects}
-
-  \item{Nmv}{Number of multivariate MM effects.  Defaults
-  to 1 for univariate MM if left blank.}
-
-  \item{Nsession}{Number of multiple membership effects for
-  each entry in "Nmv".  May be left blank for univariate
-  MM.}
+  \item{typet}{A numeric vector of length equal to the
+  number of treatments that contains the base distribution
+  for each treatment.  \code{1 = "car"}, \code{2 = "mvn"},
+  \code{3 = "ind"}.}
 }
 \value{
   A list object containing quantile summaries for all
@@ -39,14 +39,14 @@
   \item{bmat.summary}{list object of length \code{Nrandom},
   each cell containing a \code{P x 3} matrix of by-subject
   parameter quantile summaries.}
-  \item{tauu.summary}{\code{Nmv x 3} quantile summary for
-  prior precision parameters employed for multiple
-  membership random effects. An \code{nty x 3} matrix in
-  the case of \code{nty} multiple membership effect terms.}
+  \item{tauu.summary}{quantile summary for prior precision
+  parameter employed for multiple membership random
+  effects. An \code{nty x 3} matrix in the case of
+  \code{nty} multiple membership effect terms.}
   \item{taue.summary}{quantile summary for model error
   precision parameter.} \item{taub}{\code{Nrandom x 3}
   quantile summaries for subject effect precision
-  parameters.} \item{u.summary}{\code{S*Nmv x 3} quantile
+  parameters.} \item{u.summary}{\code{S x 3} quantile
   summaries for multiple membership random effect
   parameters. A list of such matrices in the case of
   \code{nty} multiple membership effect terms.}

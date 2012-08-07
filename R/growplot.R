@@ -42,12 +42,12 @@ growplot <- function(object, compare.objects = NULL, subjects.plot = NULL, group
   L = length(compare.objects)
   for( l in 1:L )
   {
-	if(class(compare.objects[[l]]) != "dpgrow" & class(compare.objects[[l]]) != "dpgrowmm" & class(compare.objects[[l]]) != "dpgrowmult") 
+	if(class(compare.objects[[l]]) != "dpgrow" & class(compare.objects[[l]]) != "dpgrowmm" & class(compare.objects[[l]]) != "dpgrowmult" & class(compare.objects[[l]]) != "ddpgrow") 
 	{
-		stop("Class of each element of 'compare.objects' must be either 'dpgrow', 'dpgrowmm' or 'dpgrowmult'.")
+		stop("Class of each element of 'compare.objects' must be either 'dpgrow', 'dpgrowmm', 'dpgrowmult' or 'ddpgrow'.")
 	}
   }
-  if(class(object) != "dpgrow" & class(object) != "dpgrowmm" & class(object) != "dpgrowmult") stop("Class of 'object' must be either 'dpgrow', 'dpgrowmm' or 'dpgrowmult'.")
+  if(class(object) != "dpgrow" & class(object) != "dpgrowmm" & class(object) != "dpgrowmult" & class(object) != "ddpgrow") stop("Class of 'object' must be either 'dpgrow', 'dpgrowmm', 'dpgrowmult' or 'ddpgrow'.")
   if( !is.null(groups.plot) & !is.null(subjects.plot) )
   {
   	if( length(groups.plot) != length(subjects.plot) ) stop("Variable 'groups.plot' must be of same length as 'subjects.plot'.")
@@ -132,6 +132,7 @@ growplot <- function(object, compare.objects = NULL, subjects.plot = NULL, group
   }else{
 	options				= NULL
   }
+  dev.new()
   p.gctrt		= p + l + l.2 + f + axis + options
   print(p.gctrt)
 

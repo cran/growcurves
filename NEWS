@@ -1,23 +1,24 @@
-Version 0.1.1
+Version 0.2.0
 -------------------------------------------------------------------------
 
 NEW FEATURES
 
-* Minor syntax change to accommodate RcppArmadillo 0.3.0; otherwise identical to version 0.1.0
+* updated release on CRAN.
 
-* performs Bayesian semi-parametric mixed effects modeling on repeated measures data.
+* performs Bayesian mixed effects modeling on repeated measures data.
 
 * allows a DP prior on a set of subject random effects to borrow strength across subjects for estimation.
 
 * simultaneously supports definition of random effects under other than subject groupings with one or more multiple membership (MM) terms.
-
-* package functions are constructed to promote intuitive structures for data input and ease-of-use for model outputs.
 
 * the dpgrow function performs mixed effects modeling without an MM term (but with a DP prior on the set of subject random effects).
 
 * the dpgrowmm function extends dpgrow by allowing for a single MM term under one of three prior formulation options = c("mmi","mmigrp","mmcar").
 
 * the dpgrowmult function extends dpgrowmm by allowing for any number of MM terms, each under one of four prior formulation options = c("mmi","mmigrp","mmcar","mmdp").
+
+* a new ddpgrow function extends dpgrowmm and dpgrowmult by absorbing the MM term inside the subject effects such that each subject parameters their own MM effects.  
+	-- prior formulation options = c("car","mvn","ind").
 
 * there are also 3 accompanying graphical accessor functions for the 3 sampling functions to promote easy analysis:
 

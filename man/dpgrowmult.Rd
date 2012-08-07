@@ -6,7 +6,7 @@
   dpgrowmult(y, subject, trt, time, n.random, n.fix_degree,
     formula, random.only, data, Omega, group, subj.aff,
     W.subj.aff, n.iter, n.burn, n.thin, strength.mm,
-    shape.dp, plot.out, option, ulabs)
+    shape.dp, rate.dp, plot.out, option, ulabs)
 }
 \arguments{
   \item{y}{A univariate continuous response, specified as
@@ -160,6 +160,10 @@
   the DP (prior on the set of random effects parameters,
   \emph{b_1, ..., b_n ~ DP(c,G_0)} where \code{n} is the
   total number of subjects.}
+
+  \item{rate.dp}{Rate parameter under a \emph{c ~
+  G(shape.dp, rate.dp)} prior on the concentration
+  parameter of the DP.}
 
   \item{plot.out}{A boolean variable indicating whether
   user wants to return plots with output results.  Defaults

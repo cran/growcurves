@@ -6,7 +6,7 @@ using namespace std;
 
 
 SEXP DPre(SEXP yvec, SEXP Xmat, SEXP Zmat,  SEXP personsvec, SEXP niterInt,
-        SEXP nburnInt, SEXP nthinInt, SEXP shapealph)
+        SEXP nburnInt, SEXP nthinInt, SEXP shapealph, SEXP ratebeta)
 {
 BEGIN_RCPP
     // Time run
@@ -26,6 +26,7 @@ BEGIN_RCPP
     int nthin = as<int>(nthinInt);
     int nkeep = (niter -  nburn)/nthin;
     double ac = as<double>(shapealph);
+    double bc = as<double>(ratebeta);
 
     // Extract key row and column dimensions we will need to sample parameters
     int nc =  Xr.nrow(), nf = Xr.ncol(), nr = Zr.ncol();
@@ -102,13 +103,13 @@ BEGIN_RCPP
     double a2, a3, a6, b2, b3, b6;
     a2 = b2 = 1.0; /* taub */
     a3 = b3 = 1; /*taue */
-    a6 = ac; b6 = 1; /* conc */
+    a6 = ac; b6 = bc; /* conc */
     
     // Conduct posterior samples and store results
     int k,l;
     for(k = 0; k < niter; k++)
     {
-        //if( (k % 1000) == 0 ) cout << "Interation: " << k << endl;
+        //if( (k % 1000) == 0 ) Rcout << "Interation: " << k << endl;
         clusterstep(xmat, zmat, zsplit, ytilsplit, pbmat, y, beta, alpha,
                 taue, taub, persons, bstarmat, s, num, M, conc,
                 np, nr);
@@ -382,7 +383,7 @@ END_RCPP
             {
                 /* extract by-person matrix views from data*/
                 rowchoose = ord(thresh(j) + k);
-                zjwedge.row(k) = zsplit.row(rowchoose);
+                zjwedge.row(k) = zsplit.row(rowchoose); /* zsplit is a field<mat> containing repeated obs for person = rowchoose */
                 yjtilwedge.row(k) = ytilsplit.row(rowchoose);
             }
             /* sample posterior of nj block of bmat*/
@@ -481,7 +482,7 @@ END_RCPP
         log_det(val,sign,phib);
         double p = hb.n_rows;
         double c = log(2*M_PI)*(-0.5*p);
-        double logdens = c + 0.5*val - 0.5*as_scalar( trans(hb)*phib*hb );
+ 	double logdens = c + 0.5*val - 0.5*as_scalar( trans(hb)*phib*hb );
         return(logdens);
     }
 

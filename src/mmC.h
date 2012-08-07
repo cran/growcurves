@@ -13,13 +13,13 @@
 
 RcppExport SEXP DDP(SEXP yvec, SEXP Xmat, SEXP Zmat,  SEXP personsvec, SEXP Dosemat, 
            SEXP numTreat, SEXP typeTreat, SEXP OmegaList, SEXP omegapluslist,
-           SEXP niterInt, SEXP nburnInt, SEXP nthinInt, SEXP shapealph, SEXP Minit);
+           SEXP niterInt, SEXP nburnInt, SEXP nthinInt, SEXP shapealph, SEXP ratebeta, SEXP Minit);
 RcppExport SEXP mmmult(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP WcaseList, SEXP MmatList, 
            SEXP OmegaList,SEXP omegaplusvecList, SEXP ngsvec, SEXP personsvec,  
-           SEXP typeTreat, SEXP niterInt, SEXP nburnInt, SEXP nthinInt, SEXP shapealph,
+           SEXP typeTreat, SEXP niterInt, SEXP nburnInt, SEXP nthinInt, SEXP shapealph, SEXP ratebeta,
            SEXP ustrengthd);
 RcppExport SEXP DPre(SEXP yvec, SEXP Xmat, SEXP Zmat,  SEXP personsvec, SEXP niterInt,
-           SEXP nburnInt, SEXP nthinInt, SEXP shapealph);
+           SEXP nburnInt, SEXP nthinInt, SEXP shapealph, SEXP ratebeta);
 RcppExport SEXP lgm(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP personsvec, SEXP niterInt,
            SEXP nburnInt, SEXP nthinInt);
 RcppExport SEXP mmC(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP Wcase, SEXP Wperson,
@@ -33,8 +33,8 @@ RcppExport SEXP mmCsep(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP Wcase, SEXP Wperson
            SEXP niterInt, SEXP nburnInt, SEXP ustrengthd);
 RcppExport SEXP mmCmiar(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP Hmat, SEXP Wcase,
            SEXP Wperson, SEXP Omega, SEXP omegaplusvec, SEXP groupsvec,
-           SEXP personsvec, SEXP niterInt, SEXP nburnInt,
-           SEXP ustrengthd, SEXP corsessInt);
+           SEXP personsvec, SEXP niterInt, SEXP nburnInt, SEXP nthinInt,
+           SEXP ustrengthd, SEXP corsessInt, SEXP typeMM);
 RcppExport SEXP mmCwb(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP Wcase, SEXP Wperson,
            SEXP Omega, SEXP omegaplusvec, SEXP groupsvec, SEXP personsvec,
            SEXP niterInt, SEXP nburnInt, SEXP ustrengthd);
@@ -45,17 +45,17 @@ RcppExport SEXP mmIgroup(SEXP yvec, SEXP Xmat,
            SEXP personsvec, SEXP niterInt, SEXP nburnInt, SEXP ustrengthd);
 RcppExport SEXP mmCplusDP(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP Wcase, SEXP Wperson, SEXP Omega,
            SEXP omegaplusvec, SEXP groupsvec, SEXP personsvec, SEXP niterInt,
-           SEXP nburnInt, SEXP nthinInt, SEXP ustrengthd, SEXP shapealph);
+           SEXP nburnInt, SEXP nthinInt, SEXP ustrengthd, SEXP shapealph, SEXP ratebeta);
 RcppExport SEXP mmIplusDP(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP Wcase, SEXP Wperson,
            SEXP personsvec, SEXP niterInt, SEXP nburnInt, SEXP nthinInt, SEXP ustrengthd,
-           SEXP shapealph);
+           SEXP shapealph, SEXP ratebeta);
 RcppExport SEXP mmIgroupDP(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP Wcase, SEXP Wperson, SEXP Mmat,
            SEXP personsvec, SEXP niterInt, SEXP nburnInt, SEXP nthinInt, SEXP ustrengthd,
-           SEXP shapealph);
+           SEXP shapealph, SEXP ratebeta);
 RcppExport SEXP mmCmvplusDP(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP Hmat, SEXP Wcase, SEXP Wperson,
            SEXP Omega, SEXP omegaplusvec, SEXP groupsvec, SEXP personsvec,
-           SEXP niterInt, SEXP nburnInt, SEXP ustrengthd, SEXP corsessInt,
-           SEXP shapealph);
+           SEXP niterInt, SEXP nburnInt, SEXP nthinInt, SEXP ustrengthd, SEXP corsessInt,
+           SEXP shapealph, SEXP ratebeta, SEXP typeMM);
 RcppExport SEXP growthCurve(SEXP Bmat, SEXP Alphavec, SEXP Betamat, SEXP Umat, SEXP Wperson,
            SEXP ttarmvec, SEXP personvec, SEXP TInt, SEXP maxTint, SEXP nthinInt,
            SEXP nwavesInt, SEXP modelsessions);
@@ -175,6 +175,12 @@ SEXP umvstep(const arma::mat& xmat, const arma::mat& omega, const arma::mat& wca
                const arma::mat& wpers, const arma::mat& hmat,
                const arma::colvec& zb, const arma::colvec& beta,
                const arma::colvec& y, const arma::colvec& omegaplus,
+               arma::mat& umat, arma::mat& mmmat, double alpha,
+               double taue, const arma::mat& L, int ns, int nc);
+SEXP uindmvstep(const arma::mat& xmat, const arma::mat& wcase,
+               const arma::mat& wpers, const arma::mat& hmat,
+               const arma::colvec& zb, const arma::colvec& beta,
+               const arma::colvec& y, 
                arma::mat& umat, arma::mat& mmmat, double alpha,
                double taue, const arma::mat& L, int ns, int nc);
 SEXP uwbstep(const arma::mat& xmat, const arma::mat& omega, const arma::mat& wcase,

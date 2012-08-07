@@ -140,7 +140,8 @@ trtplot <- function(run.objects, run.models, trt.labs, time.points, y.label = NU
   f	<- facet_wrap(~time,scales = "fixed")
   title <- 
   axis	<- labs(x = "Model", y = y.lab)
-  p	<- p + l + f + axis
+  p	<- p + l + f + axis + scale_fill_brewer(palette="OrRd")  ## color scale supports bw printing
+  dev.new()
   print(p)
 
   return(invisible(list(p.trt = p, dat.trt = Mu.dat)))

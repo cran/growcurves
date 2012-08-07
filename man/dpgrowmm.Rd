@@ -5,8 +5,8 @@
 \usage{
   dpgrowmm(y, subject, trt, time, n.random, n.fix_degree,
     formula, random.only, data, Omega, group, subj.aff,
-    W.subj.aff, n.iter, n.burn, n.thin, strength.mm,
-    shape.dp, plot.out, option)
+    W.subj.aff, multi, n.iter, n.burn, n.thin, strength.mm,
+    shape.dp, rate.dp, plot.out, option)
 }
 \arguments{
   \item{y}{A univariate continuous response, specified as
@@ -20,7 +20,7 @@
   conducted that serves as the random effects grouping
   factor.  Input as an \emph{N x 1} matrix or vector of
   subject-measure cases in either integer or character
-  formt; e.g. \code{(1,1,1,2,2,3,3,3,...,n,n,n)}, where
+  format; e.g. \code{(1,1,1,2,2,3,3,3,...,n,n,n)}, where
   \code{n} is the total number of subjects.}
 
   \item{trt}{An integer or character matrix/vector of
@@ -41,13 +41,13 @@
   measure.  Mav leave blank if only one time point (no
   repeated measures).}
 
-  \item{n.random}{The desired number of subject random
-  effect terms, \code{q}.  Since a DP prior is used on
-  client effects, may be set equal to the number of
-  measurement waves, \code{T}.  The \code{y, trt, time}
-  vectors will together be used to create both fixed and
-  random effect design matrices.  The random effects matrix
-  will be of the the form, \code{(1, time, ... ,
+  \item{n.random}{The desired number of time-indexed
+  subject random effect terms, \code{q}.  Since a DP prior
+  is used on subject effects, may be set equal to the
+  number of measurement waves, \code{T}.  The \code{y, trt,
+  time} vectors will together be used to create both fixed
+  and random effect design matrices.  The random effects
+  matrix will be of the the form, \code{(1, time, ... ,
   time^(n.random - 1))} (grouped, by \code{subject}).  This
   formulation is a growth curve model that allows
   assessment of by-treatment effects and by-client growth
@@ -129,6 +129,19 @@
   of \code{S} treatment dosages are linked to a given
   \code{subject}.}
 
+  \item{multi}{A boolean scalar input that when set to
+  \code{TRUE} indicates the each of the \code{S} MM effects
+  is multivariate.  Leave blank if univariate multiple
+  membership effects are desired.  It is assumed that the
+  associated design matrix is equal to the number of
+  time-indexed random effects.  For example, the
+  time-indexed (non-nuisance) random effects design matrix,
+  Z = (1,time,time^{n.random-1}) is also used to compose an
+  inner product with each row of the \code{N x n.random} MM
+  product, \code{W * U}, where \code{W} is case-expanded MM
+  design matrix and \code{U} is the \code{S x n.random} set
+  of multivariate MM effects.}
+
   \item{n.iter}{Total number of MCMC iterations.}
 
   \item{n.burn}{Number of MCMC iterations to discard.
@@ -150,6 +163,10 @@
   the DP (prior on the set of random effects parameters,
   \emph{b_1, ..., b_n ~ DP(c,G_0)} where \code{n} is the
   total number of subjects.}
+
+  \item{rate.dp}{Rate parameter under a \emph{c ~
+  G(shape.dp, rate.dp)} prior on the concentration
+  parameter of the DP.}
 
   \item{plot.out}{A boolean variable indicating whether
   user wants to return plots with output results.  Defaults
@@ -242,7 +259,7 @@ data(datsim)
 ## in a multiple membership construction communicated with the N x S matrix, W.subj.aff.
 ## Returns object, res.mm, of class "dpgrowmm".
 shape.dp		= 3
-strength.mm		= 0.01
+strength.mm		= 0.001
 res.mm			= dpgrowmm(y = datsim$y, subject = datsim$subject, trt = datsim$trt, time = datsim$time, n.random = datsim$n.random,
 						n.fix_degree = 2, Omega = datsim$Omega, group = datsim$group, subj.aff = datsim$subj.aff,
 						W.subj.aff = datsim$W.subj.aff, n.iter = 10000, n.burn = 2000, n.thin = 10,

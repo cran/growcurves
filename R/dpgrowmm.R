@@ -22,7 +22,7 @@ NULL
 #'	number of measures per subject.  Missing occasions are left out as no \code{NA} values are allowed.
 #' @param subject The objects on which repeated measures are conducted that serves as the random effects
 #'	grouping factor.  Input as an \emph{N x 1} matrix or vector of subject-measure cases in either
-#'	integer or character formt; e.g. \code{(1,1,1,2,2,3,3,3,...,n,n,n)}, where \code{n} is the total
+#'	integer or character format; e.g. \code{(1,1,1,2,2,3,3,3,...,n,n,n)}, where \code{n} is the total
 #'	number of subjects.
 #' @param trt An integer or character matrix/vector of length \code{N} (number of cases) indicating treatment
 #'	group assignments for each case.  May also be input as length \code{P} vector, where \code{P} is
@@ -33,7 +33,7 @@ NULL
 #'	then this vector may be excluded (set to NULL).
 #' @param time A univariate vector of length \code{N}, capturing the time points associated to each by-subject
 #'	measure.  Mav leave blank if only one time point (no repeated measures).
-#' @param n.random The desired number of subject random effect terms, \code{q}.  Since a DP prior is used on client effects,
+#' @param n.random The desired number of time-indexed subject random effect terms, \code{q}.  Since a DP prior is used on subject effects,
 #'	may be set equal to the number of measurement waves, \code{T}.  The \code{y, trt, time} vectors will together
 #'	be used to create both fixed and random effect design matrices.  The random effects matrix will be of the 
 #' 	the form, \code{(1, time, ... , time^(n.random - 1))} (grouped, by \code{subject}). 
@@ -69,6 +69,12 @@ NULL
 #'	as the order of \code{subj.aff} (or \code{unique(subject)} if \code{subj.aff} is not input).  If \code{W.subj.aff} is a multiple membership
 #'	weight matrix, then the rows will sum to 1.  The form and therefore, interpretation of output is dependent on form of input; for example, 
 #'	the rows of \code{W.subj.aff} may include indicators for whether each of \code{S} treatment dosages are linked to a given \code{subject}.
+#' @param multi A boolean scalar input that when set to \code{TRUE} indicates the each of the \code{S} MM effects is multivariate.
+#'		Leave blank if univariate multiple membership effects are desired.
+#'		It is assumed that the associated design matrix is equal to the number of time-indexed random effects.
+#'		For example, the time-indexed (non-nuisance) random effects design matrix, Z = (1,time,time^{n.random-1}) is also
+#'		used to compose an inner product with each row of the \code{N x n.random} MM product, \code{W * U}, where 
+#'		\code{W} is case-expanded MM design matrix and \code{U} is the \code{S x n.random} set of multivariate MM effects.
 #' @param n.iter Total number of MCMC iterations.
 #' @param n.burn Number of MCMC iterations to discard.  \code{dpgrow} will return \code{(n.iter - n.burn)} posterior samples.
 #' @param n.thin Gap between successive sampling iterations to save.
@@ -78,6 +84,7 @@ NULL
 #' @param shape.dp Shape parameter under a \emph{c ~ G(shape.dp, 1)} prior on the concentration parameter of the DP (prior
 #'	on the set of random effects parameters, \emph{b_1, ..., b_n ~ DP(c,G_0)}
 #'	where \code{n} is the total number of subjects.
+#' @param rate.dp Rate parameter under a \emph{c ~ G(shape.dp, rate.dp)} prior on the concentration parameter of the DP.
 #' @param plot.out A boolean variable indicating whether user wants to return plots with output results.  Defaults to \code{TRUE}.
 #' @param option Modeling option, of which there are three: 1. \code{mmcar} places a CAR prior on the set of multiple membership effects;
 #'				2. \code{mmi} places the usual independent Gaussian priors on the set of multiple membership effects.
@@ -123,7 +130,7 @@ NULL
 #' ## in a multiple membership construction communicated with the N x S matrix, W.subj.aff.
 #' ## Returns object, res.mm, of class "dpgrowmm".
 #' shape.dp		= 3
-#' strength.mm		= 0.01
+#' strength.mm		= 0.001
 #' res.mm			= dpgrowmm(y = datsim$y, subject = datsim$subject, trt = datsim$trt, time = datsim$time, n.random = datsim$n.random, 
 #'						n.fix_degree = 2, Omega = datsim$Omega, group = datsim$group, subj.aff = datsim$subj.aff,
 #'						W.subj.aff = datsim$W.subj.aff, n.iter = 10000, n.burn = 2000, n.thin = 10,
@@ -141,16 +148,16 @@ NULL
 #' 	T. D. Savitsky and S. M. Paddock (2012) Visual Sufficient Statistics for Repeated Measures data with growcurves for R, submitted to: Journal of Statistical Software.
 #' @export dpgrowmm 
 #' @S3method dpgrowmm default
-dpgrowmm			<- function(y, subject, trt, time, n.random, n.fix_degree, formula, random.only, data, Omega, group, subj.aff, W.subj.aff, n.iter, 
-					n.burn, n.thin, strength.mm, shape.dp, plot.out, option)
+dpgrowmm			<- function(y, subject, trt, time, n.random, n.fix_degree, formula, random.only, data, Omega, group, subj.aff, W.subj.aff, multi, n.iter, 
+					n.burn, n.thin, strength.mm, shape.dp, rate.dp, plot.out, option)
 					UseMethod("dpgrowmm")
 
 ################################################
 ## default dispatch method for mm-session models
 ################################################
 dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.random = NULL, n.fix_degree = NULL, formula = NULL, 
-						random.only = FALSE, data = NULL, Omega = NULL, group = NULL, subj.aff = NULL, W.subj.aff, 
-					 	n.iter, n.burn, n.thin = 1, strength.mm = 0.1, shape.dp = 1, plot.out = TRUE, option = "mmcar")
+						random.only = FALSE, data = NULL, Omega = NULL, group = NULL, subj.aff = NULL, W.subj.aff, multi = FALSE,
+					 	n.iter, n.burn, n.thin = 1, strength.mm = 0.1, shape.dp = 1, rate.dp = 1, plot.out = TRUE, option = "mmi")
 { ## start function dpgrowmm.default
 
   ############################
@@ -325,6 +332,7 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
   start		<- 1
   out		<- relabel(label.input = subject, start)
   subject	<- out$label.new
+  o		<- order(subject) ## use later to place X, Z, map.subject, map.trt in contiguous order of subject
   subjecti.u	<- out$labeli.u
   map.subject	<- out$dat.label ## colnames = c("label.input","label.new"), in case format
 
@@ -356,7 +364,7 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
   #################################################################
   Ncase			= length(subject)
   Nsubject 		= length(unique(subject))
-  Nsession		= ncol(W.subj.aff)
+  Nsession		= ncol(W.subj.aff)  ## this is true for both univariate and multivariate session effects
   Nsubj.aff		= length(subj.aff)
   Nlevel		= length(unique(trt))
   if(is.null(group)) group = matrix(1,length(subject))
@@ -366,7 +374,7 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
   if(!is.null(time)) n.waves = length(unique(time)) ## number of measurement waves - used for growth curve generation with nuisance covariates
  
   ##################################################################
-  ## construct fixed and random effect design matrices
+  ## construct fixed and random effect design matrices - ordered by subject so that subject is contiguous
   ##################################################################
   out 	<- XZcov(time = time , trt = trt, trt.lab = trti.u, subject = subject, n.random = n.random, n.fix_degree = n.fix_degree, formula = formula, 
 		random.only = random.only, data = data)
@@ -376,11 +384,30 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
   Z	<- out$Z
   Z.n	<- out$Z.n
   Z.c   <- out$Z.c
-  if( !is.null(out$y) ) y <- out$y  ## over-writes possible duplicative input of y by user (since must be in formula).
+  if( !is.null(out$y) ) 
+  {
+	y 	<- out$y  ## over-writes possible duplicative input of y by user (since must be in formula).
+  }else{ ## out$y is null, so user separately entered
+	y	<- y[o] ## re-order y by subject to ensure subject is in contiguous order
+  }
+
+  ## reorder remaining objects to subject (in contiguous fashion) where entries indexed by case
+  subject		<- subject[o]
+  map.subject		<- map.subject[o,]
+  map.trt		<- map.trt[o,]
 
   ## capture number of fixed effects
   Nfixed		= ncol(X)
-  Nrandom		= ncol(Z)
+  Nrandom		= ncol(Z) ## counts both number of time-indexed and nuisance random effects per subject
+
+  ## set design matrix for multivariate mm effects equal to time-indexed random effects design matrix
+  if( multi == TRUE)
+  {
+	Nmv	<- n.random
+	H 	<- Z.c
+  }else{ ## univariate MM effects
+	Nmv	<- 1
+  }
 
   #################################################################
   ## re-cast inputs to matrices
@@ -405,33 +432,55 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
   ################################################################
   ## conduct posterior sampling and capture results
   ################################################################
-  option = tolower(option)
-  if(option == "mmcar")
+  if( Nmv == 1 ) ## univariate MM effects
   {
-	print("Your chosen option = mmcar")
-	omega.plus	= rowSums(Omega)
-  	res 		= mmCplusDpPost(y, X, Z, W.case, W.subj.aff, Omega, omega.plus, group, subject, n.iter, n.burn, n.thin, strength.mm, shape.dp)
-  }else{
-	if(option == "mmi")
-	{
-		print("Your chosen option = mmi")
-		res 		= mmIplusDpPost(y, X, Z, W.case, W.subj.aff, subject, n.iter, n.burn, n.thin, strength.mm, shape.dp)
-	}
-	else{ ## option == "mmigrp"
-		print("Your chosen option = mmigrp")
-		M			= matrix(0,length(group),G) ## Design matrix for session mean parameters in MM(I)
-		for(i in 1:G)
+  	if(option == "mmcar")
+  	{
+		print("Your chosen option = mmcar")
+		omega.plus	= rowSums(Omega)
+  		res 		= mmCplusDpPost(y, X, Z, W.case, W.subj.aff, Omega, omega.plus, group, subject, n.iter, n.burn, n.thin, strength.mm, shape.dp, rate.dp)
+  	}else{
+		if(option == "mmi")
 		{
-			M[group == i,i]	= 1
+			print("Your chosen option = mmi")
+			res 		= mmIplusDpPost(y, X, Z, W.case, W.subj.aff, subject, n.iter, n.burn, n.thin, strength.mm, shape.dp, rate.dp)
 		}
-		res 		= mmIgroupDpPost(y, X, Z, W.case, W.subj.aff, M, subject, n.iter, n.burn, n.thin, strength.mm, shape.dp)
-	}				
+		else{ ## option == "mmigrp"
+			print("Your chosen option = mmigrp")
+			M			= matrix(0,length(group),G) ## Design matrix for session mean parameters in MM(I)
+			for(i in 1:G)
+			{
+				M[group == i,i]	= 1
+			}
+			res 		= mmIgroupDpPost(y, X, Z, W.case, W.subj.aff, M, subject, n.iter, n.burn, n.thin, strength.mm, shape.dp, rate.dp)
+		}				
+  	}
+  }else{ ## multivariate MM effects
+	if( option %in% c("mmi","mmigrp") )
+	{
+		print("Your chosen option = mmi for mulivariate MM effects")
+		Omega	 	= matrix(0, Nsession, Nsession)
+		omega.plus	= matrix(0, Nsession, 1)
+		corsess		= 0 ## correlations in prior scale matrix for wishart prior on precision matrix for effects order
+		typemm		= 0 ## "mmi"
+		res 		= mmCmvplusDpPost(y, X, Z, H, W.case, W.subj.aff, Omega, omega.plus, group, subject, n.iter, n.burn, n.thin, strength.mm, corsess, shape.dp, rate.dp, typemm)
+		stopifnot( ncol(res$U) == (Nmv*Nsession) )
+	}else{ ## option == "mmcar"
+		print("Your chosen option = mmcar for mulivariate MM effects")
+		corsess		= 0 ## correlations in prior scale matrix for wishart prior on precision matrix for effects order
+		typemm		= 1 ## "mmcar"
+		res 		= mmCmvplusDpPost(y, X, Z, H, W.case, W.subj.aff, Omega, omega.plus, group, subject, n.iter, n.burn, n.thin, strength.mm, corsess, shape.dp, rate.dp, typemm)
+		stopifnot( ncol(res$U) == (Nmv*Nsession) )
+	}
+
   }
+
 
   ##################################################################
   ## summary (short-hand) results
   ##################################################################
-  summary.results			<- summary_quantiles(model.output = res, Nfixed = Nfixed, Nrandom = Nrandom, Nsubject = Nsubject, Nsubj.aff = Nsubj.aff)
+  summary.results			<- summary_quantiles(model.output = res, Nfixed = Nfixed, Nrandom = Nrandom, Nsubject = Nsubject, Nsubj.aff = Nsubj.aff, Nmv = Nmv, Nsession = Nsession)
+  if( Nmv == 1 ) {summary.results$rhotauu.summary <- NULL} ## this will remove the element from the list object that is always returned from 'summary.results'
   summary.results$X			<- X
   summary.results$Z			<- Z
   summary.results$map.subject		<- map.subject
@@ -439,6 +488,7 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
   summary.results$map.grp		<- map.grp
   summary.results$model 		<- option
   summary.results$n.fix_degree		<- n.fix_degree
+  summary.results$Nmv			<- Nmv
 
   residuals		= colMeans(res$Residuals)
  
@@ -481,7 +531,7 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
    ##################################################################
 
    plot.results = mcmcPlots(subjecti.u = subjecti.u, subj.aff = subj.aff, subjaff.input = subjaff.input, bmat.summary = summary.results$bmat.summary, group = group, 
-				groupi.u = groupi.u, u.summary = summary.results$u.summary, mm.summary = summary.results$mm.summary, 
+				groupi.u = groupi.u, u.summary = summary.results$u.summary, Nmv = Nmv, mm.summary = summary.results$mm.summary, 
 				M = res$M, Tauu = res$Tauu, Taub = res$Taub, Taue = res$Taue, Deviance = res$Deviance)
 
  } #end conditional statement on whether to plot 
@@ -495,7 +545,7 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
    if( (!is.null(time) & length(unique(time)) > 1) & !is.null(n.fix_degree) ) ## a set of growth curves were generated from time-based covariates
    {
    	plot.results$p.gcall = gc.plot$p.gcall; plot.results$p.gcsel = gc.plot$p.gcsel
-   	if( (option != "mmcar") & (option != "mmi") )
+   	if( (option != "mmcar") & (option != "mmi") & (multi == FALSE) )
    	{
 		
     		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, U = res$U, Eta = res$Eta,
@@ -509,7 +559,7 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
 			residuals = residuals, dat.growthCurve = gc.plot$plot.dat, dat.gcdata = gc.plot$dat.data)
    	}
    }else{ ## is.null(time) = TRUE
-     	if((option != "mmcar") & (option != "mmi"))
+     	if((option != "mmcar") & (option != "mmi") & (multi == FALSE) )
      	{
     		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, U = res$U, Eta = res$Eta,
 			M = res$M, S = res$S, Num = res$Num, Residuals = res$Residuals, bigSmin = res$bigSmin, Tau.u = res$Tauu, Tau.e = res$Taue, 
@@ -532,6 +582,12 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
 			Tau.b = res$Taub, summary.results = summary.results, residuals = residuals)
    }
  } ## end conditional statement on plot.out
+
+ ##
+ ##  Add unique return item for multivariate objects
+ ##
+ 
+ if( Nmv > 1 ) { resot$Rhotau.u = res$Rhotauu }
 
  ##
  ## return list output for dpgrowmm.default()
@@ -574,16 +630,17 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
 #' @param strength.mm The shape and rate parameters for the \eqn{\Gamma} prior on the CAR precision parameter, \eqn{\tau_{\gamma}}
 #' @param shapealph The shape parameter for the \eqn{\Gamma} prior on the DP concentration parameter.  
 #'	The rate parameter is set of \code{1}.
+#' @param ratebeta The rate parameter for the \eqn{\Gamma} prior on the DP concentration parameter. Default value is \code{1}.
 #' @return res A list object containing MCMC runs for all model parameters.
 #' @seealso \code{\link{dpgrow}}
 #' @author Terrance Savitsky \email{tds151@@gmail.com}
 #' @note Intended as an internal function for \code{\link{dpgrowmm}}
-mmCplusDpPost = function (y, X, Z, Wcase, Wsubject, Omega, omegaplus, groups, subjects, niter, nburn, nthin, strength.mm, shapealph) {
+mmCplusDpPost = function (y, X, Z, Wcase, Wsubject, Omega, omegaplus, groups, subjects, niter, nburn, nthin, strength.mm, shapealph, ratebeta) {
     stopifnot(nrow(X) == nrow(Z))
     stopifnot(nrow(Wcase) == nrow(Z))
     stopifnot(length(y) == nrow(X))
     stopifnot(length(omegaplus) == nrow(Omega))
-    res <- .Call("mmCplusDP", y, X, Z, Wcase, Wsubject, Omega, omegaplus, groups, subjects, niter, nburn, nthin, strength.mm, shapealph, package = "growcurves")
+    res <- .Call("mmCplusDP", y, X, Z, Wcase, Wsubject, Omega, omegaplus, groups, subjects, niter, nburn, nthin, strength.mm, shapealph, ratebeta, package = "growcurves")
 }
 
 #' Bayesian mixed effects model with a DP prior on by-subject effects and use of group means for multiple membership effects
@@ -606,15 +663,16 @@ mmCplusDpPost = function (y, X, Z, Wcase, Wsubject, Omega, omegaplus, groups, su
 #' @param strength.mm The shape and rate parameters for the \eqn{\Gamma} prior on the CAR precision parameter, \eqn{\tau_{\gamma}}
 #' @param shapealph The shape parameter for the \eqn{\Gamma} prior on the DP concentration parameter.  
 #'	The rate parameter is set of \code{1}.
+#' @param ratebeta The rate parameter for the \eqn{\Gamma} prior on the DP concentration parameter. Default value is \code{1}.
 #' @return res A list object containing MCMC runs for all model parameters.
 #' @seealso \code{\link{dpgrowmm}}
 #' @author Terrance Savitsky \email{tds151@@gmail.com}
 #' @note Intended as an internal function for \code{\link{dpgrowmm}}
-mmIgroupDpPost = function (y, X, Z, Wcase, Wsubject, M, subjects, niter, nburn, nthin, strength.mm, shapealph) {
+mmIgroupDpPost = function (y, X, Z, Wcase, Wsubject, M, subjects, niter, nburn, nthin, strength.mm, shapealph, ratebeta) {
     stopifnot(nrow(X) == nrow(Z))
     stopifnot(nrow(Wcase) == nrow(Z))
     stopifnot(length(y) == nrow(X))
-    res <- .Call("mmIgroupDP", y, X, Z, Wcase, Wsubject, M, subjects, niter, nburn, nthin, strength.mm, shapealph, package = "growcurves")
+    res <- .Call("mmIgroupDP", y, X, Z, Wcase, Wsubject, M, subjects, niter, nburn, nthin, strength.mm, shapealph, ratebeta, package = "growcurves")
 }
 
 #' Bayesian mixed effects model with a DP prior on by-subject effects and zero mean independent Gaussian priors on multiple membership effects
@@ -635,18 +693,59 @@ mmIgroupDpPost = function (y, X, Z, Wcase, Wsubject, M, subjects, niter, nburn, 
 #' @param strength.mm The shape and rate parameters for the \eqn{\Gamma} prior on the CAR precision parameter, \eqn{\tau_{\gamma}}
 #' @param shapealph The shape parameter for the \eqn{\Gamma} prior on the DP concentration parameter.  
 #'	The rate parameter is set of \code{1}.
+#' @param ratebeta The rate parameter for the \eqn{\Gamma} prior on the DP concentration parameter. Default value is \code{1}.
 #' @return res A list object containing MCMC runs for all model parameters.
 #' @seealso \code{\link{dpgrowmm}}
 #' @author Terrance Savitsky \email{tds151@@gmail.com}
 #' @note Intended as an internal function for \code{\link{dpgrowmm}}
-mmIplusDpPost = function (y, X, Z, Wcase, Wsubject, subjects, niter, nburn, nthin, strength.mm, shapealph) {
+mmIplusDpPost = function (y, X, Z, Wcase, Wsubject, subjects, niter, nburn, nthin, strength.mm, shapealph, ratebeta) {
     stopifnot(nrow(X) == nrow(Z))
     stopifnot(nrow(Wcase) == nrow(Z))
     stopifnot(length(y) == nrow(X))
-    res <- .Call("mmIplusDP", y, X, Z, Wcase, Wsubject, subjects, niter, nburn, nthin, strength.mm, shapealph, package = "growcurves")
+    res <- .Call("mmIplusDP", y, X, Z, Wcase, Wsubject, subjects, niter, nburn, nthin, strength.mm, shapealph, ratebeta, package = "growcurves")
+}
+
+#' Bayesian mixed effects model with a DP prior on by-subject effects and CAR prior on a multivariate set of multiple membership effects
+#'
+#' An internal function to \code{\link{dpgrowmm}}
+#'
+#' @export mmCmvplusDpPost 
+#' @aliases mmCmvplusDpPost mmCmv
+#' @param y An \emph{N x 1} response (of subject-measure cases)
+#' @param X Fixed effects design matrix
+#' @param Z Random effects design matrix.  Assumed grouped by \code{subjects}
+#' @param H Multivariate MM effects design matrix.
+#' @param Wcase An \emph{N x 1} multiple membership weight matrix to map supplemental random effects
+#' @param Wsubject An \emph{P.aff x S} multiple membership weight matrix with rows equal to number of unique affected subjects
+#' @param Omega An \emph{S x S} unnormalized adjacency matrix with entries equal to 1 where two effects communicate
+#'	and 0, otherwise.  Diagonal elements are zero
+#' @param omegaplus \emph{S x 1} vector of row sums of \code{Omega}
+#' @param groups \emph{S x 1} vector of group identifiers for each effect.  Effects within each group communicate.
+#' 	Effects don't communicate across groups.  Not used under "mmi" prior (though input is required).
+#' @param subjects An \emph{N x 1} set of subject identifiers
+#' @param niter The number of MCMC iterations
+#' @param nburn The number of MCMC burn-in iterations to discard
+#' @param nthin The step increment of MCMC samples to return
+#' @param strength.mm The shape and rate parameters for the \eqn{\Gamma} prior on the CAR precision parameter, \eqn{\tau_{\gamma}}.
+#' @param corsess A single value to set the prior correlations among the multivariate \code{q = ncol(H)} orders for the MM effects.
+#'		where \eqn{\tau_{\gamma}} is replaced by the \code{q x q}, \eqn{\Lambda}.
+#' @param shapealph The shape parameter for the \eqn{\Gamma} prior on the DP concentration parameter.  
+#'	The rate parameter is set of \code{1}.
+#' @param ratebeta The rate parameter for the \eqn{\Gamma} prior on the DP concentration parameter. Default value is \code{1}.
+#' @param typemm An indicator the prior formulation specified for the multivariate MM effects term.
+#'		Set \code{typemm = 0} for \code{"mmi"} and \code{typemm = 1} for \code{"mmcar"}.
+#' @return res A list object containing MCMC runs for all model parameters.
+#' @seealso \code{\link{dpgrow}}
+#' @author Terrance Savitsky \email{tds151@@gmail.com}
+#' @note Intended as an internal function for \code{\link{dpgrowmm}}
+mmCmvplusDpPost = function (y, X, Z, H, Wcase, Wsubject, Omega, omegaplus, groups, subjects, niter, nburn, nthin, strength.mm, corsess, shapealph, ratebeta, typemm) {
+    stopifnot(nrow(X) == nrow(Z))
+    stopifnot(nrow(Wcase) == nrow(Z))
+    stopifnot(length(y) == nrow(X))
+    stopifnot(length(omegaplus) == nrow(Omega))
+    res <- .Call("mmCmvplusDP", y, X, Z, H, Wcase, Wsubject, Omega, omegaplus, groups, subjects, niter, nburn, nthin, strength.mm, corsess, shapealph, ratebeta, typemm, package = "growcurves")
 }
 		
-
 ####################################
 ## accessor methods
 ####################################
@@ -713,6 +812,7 @@ samples.dpgrowmm <- function(object,...)
 
   if( !is.null(object$U) )
   {
+	Nmv				<- object$summary.results$Nmv
 	if(object$summary.results$model == "mmigrp")
 	{
   		res 		<- list(Deviance = object$Deviance, Alpha = object$Alpha, Beta = Beta, B = B, Gamma = object$U, Eta = object$Eta,
@@ -723,6 +823,7 @@ samples.dpgrowmm <- function(object,...)
 				Residuals = object$Residuals, M = object$M, S = object$S, Num.per.cluster = object$Num, bigSmin = object$bigSmin,
 				Tau.gamma = object$Tau.u, Tau.b = object$Tau.b, Tau.e = object$Tau.e)
 	}
+	if( Nmv > 1 ) { res$Rhotau.gamma = object$Rhotau.u }
   }else{ ## model contains no session effects, U
 	if(object$summary.results$model == "dp")
 	{

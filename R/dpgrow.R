@@ -61,6 +61,7 @@ NULL
 #' @param shape.dp Shape parameter under a \emph{c ~ G(shape.dp, 1)} prior on the concentration parameter of the DP (prior
 #'	on the set of random effects parameters, \emph{b_1, ..., b_n ~ DP(c,G_0)}
 #'	where \code{n} is the total number of subjects.
+#' @param rate.dp Rate parameter under a \emph{c ~ G(shape.dp, rate.dp)} prior on the concentration parameter of the DP.
 #' @param plot.out A boolean variable indicating whether user wants to return plots with output results.  Defaults to \code{TRUE}.
 #' @param option Modeling option, of which there are two: 1. \code{dp} places a DP prior on the set of subject random effects;
 #'	2. \code{lgm} places the usual independent Gaussian priors on the set of random effects.
@@ -118,7 +119,7 @@ NULL
 #' @export dpgrow 
 #' @S3method dpgrow default
 dpgrow			<- function(y, subject, trt, time, n.random, n.fix_degree, formula, random.only, data, n.iter, n.burn, n.thin, 
-					shape.dp, plot.out, option)
+					shape.dp, rate.dp, plot.out, option)
 					UseMethod("dpgrow")
 
 ################################################
@@ -126,7 +127,7 @@ dpgrow			<- function(y, subject, trt, time, n.random, n.fix_degree, formula, ran
 ################################################
 dpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NULL, n.fix_degree = NULL, formula = NULL, random.only = NULL, 
 					data = NULL, n.iter, n.burn, n.thin = 1,
-					shape.dp = 1, plot.out = TRUE, option = "dp")
+					shape.dp = 1, rate.dp = 1, plot.out = TRUE, option = "dp")
 { ## start function dpgrow.default
 
   ############################
@@ -240,6 +241,7 @@ dpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NULL
   start		<- 1
   out		<- relabel(label.input = subject, start)
   subject	<- out$label.new
+  o		<- order(subject) ## use later to place X, Z, map.subject, map.trt in contiguous order of subject
   subjecti.u	<- out$labeli.u
   map.subject	<- out$dat.label ## colnames = c("label.input","label.new")
 
@@ -271,7 +273,17 @@ dpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NULL
   Z	<- out$Z
   Z.n	<- out$Z.n
   Z.c   <- out$Z.c
-  if( !is.null(out$y) ) y <- out$y  ## over-writes possible duplicative input of y by user (since must be in formula).
+  if( !is.null(out$y) ) 
+  {
+	y 	<- out$y  ## over-writes possible duplicative input of y by user (since must be in formula).
+  }else{ ## out$y is null, so user separately entered
+	y	<- y[o] ## re-order y by subject to ensure subject is in contiguous order
+  }
+
+  ## reorder remaining objects to subject (in contiguous fashion) where entries indexed by case
+  subject		<- subject[o]
+  map.subject		<- map.subject[o,]
+  map.trt		<- map.trt[o,]
 
   ## capture number of fixed effects
   Nfixed		= ncol(X)
@@ -284,7 +296,7 @@ dpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NULL
   if(option == "dp") ## DP
   {
 	print("Your chosen option = dp")
-  	res 		= dpPost(y, X, Z, subject, n.iter, n.burn, n.thin, shape.dp)
+  	res 		= dpPost(y, X, Z, subject, n.iter, n.burn, n.thin, shape.dp, rate.dp)
   }else{ ## option == "lgm"
 	print("Your chosen option = lgm")
 	res		= lgmPost(y, X, Z, subject, n.iter, n.burn, n.thin)
@@ -328,7 +340,7 @@ dpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NULL
 	gc.plot		= growthCurve(y.case = y, B = res$B, Alpha = res$Alpha, Beta = res$Beta, X.n = X.n, Z.n = Z.n, 
 				trt.case = trt, trt.lab = trti.u, subject.case = subject, subject.lab = subjecti.u, T = T, min.T = min.T, max.T = max.T, n.thin = n.thin, 
 				n.waves = n.waves, time.case = time, n.fix_degree = n.fix_degree, Nrandom = n.random)
-			## memo: if have nuisance covariates, need input of Nrandom = n.random to construct time-based random effects since Nrandom > n.random
+			## memo: if have nuisance covariates, need input of Nrandom to construct time-based random effects since Nrandom > n.random
    }
 
  } ## end conditional statement on creating growth curves
@@ -422,14 +434,15 @@ dpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NULL
 #' @param nthin The step increment of MCMC samples to return
 #' @param shapealph The shape parameter for the \eqn{\Gamma} prior on the DP concentration parameter.  
 #'	The rate parameter is set of \code{1}.
+#' @param ratebeta The rate parameter for the \eqn{\Gamma} prior on the DP concentration parameter. Default value is \code{1}.
 #' @return res A list object containing MCMC runs for all model parameters.
 #' @seealso \code{\link{dpgrow}}
 #' @author Terrance Savitsky \email{tds151@@gmail.com}
 #' @note Intended as an internal function for \code{\link{dpgrow}}
-dpPost = function (y, X, Z, subjects, niter, nburn, nthin, shapealph) {
+dpPost = function (y, X, Z, subjects, niter, nburn, nthin, shapealph, ratebeta) {
     stopifnot(nrow(X) == nrow(Z))
     stopifnot(length(y) == nrow(X))
-    res <- .Call("DPre", y, X, Z, subjects, niter, nburn, nthin, shapealph, package = "growcurves")
+    res <- .Call("DPre", y, X, Z, subjects, niter, nburn, nthin, shapealph, ratebeta, package = "throwcurves")
 } ## end function dpPost
 
 

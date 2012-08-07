@@ -153,6 +153,23 @@ XZcov = function(time = NULL , trt = NULL, trt.lab = NULL, subject = NULL, n.ran
 	y	= NULL ## set y to NULL since user separately inputs not part of 'data'
   } ## end conditional statement on inclusion of nuisance covariates (formula is not NULL)
 
+  ## reorder objects to subject to ensure that subject is contiguous
+  o	<- order(subject)
+  X	<- X[o,]
+  Z	<- Z[o,]
+  if( !is.null(X.c) & !is.null(Z.c) ) 
+  {
+	X.c	<- X.c[o,]
+  	Z.c	<- Z.c[o,]
+  }
+
+  if( !is.null(X.n) & !is.null(Z.n) ) 
+  {
+  	X.n	<- X.n[o,] ## reordering a NULL object still leaves it with value = NULL
+  	Z.n	<- Z.n[o,]
+  }
+  if(!is.null(y)){y <- y[o]}
+
   ## collinearity check, drop collinear vars if needed
   m <- lm.fit(X, rep(1,nrow(X)), singular.ok=TRUE)
   stopifnot(all(names(m$coef) == colnames(X)))
@@ -164,7 +181,7 @@ XZcov = function(time = NULL , trt = NULL, trt.lab = NULL, subject = NULL, n.ran
       	X <- X[,-as.vector(v)]
   }
 
-out 	= list(X = X, X.c = X.c, X.n = X.n, Z = Z, Z.c = Z.c, y = y)
-return(out)
+  out 	= list(X = X, X.c = X.c, X.n = X.n, Z = Z, Z.c = Z.c, y = y)
+  return(out)
 
 } ## end function XZcov.R

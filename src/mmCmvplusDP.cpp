@@ -7,8 +7,8 @@ using namespace std;
 
 SEXP mmCmvplusDP(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP Hmat, SEXP Wcase, SEXP Wperson,
         SEXP Omega, SEXP omegaplusvec, SEXP groupsvec, SEXP personsvec,
-        SEXP niterInt, SEXP nburnInt, SEXP ustrengthd, SEXP corsessInt,
-        SEXP shapealph)
+        SEXP niterInt, SEXP nburnInt, SEXP nthinInt, SEXP ustrengthd, SEXP corsessInt,
+        SEXP shapealph, SEXP ratebeta, SEXP typeMM)
 {
 BEGIN_RCPP
     // Time run
@@ -31,14 +31,17 @@ BEGIN_RCPP
     IntegerVector pr(personsvec);
     int niter = as<int>(niterInt);
     int nburn = as<int>(nburnInt);
+    int nthin = as<int>(nthinInt);
     int corsess = as<int>(corsessInt); /* correlation between sets of sess eff*/
+    int typemm = as<int>(typeMM); /* typemm == 0 for ind prior on umat, 1 for CAR prior on umat */
     double ac = as<double>(shapealph);
+    double bc = as<double>(ratebeta);
     double ustrength = as<double>(ustrengthd);
-    int nkeep = niter -  nburn;
+    int nkeep = (niter -  nburn)/nthin;
 
     // Extract key row and column dimensions we will need to sample parameters
-    int nc = Xr.nrow(), nf = Xr.ncol(), nr = Zr.ncol(), nv = Hr.ncol(), ns = Or.ncol();
-    int ng = gr.length(); int npcbt = Wp.nrow(); int nrho = 0.5*nv*(nv-1);
+    int nc = Xr.nrow(), nf = Xr.ncol(), nr = Zr.ncol(), nv = Hr.ncol(), ns = Wcr.ncol();
+    int npcbt = Wp.nrow(); int nrho = 0.5*nv*(nv-1);
 
     // Compute np, number of unique clients
     // algorithm assumes cases clustered by unique client
@@ -46,12 +49,6 @@ BEGIN_RCPP
     icolvec diffpersons(dpr.begin(), nc - 1, false);
     int np = accu(diffpersons) + 1;
     /* int np = accumulate(dpr.begin,dpr.end,1); */
-
-    // compute ng, number of session groups
-    IntegerVector dgr = diff(gr);
-    icolvec diffgroups(dgr.begin(),ns - 1, false);
-    ng = accu(diffgroups) + 1;
-
 
     // Create armadillo structures we will use for our computations
     // We set copy_aux_mem = false from the constructor, meaning we re-use
@@ -130,12 +127,24 @@ BEGIN_RCPP
         } /*end loop j */
     } /* end loop i filling variance matrix for umat, S */
     L = inv(Sigma); mat V(nv,nv); V = L; /* V is prior for L */
-    double nu = nv; /* df for L ~ W(V,nu) */
+    double nu = nv + 1; /* df for L ~ W(V,nu) */
     /* compute correlation matrix for each iteration */
     mat Linv(nv,nv); int nelem, totelem; double rho;
     mat umat(ns,nv); rowvec m(nv); m.zeros(); rmvnrnd(L,umat,m);
     mat mmmat(npcbt,nv); mmmat.zeros(); /* client effect mapped from session */
-    mat qmat = -omega; qmat.diag() = omegaplus;/* prior precision for joint u */
+    int ng; /* number of groups for MM (session) effects */
+    mat qmat;
+    if( typemm == 0)  /* mmi */
+    {
+	qmat.eye(ns,ns);
+	ng = 0;
+    }else{ /* typemm = 1 */
+    	qmat = -omega; qmat.diag() = omegaplus;/* prior precision for joint u */
+	// compute ng, number of session groups
+    	IntegerVector dgr = diff(gr);
+    	icolvec diffgroups(dgr.begin(),ns - 1, false);
+    	ng = accu(diffgroups) + 1;
+    }
     /* remaining parameters */
     colvec beta = randn<colvec>(nf)*sqrt(1/taubeta);
     colvec resid(nc); resid.zeros(); /* regression residual */
@@ -144,18 +153,20 @@ BEGIN_RCPP
     /* goodness of fit related measures */
     double deviance; colvec devres(4); rowvec devmarg(nc);
     rowvec logcpo(nc); logcpo.zeros(); double lpml;
+    /* capture samples to return */
+    int oo = 0, kk;
 
     // set hyperparameter values
     double a2, a4, a7, b2, b4, b7;
     a2 = b2 = 1; /* taub */
     a4 = b4 = 1; /* taue */
-    a7 = ac; b7 = 1; /* conc */
+    a7 = ac; b7 = bc; /* conc */
 
     // Conduct posterior samples and store results
     int k,l,h;
     for(k = 0; k < niter; k++)
     {
-        //if( (k % 1000) == 0 ) cout << "Interation: " << k << endl;
+        //if( (k % 1000) == 0 ) Rcout << "Interation: " << k << endl;
         clustermvstep(xmat, zmat, zsplit, ytilsplit, hmat, pbmat, y,
                 wcase, umat, beta, alpha,
                 taue, taub, persons, bstarmat, s, num, M, conc,
@@ -165,8 +176,14 @@ BEGIN_RCPP
                 zb, bmat, np, nr);
         betamvlsstep(xmat, wcase, hmat, y, beta, umat, alpha, taue, 
                     zb, nf);
-        umvstep(xmat, omega, wcase, wpers, hmat, zb, beta, y, omegaplus, umat,
-                mmmat, alpha, taue, L, ns, nc);
+	if( typemm == 0)
+	{
+		uindmvstep(xmat, wcase, wpers, hmat, zb, beta, y, umat,
+                	mmmat, alpha, taue, L, ns, nc);
+	}else{ /* typemm == 1, MM-MCAR */
+		umvstep(xmat, omega, wcase, wpers, hmat, zb, beta, y, omegaplus, umat,
+                	mmmat, alpha, taue, L, ns, nc);
+	}
         alphamvlsstep(xmat, wcase, beta, hmat, zb, y, umat, resid, alpha,
                     taue, nc);
         taumvdpstep(bstarmat, resid, qmat, umat, V, L, taub, taue,
@@ -175,46 +192,50 @@ BEGIN_RCPP
         {
             deviance =  dev(resid, taue); /* scalar double deviance */
             dmarg(resid, taue, devmarg); /* 1 x nc vector of densities*/
-            int oo = k - nburn;
-            Deviance(oo) = deviance;
-            Devmarg.row(oo)  = devmarg;
-            Beta.row(oo) = trans(beta);
-            Alpha(oo) = alpha;
-            Conc(oo) = conc;
-            for( l = 0; l < nr; l++)
+            kk = k - nburn;
+	    if( kk == ((oo+1)*nthin - 1) )
             {
-                brow.cols( np*l,(np*(l+1)-1) ) = trans( bmat.col(l) );
-            }
-            /* nv sets of session effects */
-            for( h = 0; h < nv; h++)
-            {
-                urow.cols( ns*h,(ns*(h+1)-1) ) = trans( umat.col(h) );
-                mmrow.cols( npcbt*h,(npcbt*(h+1)-1) ) = trans( mmmat.col(h) );
-                taurow.col(h) = L(h,h);
-            }
-            /* correlation coefficients between sets of session effects */
-            rho = 0; Linv = inv(L); totelem = 0; nelem = 0;
-            for( h = 0; h < (nv-1); h++)
-            {
-                nelem = nv - (h+1);
-                for(l = (h+1); l < nv; l++)
-                {
-                    rho = Linv(h,l)/( sqrt(Linv(h,h))*sqrt(Linv(l,l)) );
-                    rhotaurow.col(totelem + (l - h) - 1) = rho;
-                }
-                totelem += nelem;
-            }
-            B.row(oo) = brow;
-            U.row(oo) = urow;
-            MM.row(oo) = mmrow;
-            Tauu.row(oo) = taurow;
-            Rhotauu.row(oo) = rhotaurow;
-            Taue(oo) = taue;
-            Taub.row(oo) = taub;
-            Resid.row(oo) = trans(resid);
-            numM(oo) = M;
-            S.row(oo) = trans(s);
-            Num(oo,0) = num;
+            	Deviance(oo) = deviance;
+            	Devmarg.row(oo)  = devmarg;
+            	Beta.row(oo) = trans(beta);
+            	Alpha(oo) = alpha;
+            	Conc(oo) = conc;
+            	for( l = 0; l < nr; l++)
+            	{
+                	brow.cols( np*l,(np*(l+1)-1) ) = trans( bmat.col(l) );
+            	}
+            	/* nv sets of session effects */
+            	for( h = 0; h < nv; h++)
+            	{
+                	urow.cols( ns*h,(ns*(h+1)-1) ) = trans( umat.col(h) );
+                	mmrow.cols( npcbt*h,(npcbt*(h+1)-1) ) = trans( mmmat.col(h) );
+                	taurow.col(h) = L(h,h);
+            	}
+            	/* correlation coefficients between sets of session effects */
+            	rho = 0; Linv = inv(L); totelem = 0; nelem = 0;
+            	for( h = 0; h < (nv-1); h++)
+            	{
+                	nelem = nv - (h+1);
+                	for(l = (h+1); l < nv; l++)
+                	{
+                    		rho = Linv(h,l)/( sqrt(Linv(h,h))*sqrt(Linv(l,l)) );
+                    		rhotaurow.col(totelem + (l - h) - 1) = rho;
+                	}
+                	totelem += nelem;
+            	}
+            	B.row(oo) = brow;
+            	U.row(oo) = urow;
+            	MM.row(oo) = mmrow;
+            	Tauu.row(oo) = taurow;
+            	Rhotauu.row(oo) = rhotaurow;
+            	Taue(oo) = taue;
+            	Taub.row(oo) = taub;
+            	Resid.row(oo) = trans(resid);
+            	numM(oo) = M;
+            	S.row(oo) = trans(s);
+            	Num(oo,0) = num;
+	  	oo += 1; /* increment sample counter */
+            } /* end conditional statement on returning sample */
         } /* end if k > burnin, record results for return */
 
     } /* end MCMC loop over k */

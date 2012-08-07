@@ -7,7 +7,7 @@ using namespace std;
 
 SEXP mmmult(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP WcaseList, SEXP MmatList, SEXP OmegaList,
         SEXP omegapluslist, SEXP ngsvec, SEXP personsvec,  SEXP typeTreat, SEXP niterInt, SEXP nburnInt, 
-        SEXP nthinInt, SEXP shapealph, SEXP ustrengthd)
+        SEXP nthinInt, SEXP shapealph, SEXP ratebeta, SEXP ustrengthd)
 {
 BEGIN_RCPP
     NumericVector yr(yvec);
@@ -28,6 +28,7 @@ BEGIN_RCPP
     int nkeep = (niter -  nburn)/nthin;
     int nOmega = Omega.size(); /* should equal numcar */
     double ac = as<double>(shapealph);
+    double bc = as<double>(ratebeta);
     double ustrength = as<double>(ustrengthd);
 
     // Extract key row and column dimensions we will need to sample parameters
@@ -243,12 +244,13 @@ BEGIN_RCPP
 
     // set hyperparameter values
     double a6, b6;
-    a6 = ac; b6 = 1; /* conc */
+    a6 = ac; b6 = bc; /* conc */
     
     // Conduct posterior samples and store results
     int k,l;
     for(k = 0; k < niter; k++)
     {
+	//if( (k % 1000) == 0 ) Rcout << "Interation: " << k << endl;
         clusterbstep(xmat, zmat, wmats, us, zsplit, ytilsplit, pbmat, y, 
             beta, alpha, taue, taub, persons, bstarmat, s, num, M, conc,
             np, nr);

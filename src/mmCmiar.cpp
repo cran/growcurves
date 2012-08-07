@@ -7,7 +7,7 @@ using namespace std;
 
 SEXP mmCmiar(SEXP yvec, SEXP Xmat, SEXP Zmat, SEXP Hmat, SEXP Wcase, SEXP Wperson,
         SEXP Omega, SEXP omegaplusvec, SEXP groupsvec, SEXP personsvec,
-        SEXP niterInt, SEXP nburnInt, SEXP ustrengthd, SEXP corsessInt)
+        SEXP niterInt, SEXP nburnInt, SEXP nthinInt, SEXP ustrengthd, SEXP corsessInt, SEXP typeMM)
 {
 BEGIN_RCPP
     // Time run
@@ -30,13 +30,15 @@ BEGIN_RCPP
     IntegerVector pr(personsvec);
     int niter = as<int>(niterInt);
     int nburn = as<int>(nburnInt);
+    int nthin = as<int>(nthinInt);
     int corsess = as<int>(corsessInt); /* correlation between sets of sess eff*/
+    int typemm = as<int>(typeMM); /* typemm == 0 for ind prior on umat, 1 for CAR prior on umat */
     double ustrength = as<double>(ustrengthd);
-    int nkeep = niter -  nburn;
+    int nkeep = (niter -  nburn)/nthin;
 
     // Extract key row and column dimensions we will need to sample parameters
     int nc = Xr.nrow(), nf = Xr.ncol(), nr = Zr.ncol(), nv = Hr.ncol(), ns = Or.ncol();
-    int ng = gr.length(); int npcbt = Wp.nrow(); int nrho = 0.5*nv*(nv-1);
+    int npcbt = Wp.nrow(); int nrho = 0.5*nv*(nv-1);
 
     // Compute np, number of unique clients
     // algorithm assumes cases clustered by unique client
@@ -44,11 +46,6 @@ BEGIN_RCPP
     icolvec diffpersons(dpr.begin(), nc - 1, false);
     int np = accu(diffpersons) + 1;
     /* int np = accumulate(dpr.begin,dpr.end,1); */
-
-    // compute ng, number of session groups
-    IntegerVector dgr = diff(gr);
-    icolvec diffgroups(dgr.begin(),ns - 1, false);
-    ng = accu(diffgroups) + 1;
 
     // Create armadillo structures we will use for our computations
     // We set copy_aux_mem = false from the constructor, meaning we re-use
@@ -118,79 +115,103 @@ BEGIN_RCPP
     mat umat(ns,nv); rowvec m(nv); m.zeros(); rmvnrnd(L,umat,m);
     mat mmmat(npcbt,nv); mmmat.zeros(); /* client effect mapped from session */
     colvec zb(nc); zb.zeros();
-    mat qmat = -omega; qmat.diag() = omegaplus;/* prior precision for joint u */
+    int ng; /* number of groups for MM (session) effects */
+    mat qmat(ns,ns);
+    if( typemm == 0)  /* mmi */
+    {
+	qmat.eye(ns,ns);
+	ng = 0;
+    }else{ /* typemm = 1 */
+    	qmat = -omega; qmat.diag() = omegaplus;/* prior precision for joint u */
+	// compute ng, number of session groups
+    	IntegerVector dgr = diff(gr);
+    	icolvec diffgroups(dgr.begin(),ns - 1, false);
+    	ng = accu(diffgroups) + 1;
+    }
     colvec resid(nc); resid.zeros(); /* regression residual */
     double alpha = rnorm( 1, 0, sqrt(1/taualph) )[0];
     /* goodness of fit related measures */
     double deviance; colvec devres(4); devres.zeros(); 
     rowvec devmarg(nc);
     rowvec logcpo(nc); logcpo.zeros(); double lpml;
+    /* capture samples to return */
+    int oo = 0, kk;
     
     // set hyperparameter values
-    double a2, a4, a5, a6, b2, b4, b5, b6;
+    double a2, a4, b2, b4;
     a2 = b2 = 1; /* taub */
     a4 = b4 = 1; /* taue */
-    a5 = 0.01; b5 = 0.01; /* taualph */
-    a6 = 0.1; b6 = 0.1; /* taubeta */
+    //a5 = 0.01; b5 = 0.01; /* taualph */
+    //a6 = 0.1; b6 = 0.1; /* taubeta */
 
     // Conduct posterior samples and store results
     int k, l, h;
     for(k = 0; k < niter; k++)
     {
-        //if( (k % 1000) == 0 ) cout << "Interation: " << k << endl;
+        //if( (k % 1000) == 0 ) Rcout << "Interation: " << k << endl;
         bmvstep(xmat, zmat, hmat, wcase, y, beta, umat, alpha, taue, taub,
             persons, zb, bmat, np, nr);
         betamvlsstep(xmat, wcase, hmat, y, beta, umat, alpha, taue, 
                     zb, nf);
-        umvstep(xmat, omega, wcase, wpers, hmat, zb, beta, y, omegaplus, umat,
-                mmmat, alpha, taue, L, ns, nc);
+	if( typemm == 0)
+	{
+		uindmvstep(xmat, wcase, wpers, hmat, zb, beta, y, umat,
+                	mmmat, alpha, taue, L, ns, nc);
+	}else{ /* typemm == 1, MM-MCAR */
+		umvstep(xmat, omega, wcase, wpers, hmat, zb, beta, y, omegaplus, umat,
+                	mmmat, alpha, taue, L, ns, nc);
+	}
         alphamvlsstep(xmat, wcase, beta, hmat, zb, y, umat, resid, alpha,
                     taue, nc);
         taumvlsstep(bmat, resid, qmat, umat, V, L, taub, taue,
-                nu, a2, a4,  b2, b4, ns, np, nc, ng);
+                nu, a2, a4, b2, b4, ns, np, nc, ng);
 
         if(k >= nburn)
         {
             deviance =  dev(resid, taue); /* scalar double deviance */
             dmarg(resid, taue, devmarg); /* 1 x nc vector of densities*/
-            int oo = k - nburn; 
-            Deviance(oo) = deviance;
-            Devmarg.row(oo)  = devmarg;
-            Beta.row(oo) = trans(beta);
-            Alpha(oo) = alpha;
-            for( l = 0; l < nr; l++)
+            kk = k - nburn;
+	    if( kk == ((oo+1)*nthin - 1) )
             {
-                brow.cols( np*l,(np*(l+1)-1) ) = trans( bmat.col(l) );
-            }
-            /* nv sets of session effects */
-            for( h = 0; h < nv; h++)
-            {
-                urow.cols( ns*h,(ns*(h+1)-1) ) = trans( umat.col(h) );
-                mmrow.cols( npcbt*h,(npcbt*(h+1)-1) ) = trans( mmmat.col(h) );
-                taurow.col(h) = L(h,h);
-            }
-            /* correlation coefficients between sets of session effects */
-            rho = 0; Linv = inv(L); totelem = 0; nelem = 0;
-            for( h = 0; h < (nv-1); h++)
-            {
-                nelem = nv - (h+1);
-                for(l = (h+1); l < nv; l++)
-                {
-                    rho = Linv(h,l)/( sqrt(Linv(h,h))*sqrt(Linv(l,l)) );
-                    rhotaurow.col(totelem + (l - h) - 1) = rho;
-                }
-                totelem += nelem;
-            }
-            B.row(oo) = brow;
-            U.row(oo) = urow;
-            MM.row(oo) = mmrow;
-            Tauu.row(oo) = taurow;
-            Rhotauu.row(oo) = rhotaurow;
-            //Taubeta(oo) = taubeta;
-            //Taualph(oo) = taualph;
-            Taue(oo) = taue;
-            Taub.row(oo) = taub;
-            Resid.row(oo) = trans(resid);
+            	Deviance(oo) = deviance;
+            	Devmarg.row(oo)  = devmarg;
+            	Beta.row(oo) = trans(beta);
+            	Alpha(oo) = alpha;
+            	for( l = 0; l < nr; l++)
+            	{
+                	brow.cols( np*l,(np*(l+1)-1) ) = trans( bmat.col(l) );
+            	}
+            	/* nv sets of session effects */
+            	for( h = 0; h < nv; h++)
+            	{
+                	urow.cols( ns*h,(ns*(h+1)-1) ) = trans( umat.col(h) );
+                	mmrow.cols( npcbt*h,(npcbt*(h+1)-1) ) = trans( mmmat.col(h) );
+                	taurow.col(h) = L(h,h);
+            	}
+            	/* correlation coefficients between sets of session effects */
+            	rho = 0; Linv = inv(L); totelem = 0; nelem = 0;
+            	for( h = 0; h < (nv-1); h++)
+            	{
+                	nelem = nv - (h+1);
+                	for(l = (h+1); l < nv; l++)
+                	{
+                    		rho = Linv(h,l)/( sqrt(Linv(h,h))*sqrt(Linv(l,l)) );
+                    		rhotaurow.col(totelem + (l - h) - 1) = rho;
+                	}
+                	totelem += nelem;
+            	}
+            	B.row(oo) = brow;
+            	U.row(oo) = urow;
+            	MM.row(oo) = mmrow;
+            	Tauu.row(oo) = taurow;
+            	Rhotauu.row(oo) = rhotaurow;
+            	//Taubeta(oo) = taubeta;
+            	//Taualph(oo) = taualph;
+            	Taue(oo) = taue;
+            	Taub.row(oo) = taub;
+            	Resid.row(oo) = trans(resid);
+		oo += 1; /* increment sample counter */
+            } /* end conditional statement on returning sample */
         } /* end if k > burnin, record results for return */
 
     } /* end MCMC loop over k */
@@ -415,6 +436,62 @@ END_RCPP
         }
 
         END_RCPP
+    } /* end function ustep to sample u[1,...,s] */
+
+    SEXP uindmvstep(const mat& xmat, const mat& wcase,
+            const mat& wpers, const mat& hmat, const colvec& zb,
+            const colvec& beta, const colvec& y, 
+            mat& umat, mat& mmmat, double alpha,
+            double taue, const mat& L, int ns, int nc)
+    {
+        BEGIN_RCPP
+        // build portion of offset constant, c, not dependent on u
+        colvec cminuss = alpha + xmat*beta + zb;
+        // set up structures that will set column s of wcase = 0 and
+        // entry s for row s of omega = 0 for sampling u[s]
+        mat wcases; colvec ws(nc), c(nc);
+        int nv = umat.n_cols;
+        colvec es(nv), hs(nv); mat phis(nv,nv);
+        mat us(1,nv); rowvec ths(nv); mat hws(nc,nv);
+
+        // loop over s to sample umat[s]|umat[-s],..,y
+        int s, i, j;
+        for(s = 0; s < ns; s++)
+        {
+            // Set entry s for data to 0
+            umat.row(s).zeros();
+            ws = wcase.col(s); /* w.s = W.case[,s] */
+            wcases = wcase;
+            wcases.col(s).zeros(); /* set W.case[,s] = 0*/
+            // put entry Z[,j]*W.case[,-s]%*%U[-s,j] into c
+            /* adds in nothing for session s */
+            c.zeros(); /* re-zero contribution of terms -s for each iteration */
+            for(i = 0; i < nv; i++)
+            {
+                c += hmat.col(i) % (wcases*umat.col(i));
+                hws.col(i) = hmat.col(i) % ws;
+            }
+            c += cminuss;
+            // sample umat[s,]
+            // construct posterior mean, hs, and precision, phis
+            colvec ytilde = y - c;
+            /* nv x 1 */
+	    es = taue*trans(hws)*ytilde; /* nv x 1 */
+            phis = taue*trans(hws)*hws + L; /* nv x nv */
+            hs = inv(phis)*es; /* nv x 1*/
+            us = umat.row(s);
+            ths = trans(hs);
+            rmvnrnd(phis, us, ths);
+            umat.row(s) = us.row(0);
+        } /* end loop over s for sampling umat */
+
+	// compute npcbt x 1, mm, resulting from mapping u to the npcbt clients
+        for(j = 0; j < nv; j++)
+        {
+            mmmat.col(j) = wpers*umat.col(j);
+        }
+
+    	END_RCPP
     } /* end function ustep to sample u[1,...,s] */
 
     SEXP alphamvstep(const mat& xmat, const mat& wcase, const colvec& beta,

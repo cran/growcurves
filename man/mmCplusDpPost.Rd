@@ -5,7 +5,7 @@
 \usage{
   mmCplusDpPost(y, X, Z, Wcase, Wsubject, Omega, omegaplus,
     groups, subjects, niter, nburn, nthin, strength.mm,
-    shapealph)
+    shapealph, ratebeta)
 }
 \arguments{
   \item{y}{An \emph{N x 1} response (of subject-measure
@@ -53,6 +53,10 @@
   \item{shapealph}{The shape parameter for the \eqn{\Gamma}
   prior on the DP concentration parameter.  The rate
   parameter is set of \code{1}.}
+
+  \item{ratebeta}{The rate parameter for the \eqn{\Gamma}
+  prior on the DP concentration parameter. Default value is
+  \code{1}.}
 }
 \value{
   res A list object containing MCMC runs for all model
