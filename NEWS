@@ -1,9 +1,11 @@
-Version 0.2.0
+Version 0.2.1
 -------------------------------------------------------------------------
 
 NEW FEATURES
 
 * updated release on CRAN.
+
+* Only change from version 0.2 accommodates ggplot version 0.9.2 for performing plotting.
 
 * performs Bayesian mixed effects modeling on repeated measures data.
 

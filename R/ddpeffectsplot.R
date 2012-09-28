@@ -183,9 +183,9 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
   }	
   if( smoother == TRUE)
   {
-  	p.p			= p.p + l + l.2 + xaxis + yaxis + f + options + opts(axis.text.x=theme_text(size=6, angle = 90))
+  	p.p			= p.p + l + l.2 + xaxis + yaxis + f + options + theme(axis.text.x=element_text(size=6, angle = 90))
   }else{
-	p.p			= p.p + l + xaxis + yaxis + f + options + opts(axis.text.x=theme_text(size=6, angle = 90))
+	p.p			= p.p + l + xaxis + yaxis + f + options + theme(axis.text.x=element_text(size=6, angle = 90))
   }
   dev.new()
   print(p.p)	
@@ -267,9 +267,9 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
   	f			= facet_wrap( trt~cluster, scales = "free_x", nrow=nt )
 	if( smoother == TRUE)
   	{
-  		pc.m			= pc.m + l + l.2 + xaxis + yaxis + f + options + theme_bw() + opts(axis.text.x=theme_text(size=6, angle = 90)) 
+  		pc.m			= pc.m + l + l.2 + xaxis + yaxis + f + options + theme_bw() + theme(axis.text.x=element_text(size=6, angle = 90)) 
   	}else{
-		pc.m			= pc.m + l + xaxis + yaxis + f + options + theme_bw() + opts(axis.text.x=theme_text(size=6, angle = 90)) 
+		pc.m			= pc.m + l + xaxis + yaxis + f + options + theme_bw() + theme(axis.text.x=element_text(size=6, angle = 90)) 
   	}
   	dev.new()
   	print(pc.m)
@@ -293,9 +293,9 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
   	f			= facet_wrap( trt~cluster, scales= "free_x", nrow=nt )
 	if( smoother == TRUE)
   	{
-  		pc.ci			= pc.ci + l + l.2 + xaxis + yaxis + f + options + opts(axis.text.x=theme_text(size=6, angle = 90))
+  		pc.ci			= pc.ci + l + l.2 + xaxis + yaxis + f + options + theme(axis.text.x=element_text(size=6, angle = 90))
   	}else{
-		pc.ci			= pc.ci + l + xaxis + yaxis + f + options + opts(axis.text.x=theme_text(size=6, angle = 90))
+		pc.ci			= pc.ci + l + xaxis + yaxis + f + options + theme(axis.text.x=element_text(size=6, angle = 90))
   	}
   	dev.new()
   	print(pc.ci)	

@@ -36,7 +36,7 @@
 #'			as \code{(1,0,0,..,0)} such that no attendance is the hold-out category for identification.
 #'   \item numdose. A numeric vector of length equal to \code{G=4} CBT open enrollment groups with each entry capturing the number of modules for that group.   This vector is used to allocate
 #'			modules to the set of base distributions chosen with \code{option} under the \code{ddpgrow} engine function; for example, \code{option = c("car","mvn","car","ind")} assigns
-#'			the noted distributional choices to the corresponding block of module collected in \code{numdose}.
+#'			the noted distributional choices to the corresponding blocks of modules collected in \code{numdose}.
 #'   \item labt.  A character vector of length equal to \code{G=4} CBT open enrollment groups that provides a label for each module block under a distinct base distribution.  These labels will be
 #'			used in the rendered plots using accessor functions associated to \code{ddpgrow}.
 #'   \item group.  A list object of length equal to the number of MM terms under the \code{"mmcar"} or \code{"mmigrp"} prior formulations for session effects.  Each item contains a vector
@@ -49,14 +49,14 @@
 #'   \item Omega. A list object with each element containing an \code{S[g] x S[g]} CAR adjacency matrix used to model prior association among effects for each MM term under prior \code{"mmcar"}, 
 #'			where \code{S[g]} are the number of effects for CBT therapy group \code{g}.  One may employ the approach subset of adjacency matrices for those terms under which one
 #'			desires to specify prior \code{"mmcar"}.
-#'   \item Omega_mat. An \code{(S = 61) x (S = 61)} matrix object encoding the dependence structure among sessions that concatenates the entries of \code{Omega} into a block diagonal structure for use in \code{dpgrowmm}.
+#'   \item Omega_mat. An \code{(S = 61) x (S = 61)} matrix object encoding the dependence structure among modules that concatenates the entries of \code{Omega} into a block diagonal structure for use in \code{dpgrowmm}.
 #' }
 #' 
 #' @references
 #' 	K. E. Watkins, S. B. Hunter, K. A. Hepner, S. M. Paddock, E. de la Cruz, A. J. Zhou and J. Gilmore (2011) An effectiveness trial of group cognitive behavioral therapy
 #'	for patients with persistent depressive symptoms in substance abuse treatment, Archives of General Psychiatry, 68(6), 1- 8.
 #' @references
-#'	S. M. Paddock and T. D. Savitsky (2012) Bayesian Hierarchical Semiparametric Modeling of Longitudinal Post-treatment Outcomes from Open-enrollment Therapy Groups, invited re-submission to: 
+#'	S. M. Paddock and T. D. Savitsky (2012) Bayesian Hierarchical Semiparametric Modeling of Longitudinal Post-treatment Outcomes from Open-enrollment Therapy Groups, soon to appear in: 
 #'      JRSS Series A (Statistics in Society).
 #' @docType data
 #' @keywords datasets

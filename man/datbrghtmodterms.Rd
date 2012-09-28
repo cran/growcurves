@@ -97,8 +97,8 @@
   set of base distributions chosen with \code{option} under
   the \code{ddpgrow} engine function; for example,
   \code{option = c("car","mvn","car","ind")} assigns the
-  noted distributional choices to the corresponding block
-  of module collected in \code{numdose}.  \item labt.  A
+  noted distributional choices to the corresponding blocks
+  of modules collected in \code{numdose}.  \item labt.  A
   character vector of length equal to \code{G=4} CBT open
   enrollment groups that provides a label for each module
   block under a distinct base distribution.  These labels
@@ -132,7 +132,7 @@
   subset of adjacency matrices for those terms under which
   one desires to specify prior \code{"mmcar"}.  \item
   Omega_mat. An \code{(S = 61) x (S = 61)} matrix object
-  encoding the dependence structure among sessions that
+  encoding the dependence structure among modules that
   concatenates the entries of \code{Omega} into a block
   diagonal structure for use in \code{dpgrowmm}. }
 }
@@ -147,8 +147,8 @@
   S. M. Paddock and T. D. Savitsky (2012) Bayesian
   Hierarchical Semiparametric Modeling of Longitudinal
   Post-treatment Outcomes from Open-enrollment Therapy
-  Groups, invited re-submission to: JRSS Series A
-  (Statistics in Society).
+  Groups, soon to appear in: JRSS Series A (Statistics in
+  Society).
 }
 \keyword{datasets}
 

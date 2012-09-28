@@ -82,7 +82,7 @@ ddpMCMCplots = function(subjecti.u, labt = NULL, typet, numt, theta.summary, lam
    l.2		= geom_smooth(aes(group=1),method = "loess", span = .2, size = 1.2, colour = "pink")
    f 		= facet_wrap(~type, scales="free_y",ncol=1)
    axis		= labs(x = "Subject", y = "Effect Size")
-   options 	= opts(title="Subject Effects, Theta")
+   options 	= labs(title="Subject Effects, Theta")
    p.theta 	= p.theta + l.1 + l.2 + f + axis + options 
 
    ## tau.e - MCMC trace
@@ -91,7 +91,7 @@ ddpMCMCplots = function(subjecti.u, labt = NULL, typet, numt, theta.summary, lam
    p.taue		= ggplot(data=dattaue,aes(x=iteration,y=value))
    l			= geom_line()
    axis			= labs(x = "Iterations", y = "Sampled Value")
-   options		= opts(title="MCMC Trace plot for tau.e")
+   options		= labs(title="MCMC Trace plot for tau.e")
    p.taue		= p.taue + l + axis + options
 
    ## deviance - MCMC trace
@@ -100,7 +100,7 @@ ddpMCMCplots = function(subjecti.u, labt = NULL, typet, numt, theta.summary, lam
    p.dev		= ggplot(data=datdev,aes(x=iteration,y=value))
    l			= geom_line()
    axis			= labs(x = "Iterations", y = "Sampled Value")
-   options		= opts(title="MCMC Trace plot for Deviance")
+   options		= labs(title="MCMC Trace plot for Deviance")
    p.dev		= p.dev + l + axis + options
 
    ## M - MCMC trace
@@ -109,7 +109,7 @@ ddpMCMCplots = function(subjecti.u, labt = NULL, typet, numt, theta.summary, lam
    p.M		= ggplot(data=datM,aes(x=iteration,y=value))
    l		= geom_line()
    axis		= labs(x = "Iterations", y = "Sampled Value")
-   options		= opts(title="MCMC Trace plot for M")
+   options	= labs(title="MCMC Trace plot for M")
    p.M		= p.M + l + axis + options
 
    ## Heatmap of covariance matrix, Lambda
@@ -120,7 +120,7 @@ ddpMCMCplots = function(subjecti.u, labt = NULL, typet, numt, theta.summary, lam
    l		= geom_tile()
    yaxis 	= ylab("Dose")
    xaxis 	= xlab("Dose")
-   options	= opts(title="Heatmap for Base Dist. Columns Covariance Matrix, Lambda.")
+   options	= labs(title="Heatmap for Base Dist. Columns Covariance Matrix, Lambda.")
    p.lam	= p.lam + l + xaxis + yaxis + scale_fill_gradient(low = "white", high = "steelblue") + options
 
 
@@ -155,7 +155,7 @@ ddpMCMCplots = function(subjecti.u, labt = NULL, typet, numt, theta.summary, lam
   	yaxis 		= ylab("Dose")
   	xaxis 		= xlab("Dose")
   	f		= facet_wrap(~trt, scales="free_y", ncol=min(nt,5) )
-	options		= opts(title="Heatmap for Covariance Matrices under MVN Prior.")
+	options		= labs(title="Heatmap for Covariance Matrices under MVN Prior.")
   	p.mvn		= p.mvn + l + xaxis + yaxis + f + scale_fill_gradient(low = "white", high = "steelblue") + options
   }else{
 	p.mvn <- NULL
@@ -187,7 +187,7 @@ ddpMCMCplots = function(subjecti.u, labt = NULL, typet, numt, theta.summary, lam
    	l		= geom_line()
 	f 		= facet_wrap(~label, scales="free_y",ncol=1)
    	axis		= labs(x = "Iterations", y = "Sampled Value")
-   	options		= opts(title="MCMC Trace plot for CAR strength parameter, Alphacar")
+   	options		= labs(title="MCMC Trace plot for CAR strength parameter, Alphacar")
    	p.acar		= p.acar + l + f + axis + options
 
 	## Taucar - MCMC trace
@@ -199,7 +199,7 @@ ddpMCMCplots = function(subjecti.u, labt = NULL, typet, numt, theta.summary, lam
    	l		= geom_line()
 	f 		= facet_wrap(~label, scales="free_y",ncol=1)
    	axis		= labs(x = "Iterations", y = "Sampled Value")
-   	options		= opts(title="MCMC Trace plot for CAR precision parameter, Taucar")
+   	options		= labs(title="MCMC Trace plot for CAR precision parameter, Taucar")
    	p.tcar		= p.tcar + l + f + axis + options
 
 	##
@@ -217,7 +217,7 @@ ddpMCMCplots = function(subjecti.u, labt = NULL, typet, numt, theta.summary, lam
    	l.1 			= geom_line(colour = "steelblue4")
    	l.2			= geom_smooth(aes(group=1),method = "loess", span = .8, size = 1.2, colour = "pink")
    	axis			= labs(x = "Treatment", y = "95% Credible Interval")
-   	options 		= opts(title="CAR Strength Parameters, alpha")
+   	options 		= labs(title="CAR Strength Parameters, alpha")
    	p.aband 		= p.aband + l.1 + l.2 + axis + options 
 
 	## taucar
@@ -231,7 +231,7 @@ ddpMCMCplots = function(subjecti.u, labt = NULL, typet, numt, theta.summary, lam
    	l.1 		= geom_line(colour = "steelblue4")
    	l.2		= geom_smooth(aes(group=1),method = "loess", span = .8, size = 1.2, colour = "pink")
    	axis		= labs(x = "Treatment", y = "95% Credible Interval")
-   	options 	= opts(title="CAR Precision Parameters, tau")
+   	options 	= labs(title="CAR Precision Parameters, tau")
    	p.tband 	= p.tband + l.1 + l.2 + axis + options 
 
    }else{ 
@@ -271,7 +271,7 @@ ddpMCMCplots = function(subjecti.u, labt = NULL, typet, numt, theta.summary, lam
    	l.2		= geom_smooth(aes(group=1),method = "loess", span = .8, size = 1.2, colour = "pink")
 	f 		= facet_wrap(~trt, scales="free_y",ncol=1)
    	axis		= labs(x = "Dose Precision Parameter", y = "95% Credible Interval")
-   	options 	= opts(title="Precision Parameter under Independent Gaussian base, tauind")
+   	options 	= labs(title="Precision Parameter under Independent Gaussian base, tauind")
    	p.iband 	= p.iband + l.1 + l.2 + f + axis + options 		
 
    }else{

@@ -108,7 +108,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
 		l.2				= geom_smooth(aes(group=block),method = "loess", span = 1.0, size = 1.1, se = FALSE, colour = "pink")
    		f				= facet_wrap(~block,scales="free",ncol=2)
    		axis	 			= labs(x = "Effect ID", y = "Effect Size", colour = "Group")
-   		options		 	= opts(title="Random Multiple Membership Effects under Blocks")
+   		options		 		= labs(title="Random Multiple Membership Effects under Blocks")
    		p.U		 		= p.U + l + l.2 + f + axis + options
 
 		## Tau.u - MCMC trace
@@ -120,7 +120,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    		l				= geom_line()
    		f 				= facet_wrap(~label, scales="free_y",ncol=1)
    		axis				= labs(x = "Iterations", y = "Sampled Value")
-   		options			= opts(title="MCMC Trace plots for Tauu")
+   		options			= labs(title="MCMC Trace plots for Tauu")
    		p.tauu			= p.tauu + l + f + axis + options
 
 		rm(datU); rm(dat); rm(dattauu); rm(dattauu.long)
@@ -150,7 +150,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    			l 				= geom_point(aes(shape=factor(order)))
    			f				= facet_wrap(~cluster,scales="free",ncol=2)
    			axis	 			= labs(x = "Session", y = "Effect Size", shape = "Poly Order", colour = "Group")
-   			options		 		= opts(title="Session Effects (u)")
+   			options		 		= labs(title="Session Effects (u)")
    			p.U		 		= p.U + l + f + axis + options
 
 
@@ -168,7 +168,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    			l.2		= geom_smooth(aes(group=1),method = "loess", span = .2, size = 1.2, colour = "pink")
 			f		= facet_wrap(~order,scales="free",ncol=2)
    			axis 		= labs(x = "Subject", y = "Effect Size")
-   			options 	= opts(title="Session-induced client effects - mm = H (W * U)")
+   			options 	= labs(title="Session-induced client effects - mm = H (W * U)")
    			p.Umm 		= p.Umm + l.1 + l.2 + f + axis + options 
 
 
@@ -190,7 +190,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    			l.2	= geom_smooth(aes(group=1),method = "loess", span = .2, size = 1.2, colour = "pink")
 			f	= facet_wrap(~order,scales="free",ncol=2)
    			axis 	= labs(x = "Subject", y = "Effect Size")
-   			options = opts(title="Session-induced client effects - mm + b")
+   			options = labs(title="Session-induced client effects - mm + b")
    			p.Ub 	= p.Ub + l.1 + l.2 + f + axis + options 
 
 	
@@ -203,7 +203,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    			l			= geom_line()
 			f			= facet_wrap(~order,scales="free",ncol=2)
    			axis			= labs(x = "Iterations", y = "Sampled Value")
-   			options			= opts(title="MCMC Trace plot for tau.u")
+   			options			= labs(title="MCMC Trace plot for tau.u")
    			p.tauu			= p.tauu + l + f + axis + options
 
 			rm(datU); rm(datUmm); rm(datUmm.long); rm(datUb); rm(datUb.long); 
@@ -229,7 +229,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    			l 				= geom_point()
    			f				= facet_wrap(~group,scales="free",ncol=2)
    			axis	 			= labs(x = "Session", y = "Effect Size", colour = "Group")
-   			options		 		= opts(title="Session Effects (u)")
+   			options		 		= labs(title="Session Effects (u)")
    			p.U		 		= p.U + l + f + axis + options
 
 
@@ -245,7 +245,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    			l.1 		= geom_line(colour = "steelblue4")
    			l.2		= geom_smooth(aes(group=1),method = "loess", span = .2, size = 1.2, colour = "pink")
    			axis 		= labs(x = "Subject", y = "Effect Size")
-   			options 	= opts(title="Session-induced client effects - mm = (W * u)")
+   			options 	= labs(title="Session-induced client effects - mm = (W * u)")
    			p.Umm 		= p.Umm + l.1 + l.2 + axis + options 
 
 
@@ -261,7 +261,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    			l.1 	= geom_line(colour = "steelblue4")
    			l.2	= geom_smooth(aes(group=1),method = "loess", span = .2, size = 1.2, colour = "pink")
    			axis 	= labs(x = "Subject", y = "Effect Size")
-   			options = opts(title="Session-induced client effects - mm0 + b0")
+   			options = labs(title="Session-induced client effects - mm0 + b0")
    			p.Ub0 	= p.Ub0 + l.1 + l.2 + axis + options 
 	
    			## tau.u - MCMC trace
@@ -270,7 +270,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    			p.tauu			= ggplot(data=dattauu,aes(x=iteration,y=value))
    			l			= geom_line()
    			axis			= labs(x = "Iterations", y = "Sampled Value")
-   			options			= opts(title="MCMC Trace plot for tau.u")
+   			options			= labs(title="MCMC Trace plot for tau.u")
    			p.tauu			= p.tauu + l + axis + options
 
 			rm(datU); rm(datUmm); rm(datUmm.long); rm(datUb0); rm(datUb0.long);
@@ -305,7 +305,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    l.2		= geom_smooth(aes(group=1),method = "loess", span = .2, size = 1.2, colour = "pink")
    f 		= facet_wrap(~type, scales="free_y",ncol=1)
    axis		= labs(x = "Subject", y = "Effect Size")
-   options 	= opts(title="Client Effects, b")
+   options 	= labs(title="Client Effects, b")
    p.b 		= p.b + l.1 + l.2 + f + axis + options 
 
    ## Tau.b - MCMC trace
@@ -317,7 +317,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    l			= geom_line()
    f 			= facet_wrap(~label, scales="free_y",ncol=1)
    axis			= labs(x = "Iterations", y = "Sampled Value")
-   options		= opts(title="MCMC Trace plot for Taub")
+   options		= labs(title="MCMC Trace plot for Taub")
    p.taub		= p.taub + l + f + axis + options
 
    rm(datB); rm(dattaub); rm(dattaub.long);
@@ -328,7 +328,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    p.taue		= ggplot(data=dattaue,aes(x=iteration,y=value))
    l			= geom_line()
    axis			= labs(x = "Iterations", y = "Sampled Value")
-   options		= opts(title="MCMC Trace plot for tau.e")
+   options		= labs(title="MCMC Trace plot for tau.e")
    p.taue		= p.taue + l + axis + options
 
    ## deviance - MCMC trace
@@ -337,7 +337,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    p.dev		= ggplot(data=datdev,aes(x=iteration,y=value))
    l			= geom_line()
    axis			= labs(x = "Iterations", y = "Sampled Value")
-   options		= opts(title="MCMC Trace plot for Deviance")
+   options		= labs(title="MCMC Trace plot for Deviance")
    p.dev		= p.dev + l + axis + options
 
    if( !is.null(M) )
@@ -349,7 +349,7 @@ mcmcPlots = function(subjecti.u, subj.aff = NULL, subjaff.input = NULL, bmat.sum
    	p.M		= ggplot(data=datM,aes(x=iteration,y=value))
    	l		= geom_line()
    	axis		= labs(x = "Iterations", y = "Sampled Value")
-   	options		= opts(title="MCMC Trace plot for M")
+   	options		= labs(title="MCMC Trace plot for M")
    	p.M		= p.M + l + axis + options
    }
 

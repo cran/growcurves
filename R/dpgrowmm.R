@@ -134,7 +134,7 @@ NULL
 #' res.mm			= dpgrowmm(y = datsim$y, subject = datsim$subject, trt = datsim$trt, time = datsim$time, n.random = datsim$n.random, 
 #'						n.fix_degree = 2, Omega = datsim$Omega, group = datsim$group, subj.aff = datsim$subj.aff,
 #'						W.subj.aff = datsim$W.subj.aff, n.iter = 10000, n.burn = 2000, n.thin = 10,
-#'						shape.dp = shape.dp, strength.mm = strength.mm, option = "mmcar")
+#'						shape.dp = shape.dp, rate.dp = rate.dp, strength.mm = strength.mm, option = "mmcar")
 #' plot.results			= plot(res.mm) ## ggplot2 plot objects, including growth curves
 #' summary.results		= summary(res.mm) ## parameter credible intervals and fit statistics
 #' samples.posterior		= samples(res.mm) ## posterior sampled values
@@ -458,7 +458,7 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
   }else{ ## multivariate MM effects
 	if( option %in% c("mmi","mmigrp") )
 	{
-		print("Your chosen option = mmi for mulivariate MM effects")
+		print("Your chosen option = mmi for multivariate MM effects")
 		Omega	 	= matrix(0, Nsession, Nsession)
 		omega.plus	= matrix(0, Nsession, 1)
 		corsess		= 0 ## correlations in prior scale matrix for wishart prior on precision matrix for effects order
@@ -466,7 +466,7 @@ dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.rand
 		res 		= mmCmvplusDpPost(y, X, Z, H, W.case, W.subj.aff, Omega, omega.plus, group, subject, n.iter, n.burn, n.thin, strength.mm, corsess, shape.dp, rate.dp, typemm)
 		stopifnot( ncol(res$U) == (Nmv*Nsession) )
 	}else{ ## option == "mmcar"
-		print("Your chosen option = mmcar for mulivariate MM effects")
+		print("Your chosen option = mmcar for multivariate MM effects")
 		corsess		= 0 ## correlations in prior scale matrix for wishart prior on precision matrix for effects order
 		typemm		= 1 ## "mmcar"
 		res 		= mmCmvplusDpPost(y, X, Z, H, W.case, W.subj.aff, Omega, omega.plus, group, subject, n.iter, n.burn, n.thin, strength.mm, corsess, shape.dp, rate.dp, typemm)

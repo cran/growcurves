@@ -6,8 +6,9 @@
 \title{Bayesian semi and nonparametric growth curve models with employment of multiple membership random effects for longitudinal data.}
 \description{
   \tabular{ll}{ Package: \tab growcurves\cr Type: \tab
-  Package\cr Version: \tab 0.2\cr Date: \tab 2012-08-07\cr
-  License: \tab GPL (>= 2) \cr LazyLoad: \tab yes\cr }
+  Package\cr Version: \tab 0.2.1\cr Date: \tab
+  2012-09-28\cr License: \tab GPL (>= 2) \cr LazyLoad: \tab
+  yes\cr }
 }
 \details{
   Specifies a non-parametric prior for subject random
@@ -204,7 +205,8 @@ plot.results			= plot(res.mm)
 
   T. D. Savitsky and S. M. Paddock (2012) Bayesian
   Non-Parametric Hierarchical Modeling for Multiple
-  Membership Data, submitted to: Biometrics.
+  Membership Data, submitted to: Annals of Applied
+  Statistics.
 
   T. D. Savitsky and S. M. Paddock (2012) Visual Sufficient
   Statistics for Repeated Measures data with growcurves for

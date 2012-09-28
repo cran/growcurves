@@ -263,7 +263,7 @@ strength.mm		= 0.001
 res.mm			= dpgrowmm(y = datsim$y, subject = datsim$subject, trt = datsim$trt, time = datsim$time, n.random = datsim$n.random,
 						n.fix_degree = 2, Omega = datsim$Omega, group = datsim$group, subj.aff = datsim$subj.aff,
 						W.subj.aff = datsim$W.subj.aff, n.iter = 10000, n.burn = 2000, n.thin = 10,
-						shape.dp = shape.dp, strength.mm = strength.mm, option = "mmcar")
+						shape.dp = shape.dp, rate.dp = rate.dp, strength.mm = strength.mm, option = "mmcar")
 plot.results			= plot(res.mm) ## ggplot2 plot objects, including growth curves
 summary.results		= summary(res.mm) ## parameter credible intervals and fit statistics
 samples.posterior		= samples(res.mm) ## posterior sampled values

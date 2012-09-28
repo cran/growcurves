@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #' Package: \tab growcurves\cr
 #' Type: \tab Package\cr
-#' Version: \tab 0.2\cr
-#' Date: \tab 2012-08-07\cr
+#' Version: \tab 0.2.1\cr
+#' Date: \tab 2012-09-28\cr
 #' License: \tab GPL (>= 2) \cr
 #' LazyLoad: \tab yes\cr
 #' }
@@ -142,7 +142,7 @@
 #' @references 
 #'	S. M. Paddock and T. D. Savitsky (2012) Bayesian Hierarchical Semiparametric Modeling of Longitudinal Post-treatment Outcomes from Open-enrollment Therapy Groups, Invited re-submission to: JRSS Series A (Statistics in Society).
 #' @references
-#'	T. D. Savitsky and S. M. Paddock (2012) Bayesian Non-Parametric Hierarchical Modeling for Multiple Membership Data, submitted to: Biometrics.
+#'	T. D. Savitsky and S. M. Paddock (2012) Bayesian Non-Parametric Hierarchical Modeling for Multiple Membership Data, submitted to: Annals of Applied Statistics.
 #' @references
 #' 	T. D. Savitsky and S. M. Paddock (2012) Visual Sufficient Statistics for Repeated Measures data with growcurves for R, submitted to: Journal of Statistical Software.
 #' @import reshape2 scales ggplot2 testthat Rcpp RcppArmadillo Formula

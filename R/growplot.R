@@ -128,7 +128,7 @@ growplot <- function(object, compare.objects = NULL, subjects.plot = NULL, group
   f				= facet_wrap(~trt, scales="fixed")
   if( !is.null(title.lab) )
   { 
-  	options		 		= opts(title = title.lab[1])
+  	options		 		= labs(title = title.lab[1])
   }else{
 	options				= NULL
   }
@@ -217,7 +217,7 @@ growplot <- function(object, compare.objects = NULL, subjects.plot = NULL, group
   f				= facet_wrap(trt~subject, scales="fixed")
   if( !is.null(title.lab) )
   { 
-  	options		 		= opts(title = title.lab[2])
+  	options		 		= labs(title = title.lab[2])
   }else{
 	options				= NULL
   }

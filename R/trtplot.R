@@ -138,7 +138,6 @@ trtplot <- function(run.objects, run.models, trt.labs, time.points, y.label = NU
   p	<- ggplot(data=Mu.dat,aes(x = models, y = Mu_diff, fill = models))
   l	<- stat_summary(fun.data = f, geom="boxplot")
   f	<- facet_wrap(~time,scales = "fixed")
-  title <- 
   axis	<- labs(x = "Model", y = y.lab)
   p	<- p + l + f + axis + scale_fill_brewer(palette="OrRd")  ## color scale supports bw printing
   dev.new()
