@@ -6,8 +6,8 @@
 \title{Bayesian semi and nonparametric growth curve models with employment of multiple membership random effects for longitudinal data.}
 \description{
   \tabular{ll}{ Package: \tab growcurves\cr Type: \tab
-  Package\cr Version: \tab 0.2.1\cr Date: \tab
-  2012-09-28\cr License: \tab GPL (>= 2) \cr LazyLoad: \tab
+  Package\cr Version: \tab 0.2.2\cr Date: \tab
+  2012-10-10\cr License: \tab GPL (>= 2) \cr LazyLoad: \tab
   yes\cr }
 }
 \details{

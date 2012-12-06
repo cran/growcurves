@@ -374,23 +374,28 @@ dpgrowmult.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.ra
   ## re-cast subject identifier inputs to be sequential - subject, subj.aff, trt, group
   ####################################################################################
   ## subject
-  start		<- 1
-  out		<- relabel(label.input = subject, start)
-  subject	<- out$label.new
-  o		<- order(subject) ## use later to place X, Z, map.subject, map.trt in contiguous order of subject
-  subjecti.u	<- out$labeli.u
-  map.subject	<- out$dat.label ## colnames = c("label.input","label.new"), in case format
+  start			<- 1
+  out			<- relabel(label.input = subject, start)
+  subject		<- out$label.new
+  o			<- order(subject) ## use later to place X, Z, map.subject, map.trt in contiguous order of subject
+  subjecti.u		<- out$labeli.u
+  map.subject		<- out$dat.label ## colnames = c("label.input","label.new"), in case format
 
   ## subj.aff - capture as strict subset of subject
-  subjaff.input <- vector("list",nty)
+  ## don't re-order subj.aff[[i]] b/c correponds to rows in W.subj.aff[[i]].  only change labels
+  subjaff.input 			<- vector("list",nty)
+  smap.u				<- unique(map.subject) ## in subject format
   for( i in 1:nty )
   {
-  	subjaff.input[[i]] 	<- subj.aff[[i]]
-  	tmp			<- unique(map.subject) ## in subject format
-  	tmp			<- subset(tmp, tmp$label.input %in% subj.aff[[i]])
-  	subj.aff[[i]]		<- tmp$label.new ## result is a strict subset of subject, but in subject, not case format
+  	subjaff.input[[i]] 		<- subj.aff[[i]]
+	o.aff.i				<- 1:length(subj.aff[[i]]) ## will use to maintain order of input
+  	tmp				<- data.frame(o.aff.i,subjaff.input[[i]])
+  	names(tmp)			<- c("order","label.input")
+  	smap.u.i			<- subset(smap.u, smap.u$label.input %in% subjaff.input[[i]])
+  	tmp				<- merge(tmp,smap.u.i, by = "label.input", all.x = T, sort =  FALSE)
+  	subj.aff[[i]]			<- tmp$label.new[order(tmp$order)] ## result is a strict subset of subject, but in subject, not case format
   }
-  rm(tmp)
+  rm(tmp,smap.u)
   
   ## trt
   start		<- 0
@@ -458,7 +463,7 @@ dpgrowmult.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.ra
   ## construct fixed and random effect design matrices
   ##################################################################
   out 	<- XZcov(time = time , trt = trt, trt.lab = trti.u, subject = subject, n.random = n.random, n.fix_degree = n.fix_degree, formula = formula, 
-		random.only = random.only, data = data)
+		random.only = random.only, data = data) ## re-ordering to contiguous subject for X and Z is contained in the function XZcov
   X		<- out$X
   X.c   	<- out$X.c
   X.n   	<- out$X.n
@@ -611,38 +616,38 @@ dpgrowmult.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.ra
    	if( "mmdp" %in% option )
    	{
 		
-    		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, U = res$U,  M = res$M, S = res$S, 
-			Num = res$Num, Residuals = res$Residuals, bigSmin = res$bigSmin, Tau.u = res$Tauu, Tau.e = res$Taue, 
-			Tau.b = res$Taub, bigSu = res$bigSu, Mu = res$Mu, Su = res$Su, summary.results = summary.results, plot.results = plot.results,
+    		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, U = res$U,  M = res$M, S = res$optPartition[[3]], 
+			Num = res$Num, Residuals = res$Residuals, bigSmin = res$bigSmin, phat = res$optPartition[[1]], ordscore = res$optPartition[[2]],
+			Tau.u = res$Tauu, Tau.e = res$Taue, Tau.b = res$Taub, bigSu = res$bigSu, Mu = res$Mu, Su = res$Su, summary.results = summary.results, plot.results = plot.results,
 			residuals = residuals, dat.growthCurve = gc.plot$plot.dat, dat.gcdata = gc.plot$dat.data) 
    	}else{
 		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, U = res$U, 
-			M = res$M, S = res$S, Num = res$Num, Residuals = res$Residuals, bigSmin = res$bigSmin, Tau.u = res$Tauu, Tau.e = res$Taue, 
-			Tau.b = res$Taub, summary.results = summary.results, plot.results = plot.results,
+			M = res$M, S = res$S, Num = res$Num, Residuals = res$Residuals, bigSmin = res$bigSmin, phat = res$optPartition[[1]], ordscore = res$optPartition[[2]],
+			Tau.u = res$Tauu, Tau.e = res$Taue, Tau.b = res$Taub, summary.results = summary.results, plot.results = plot.results,
 			residuals = residuals, dat.growthCurve = gc.plot$plot.dat, dat.gcdata = gc.plot$dat.data)
    	}
    }else{ ## is.null(time) = TRUE
      	if( "mmdp" %in% option )
      	{
-    		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, U = res$U,  M = res$M, S = res$S, 
-			Num = res$Num, Residuals = res$Residuals, bigSmin = res$bigSmin, Tau.u = res$Tauu, Tau.e = res$Taue, 
-			Tau.b = res$Taub, bigSu = res$bigSu, Mu = res$Mu, Su = res$Su, summary.results = summary.results, plot.results = plot.results, residuals = residuals)
+    		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, U = res$U,  M = res$M, S = res$optPartition[[3]], 
+			Num = res$Num, Residuals = res$Residuals, bigSmin = res$bigSmin, phat = res$optPartition[[1]], ordscore = res$optPartition[[2]],
+			Tau.u = res$Tauu, Tau.e = res$Taue, Tau.b = res$Taub, bigSu = res$bigSu, Mu = res$Mu, Su = res$Su, summary.results = summary.results, plot.results = plot.results, residuals = residuals)
      	}else{
 		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, U = res$U, 
-			M = res$M, S = res$S, Num = res$Num, Residuals = res$Residuals, bigSmin = res$bigSmin, Tau.u = res$Tauu, Tau.e = res$Taue, 
-			Tau.b = res$Taub, summary.results = summary.results, plot.results = plot.results, residuals = residuals)
+			M = res$M, S = res$optPartition[[3]], Num = res$Num, Residuals = res$Residuals, bigSmin = res$bigSmin, phat = res$optPartition[[1]], ordscore = res$optPartition[[2]],
+			Tau.u = res$Tauu, Tau.e = res$Taue, Tau.b = res$Taub, summary.results = summary.results, plot.results = plot.results, residuals = residuals)
    	}  ## end conditional statement on choice	
    } ## end conditional statement on whether is.null(time)
  }else{ ## plot.out = FALSE
    if(  "mmdp" %in% option )
    {
-    		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, U = res$U,  M = res$M, S = res$S, 
-			Num = res$Num, Residuals = res$Residuals, bigSmin = res$bigSmin, Tau.u = res$Tauu, Tau.e = res$Taue, 
-			Tau.b = res$Taub, bigSu = res$bigSu, Mu = res$Mu, Su = res$Su, summary.results = summary.results, residuals = residuals)
+    		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, U = res$U,  M = res$M, S = res$optPartition[[3]], 
+			Num = res$Num, Residuals = res$Residuals, bigSmin = res$bigSmin, phat = res$optPartition[[1]], ordscore = res$optPartition[[2]],
+			Tau.u = res$Tauu, Tau.e = res$Taue, Tau.b = res$Taub, bigSu = res$bigSu, Mu = res$Mu, Su = res$Su, summary.results = summary.results, residuals = residuals)
    }else{
 		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, U = res$U, 
-			M = res$M, S = res$S, Num = res$Num, Residuals = res$Residuals, bigSmin = res$bigSmin, Tau.u = res$Tauu, Tau.e = res$Taue, 
-			Tau.b = res$Taub, summary.results = summary.results, residuals = residuals)
+			M = res$M, S = res$optPartition[[3]], Num = res$Num, Residuals = res$Residuals, bigSmin = res$bigSmin, phat = res$optPartition[[1]], ordscore = res$optPartition[[2]],
+			Tau.u = res$Tauu, Tau.e = res$Taue, Tau.b = res$Taub, summary.results = summary.results, residuals = residuals)
    }
  } ## end conditional statement on plot.out
 
@@ -763,11 +768,11 @@ samples.dpgrowmult <- function(object,...)
   if("mmdp" %in% object$summary.results$model )
   {
   	res 		<- list(Deviance = object$Deviance, Alpha = object$Alpha, Beta = Beta, B = B, Gamma = object$U, 
-			   	Residuals = object$Residuals, M = object$M, S = object$S, Num.per.cluster = object$Num, bigSmin = object$bigSmin,
+			   	Residuals = object$Residuals, M = object$M, S = object$S, Num.per.cluster = object$Num, bigSmin = object$bigSmin, phat = object$phat, ordscore = object$ordscore,
 			   	Tau.gamma = object$Tau.u, Tau.b = object$Tau.b, Tau.e = object$Tau.e, bigSgamma = object$bigSu, Mu = object$Mgamma, Sgamma = object$Su)
   }else{
 	res 		<- list(Deviance = object$Deviance, Alpha = object$Alpha, Beta = Beta, B = B, Gamma = object$U, 
-				Residuals = object$Residuals, M = object$M, S = object$S, Num.per.cluster = object$Num, bigSmin = object$bigSmin,
+				Residuals = object$Residuals, M = object$M, S = object$S, Num.per.cluster = object$Num, bigSmin = object$bigSmin, phat = object$phat, ordscore = object$ordscore,
 				Tau.gamma = object$Tau.u, Tau.b = object$Tau.b, Tau.e = object$Tau.e)
   }
 

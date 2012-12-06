@@ -4,7 +4,7 @@
 \usage{
   effectsplot(objects, mm.terms = NULL, prior.labs = NULL,
     center = TRUE, axis.labs = NULL, group.plot = NULL,
-    smoother = FALSE, order = TRUE, orderto = NULL,
+    smoother = FALSE, order = FALSE, orderto = NULL,
     label.mm = NULL)
 }
 \arguments{

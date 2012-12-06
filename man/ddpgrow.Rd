@@ -87,10 +87,15 @@
   \item{data}{A \code{data.frame} containing the variables
   named in \code{formula}.}
 
-  \item{dosemat}{An \code{P x (T+1)} \code{matrix} object
-  that maps \code{subjects} to treatment dosages.  The
-  first column should be an intercept column (filled with
-  1's).}
+  \item{dosemat}{An \code{n x (sum(numdose)+1)}
+  \code{matrix} object that maps \code{subjects} to
+  treatment dosages.  The first column should be an
+  intercept column (filled with 1's).  If there is only a
+  single treatment arm, then the number of columns in
+  dosemat should be \code{sum(numdose)}.  There is always a
+  leave-one-out dosage for \code{dosemat}.  For multiple
+  treatment arms, the null (0) treatment is the one left
+  out.}
 
   \item{numdose}{A vector object containing the number of
   dosages for each treatment.  So the length should be the

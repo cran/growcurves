@@ -136,7 +136,17 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
 
   ## output plots
   ## tile geom 
-  p.t			= ggplot(data=dat,aes(x=reorder(dose,mean.effects), y = factor(order), fill = mean.effects))
+  if( re.order == TRUE )
+  {
+	## first create variable, dose_trtsubject, that confines reordering to within trt-subject.
+	dat			<- transform( dat, dose_trtsubject = factor(paste(dose,trt,subject,sep=".")) )
+	## although plotting dose_trtsubject, set x-axis tick labels to dose (within trt-subject)
+	options 		<- scale_x_discrete(labels=dat$dose, breaks=dat$dose_trtsubject)
+  	p.t			= ggplot(data=dat,aes(x=reorder(dose_trtsubject,mean.effects), y = factor(order), fill = mean.effects)) + options
+  }else{
+	p.t			= ggplot(data=dat,aes(x=dose, y = factor(order), fill = mean.effects))
+  }
+
   l			= geom_tile()
   yaxis 		= ylab("Polynomial Order")
   if( is.null(x.axis.label) ) 
@@ -154,7 +164,11 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
   {
 	if( re.order == TRUE )
 	{
-  		p.p			= ggplot(data=dat,aes(x=reorder(dose,mean.effects), y = mean.effects, colour = factor(order), shape = factor(order)))
+		## first create variable, dose_trtsubject, that confines reordering to within trt-subject.
+		dat			<- transform( dat, dose_trtsubject = factor(paste(dose,trt,subject,sep=".")) )
+		## although plotting dose_trtsubject, set x-axis tick labels to dose (within trt-subject)
+		options 		<- scale_x_discrete(labels=dat$dose, breaks=dat$dose_trtsubject)
+  		p.p			= ggplot(data=dat,aes(x=reorder(dose_trtsubject,mean.effects), y = mean.effects, colour = factor(order), shape = factor(order))) + options
 	}else{
 		p.p			= ggplot(data=dat,aes(x=dose, y = mean.effects, colour = factor(order), shape = factor(order)))
 	}
@@ -171,7 +185,11 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
 
 	if( re.order == TRUE )
 	{
-		p.p			= ggplot(data=dat.ci,aes(x=reorder(dose,effects), y = effects, colour = factor(order), shape = factor(order)))
+		## first create variable, dose_trtsubject, that confines reordering to within trt-subject.
+		dat.ci			<- transform( dat.ci, dose_trtsubject = factor(paste(dose,trt,subject,sep=".")) )
+		## although plotting dose_trtsubject, set x-axis tick labels to dose (within trt-subject)
+		options 		<- scale_x_discrete(labels=dat.ci$dose, breaks=dat.ci$dose_trtsubject)
+		p.p			= ggplot(data=dat.ci,aes(x=reorder(dose_trtsubject,effects), y = effects, colour = factor(order), shape = factor(order))) + options
 	}else{
 		p.p			= ggplot(data=dat.ci,aes(x=dose, y = effects, colour = factor(order), shape = factor(order)))
 	}
@@ -256,7 +274,11 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
 	## of means
 	if( re.order == TRUE )
 	{
-		pc.m			= ggplot(data=dat.clust,aes(x=reorder(dose,mean.effects), y = mean.effects, colour = factor(order), shape = factor(order)))
+		## first create variable, dose_trtcluster, that confines reordering to within trt-cluster.
+		dat.clust		<- transform( dat.clust, dose_trtclust = factor(paste(dose,trt,cluster,sep=".")) )
+		## although plotting dose_trtclust, set x-axis tick labels to dose (within trt-cluster)
+		options 		<- scale_x_discrete(labels=dat.clust$dose, breaks=dat.clust$dose_trtclust)
+		pc.m			= ggplot(data=dat.clust,aes(x=reorder(dose_trtclust,mean.effects), y = mean.effects, colour = factor(order), shape = factor(order))) + options
 	}else{
 		pc.m			= ggplot(data=dat.clust,aes(x = dose, y = mean.effects, colour = factor(order), shape = factor(order)))
 	}
@@ -274,28 +296,37 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
   	dev.new()
   	print(pc.m)
 
-	## of credible intervals, by cluster
-	datclust.ci					= melt(dat.clust, id = c("order","dose","trt","cluster"))
-      	datclust.ci$quantile				= datclust.ci$variable
-	datclust.ci$effects				= datclust.ci$value
-	datclust.ci$variable <- datclust.ci$value <- NULL
 
 	if( re.order == TRUE )
 	{
-		pc.ci			= ggplot(data=datclust.ci,aes(x=reorder(dose,effects), y = effects, colour = factor(order), shape = factor(order)))
+		## of credible intervals, by cluster
+		datclust.ci					= melt(dat.clust, id = c("order","dose","trt","cluster","dose_trtclust"))
+      		datclust.ci$quantile				= datclust.ci$variable
+		datclust.ci$effects				= datclust.ci$value
+		datclust.ci$variable <- datclust.ci$value <- NULL
+
+		## although plotting dose_trtclust, set x-axis tick labels to dose (within trt-cluster)
+		options 		<- scale_x_discrete(labels=datclust.ci$dose, breaks=datclust.ci$dose_trtclust)
+		pc.ci			= ggplot(data=datclust.ci,aes(x=reorder(dose_trtclust,effects), y = effects, colour = factor(order), shape = factor(order))) + options
 	}else{
+		## of credible intervals, by cluster
+		datclust.ci					= melt(dat.clust, id = c("order","dose","trt","cluster"))
+      		datclust.ci$quantile				= datclust.ci$variable
+		datclust.ci$effects				= datclust.ci$value
+		datclust.ci$variable <- datclust.ci$value <- NULL
+
 		pc.ci			= ggplot(data=datclust.ci,aes(x = dose, y = effects, colour = factor(order), shape = factor(order)))
 	}
   	l			= geom_line()
   	l.2			= geom_smooth(aes(group=factor(order)), method = "loess", span = 1.0, alpha = 0.1, se = FALSE)##, colour = "pink")
   	yaxis 			= ylab("Effects")
-  	options			= labs(colour = "Order", shape="Order")
+  	options.2		= labs(colour = "Order", shape="Order")
   	f			= facet_wrap( trt~cluster, scales= "free_x", nrow=nt )
 	if( smoother == TRUE)
   	{
-  		pc.ci			= pc.ci + l + l.2 + xaxis + yaxis + f + options + theme(axis.text.x=element_text(size=6, angle = 90))
+  		pc.ci			= pc.ci + l + l.2 + xaxis + yaxis + f + options.2 + theme(axis.text.x=element_text(size=6, angle = 90))
   	}else{
-		pc.ci			= pc.ci + l + xaxis + yaxis + f + options + theme(axis.text.x=element_text(size=6, angle = 90))
+		pc.ci			= pc.ci + l + xaxis + yaxis + f + options.2 + theme(axis.text.x=element_text(size=6, angle = 90))
   	}
   	dev.new()
   	print(pc.ci)	
@@ -403,6 +434,6 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
 	}
   }
 
-  subjects.num <- label.input <- mean.effects <- dose <- cluster <- fit <- trt <- NULL
+  subject <- subjects.num <- label.input <- mean.effects <- dose <- cluster <- fit <- trt  <- dose_trtsubject <- dose_trtclust <- NULL  
 
 } ## end function ddpEffectsplot

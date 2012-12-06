@@ -314,6 +314,7 @@ SEXP rmvnlsqr(const arma::mat& xmat, const arma::colvec& y,
 SEXP rmvnqrclust(const arma::field<arma::mat>& zsplit, const arma::mat& Umat,
             const arma::field<arma::colvec>& ytilsplit,
             arma::colvec& b, double taue);
+SEXP rmvnsample(const arma::mat& phi, const arma::colvec& h, arma::colvec& b);
 SEXP rmvnchol(const arma::mat& xmat, const arma::mat& Pmat, const arma::colvec& y,
             const arma::colvec& c, arma::colvec& b, int p, double taue);
 SEXP rmvnlschol(const arma::mat& xmat, const arma::colvec& y,
@@ -364,7 +365,7 @@ double logdens(const arma::colvec& hb, const arma::mat& phib);
 unsigned long rdrawone(const arma::colvec& pr, unsigned long k);
 SEXP wishrnd(arma::mat& L, const arma::mat& V, double nu);
 SEXP lsqcluster(const arma::imat& S, const arma::field<arma::icolvec>& Num,
-            arma::ucolvec& ordscore, arma::field<arma::ucolvec>& bigS);
+            arma::ucolvec& ordscore, arma::mat& phat, arma::field<arma::ucolvec>& bigS);
 SEXP ymmteststep(const arma::mat& xtmat, const arma::mat& wtmat,
         double alphak, const arma::rowvec& ukvec,
         const arma::rowvec& betakvec, const arma::colvec& zb,

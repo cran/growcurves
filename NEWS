@@ -1,11 +1,9 @@
-Version 0.2.1
+Version 0.2.3.1
 -------------------------------------------------------------------------
 
-NEW FEATURES
+FEATURES
 
 * updated release on CRAN.
-
-* Only change from version 0.2 accommodates ggplot version 0.9.2 for performing plotting.
 
 * performs Bayesian mixed effects modeling on repeated measures data.
 
@@ -30,3 +28,21 @@ NEW FEATURES
 
 * the effectsplot function compares the mean effect values for an MM term under different prior and model formulations.
 
+
+CHANGES
+
+10/10/2012
+-----------
+* Fixed errors in effectsplot and ddpEffectsplot functions that render MM random effects plots when user elects option to order by effect size within each plot cell.
+
+11/07/2012
+-----------
+* Added additional return object, phat, the n x n matrix of pairwise clustering probabilities obtained from sampled clusters.  This object may be employed in a deterministic
+* clustering scheme as an alternative to using the optimal clustering, BigSmin, returned from the least squares clustering algorithm of Dahl (2006).
+
+12/06/2010
+----------
+* updated all multivariate normal sampling functions to avoid inverse computation of precision matrix. Now directly draws samples from cholesky
+decomposition of precision matrix.
+* updated multiple membership (MM) .cpp models for more efficient posterior sampling of MM random effects
+* fixed an error that inadvertantly sorted subj.aff (post numerical re-labeling for internal use) such that the labels no longer corresponded with the rows of W.subj.aff

@@ -37,8 +37,8 @@
   of model fixed effects.} \item{alpha.summary}{quantile
   summary of model global intercept parameter.}
   \item{bmat.summary}{list object of length \code{Nrandom},
-  each cell containing a \code{P x 3} matrix of by-subject
-  parameter quantile summaries.}
+  each cell containing a \code{Nsubject x 3} matrix of
+  by-subject parameter quantile summaries.}
   \item{tauu.summary}{\code{Nmv x 3} quantile summary for
   prior precision parameters employed for multiple
   membership random effects. An \code{nty x 3} matrix in
@@ -50,13 +50,14 @@
   summaries for multiple membership random effect
   parameters. A list of such matrices in the case of
   \code{nty} multiple membership effect terms.}
-  \item{mm.summary}{\code{P.aff x 3} quantile summaries
+  \item{mm.summary}{\code{Nsubj.aff x 3} quantile summaries
   derived from multiplying the affected subject weight
   matrix by the multiple membership random effects.}
-  \item{Dbar}{Model fit statistics.} \item{pD}{Model fit
-  statistics.} \item{pV}{Model fit statistics.}
-  \item{DIC}{Model fit statistics.} \item{lpml}{Model fit
-  statistics.}
+  \item{M.summary}{quantile summary for number of DP
+  posterior clusters formed.} \item{Dbar}{Model fit
+  statistics.} \item{pD}{Model fit statistics.}
+  \item{pV}{Model fit statistics.} \item{DIC}{Model fit
+  statistics.} \item{lpml}{Model fit statistics.}
 }
 \description{
   Inputs MCMC samples for model parameters and constructs

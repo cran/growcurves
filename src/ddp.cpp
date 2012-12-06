@@ -188,6 +188,7 @@ BEGIN_RCPP
     imat S(nkeep,np);
     field<icolvec> Num(nkeep,1);
     field<ucolvec> bigS;
+    field<mat> optPartition(3,1); /* Hold empirical probability of co-clustering matrix, index of L-sq clustering scores objects, and cluster identifiers per iteration */
 
     // Initialize parameter values   
     /* cluster capture variables */
@@ -216,6 +217,7 @@ BEGIN_RCPP
     double alpha = rnorm( 1, 0, sqrt(10) )[0];
     /* fit assessment - related measures */
     double deviance = 0;  ucolvec ordscore; ordscore.zeros();
+    mat phat(np,np); phat.zeros(); /* empirical co-clustering probability matrix */
     rowvec devmarg(nc); colvec devres(4); devres.zeros();
     rowvec logcpo(nc); logcpo.zeros(); double lpml;
     
@@ -316,7 +318,10 @@ BEGIN_RCPP
     CARprecision(1,0) = Taucar;
     
     // compute least squares cluster
-    lsqcluster(S, Num, ordscore, bigS);
+    lsqcluster(S, Num, ordscore, phat, bigS);
+    optPartition(0,0) = phat;
+    optPartition(1,0) = conv_to<mat>::from(ordscore);
+    optPartition(2,0) = conv_to<mat>::from(S);
     // DIC
     dic3comp(Deviance, Devmarg, devres); /* devres = c(dic,dbar,dhat,pd) */
     cpo(Devmarg, logcpo, lpml);
@@ -339,9 +344,9 @@ BEGIN_RCPP
                                   Rcpp::Named("Taue") = Taue,
                                   Rcpp::Named("Residuals") = Resid,
                                   Rcpp::Named("M") = numM,
-                                  Rcpp::Named("S") = S,
+                                  //Rcpp::Named("S") = S,
                                   Rcpp::Named("Num") = Num,
-                                  Rcpp::Named("ordscore") = ordscore,
+                                  Rcpp::Named("optPartition") = optPartition,
                                   Rcpp::Named("bigSmin") = bigS
 				  );
 
@@ -720,7 +725,7 @@ END_RCPP
 
         // sample cluster assignments, s(1), ..., s(np)
         // fixing all other parameters, including dstarmat
-        mat zj, xj, yj, phid(nr*ntr,nr*ntr), phidinv(nr*ntr,nr*ntr), zaugj;
+        mat zj, xj, yj, phid(nr*ntr,nr*ntr), zaugj;
         colvec cj, cstarj, ytildej, dstarj(nr*ntr), ed(nr*ntr), hd(nr*ntr);
         double logq0, q0, sweights;
         int startrow = 0; 
@@ -779,8 +784,7 @@ END_RCPP
             // build posterior density
             ed = taue*trans( doseperson(j,0) )*trans(zj)*ytildej;
             phid = taue*trans( doseperson(j,0) )*trans(zj)*zj*doseperson(j,0) + Pdelt; /*nr*ntr x nr*ntr */
-            phidinv = inv(phid);
-            hd = phidinv*ed;
+	    hd = solve(phid,ed);
             logq0 -= logdens(hd,phid); /* dmvn(hd,phibd^-1) */
             q0 = exp(logq0);
 

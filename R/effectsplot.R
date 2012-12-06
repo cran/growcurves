@@ -34,7 +34,7 @@
 #' @author Terrance Savitsky \email{tds151@@gmail.com}
 #' @aliases effectsplot
 #' @export
-effectsplot <- function(objects, mm.terms = NULL, prior.labs = NULL, center = TRUE, axis.labs = NULL, group.plot = NULL, smoother = FALSE, order = TRUE, orderto = NULL, label.mm = NULL)
+effectsplot <- function(objects, mm.terms = NULL, prior.labs = NULL, center = TRUE, axis.labs = NULL, group.plot = NULL, smoother = FALSE, order = FALSE, orderto = NULL, label.mm = NULL)
 {
   ## check inputs
   if( is.null(objects) ) stop("\n Must input 'objects' to plot. \n")
@@ -178,7 +178,9 @@ effectsplot <- function(objects, mm.terms = NULL, prior.labs = NULL, center = TR
   	## shows session effects for each prior on same within group plot
 	if( order == TRUE )
 	{
-  		p.term				= ggplot(data=dat.term,aes(x=reorder(session,mean), y = mean, colour = prior))
+		## first create variable, session_groups, that confines reordering to within group.
+		dat.term			<- transform( dat.term, session_groups = factor(paste(session,groups,sep=".")) )
+  		p.term				= ggplot(data=dat.term,aes(x=reorder(session_groups,mean), y = mean, colour = prior))
 	}else{ ## don't order
 		p.term				= ggplot(data=dat.term,aes(x=session, y = mean, colour = prior))
 	}
@@ -205,7 +207,12 @@ effectsplot <- function(objects, mm.terms = NULL, prior.labs = NULL, center = TR
 	}else{ ## no supplemental labels entered for just this term
 		labels.x = sessions
 	}
-	options = scale_x_discrete(labels=labels.x)
+	if( order == FALSE )
+	{
+		options 			<- scale_x_discrete(labels=labels.x)
+	}else{ ## reorder sessions within group - although plotting session_block, set x-axis tick labels to session (within block)
+		options 			<- scale_x_discrete(labels=labels.x, breaks=dat.term$session_groups)
+	}
   	if( smoother == TRUE)
   	{
   		p.term			= p.term + l + l.2 + f + axis + options
@@ -365,7 +372,11 @@ effectsplot <- function(objects, mm.terms = NULL, prior.labs = NULL, center = TR
 	{
 		if( sum(orderto[[i]]) == 0 )
 		{
-   			p.all		 		= ggplot(data=dat.all,aes(x=reorder(session,mean), y=mean))
+			## first create variable, session_block, that confines reordering to within block.
+			dat.all				<- transform( dat.all, session_block = factor(paste(session,block,sep=".")) )
+			## although plotting session_block, set x-axis tick labels to session (within block)
+			options 			<- scale_x_discrete(labels=dat.all$session, breaks=dat.all$session_block)
+   			p.all		 		= ggplot(data=dat.all,aes(x=reorder(session_block,mean), y=mean)) + options
 		}else{
 			p.all		 		= ggplot(data=dat.all,aes(x=reorder(session,ordering), y=mean))
 		}
@@ -406,7 +417,7 @@ effectsplot <- function(objects, mm.terms = NULL, prior.labs = NULL, center = TR
 	}
   }
 
-  session <- group <- block <- ordern.i <- ordering <- session.i <- Nsessionn.i <- sessions.i <- group.i <- order.i <- low <- mean <- high <- prior <- NULL; rm(session); rm(group); rm(low); rm(mean); rm(high); rm(prior); rm(block)
+  session <- session_groups <- session_block <- group <- block <- ordern.i <- ordering <- session.i <- Nsessionn.i <- sessions.i <- group.i <- order.i <- low <- mean <- high <- prior <- NULL; rm(session); rm(group); rm(low); rm(mean); rm(high); rm(prior); rm(block)
 
   gc()
 

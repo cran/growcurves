@@ -355,79 +355,54 @@ END_RCPP
             double taue, const mat& L, int ns, int nc)
     {
         BEGIN_RCPP
-        // build portion of offset constant, c, not dependent on u
-        colvec cminuss = alpha + xmat*beta + zb;
-        // set up structures that will set column s of wcase = 0 and
-        // entry s for row s of omega = 0 for sampling u[s]
-        mat wcases; rowvec omegarow(ns); colvec ws(nc); colvec c(nc);
-        int nv = umat.n_cols;
+	int nv = umat.n_cols, i;
+        colvec ws(nc); colvec ytilde(nc);
         colvec es(nv), hs(nv); mat phis(nv,nv);
-        rowvec umatsbar(nv); mat us(1,nv); rowvec ths(nv); mat hws(nc,nv);
+        colvec us_c(nv); mat hws(nc,nv);
+
+	// Add in full MM term for cwithalls
+	colvec cwithalls = alpha + xmat*beta + zb; /* nc x 1 */
+        for(i = 0; i < nv; i++)
+        {
+              cwithalls 	+= hmat.col(i) % (wcase*umat.col(i));
+        }
+	// q, S x 1 products of S x S, omega and S x 1, omega[,q]
+	mat omega_uall		= omega * umat; /* ns x nv */
 
         // loop over s to sample umat[s]|umat[-s],..,y
-        int s, i, j;
+        int s, j;
         for(s = 0; s < ns; s++)
         {
             // Set entry s for data to 0
-            umat.row(s).zeros();
-            omegarow = omega.row(s);
-            omegarow(s) = 0;
-            ws = wcase.col(s); /* w.s = W.case[,s] */
-            wcases = wcase;
-            wcases.col(s).zeros(); /* set W.case[,s] = 0*/
-            // put entry Z[,j]*W.case[,-s]%*%U[-s,j] into c
-            /* adds in nothing for session s */
-            c.zeros(); /* re-zero contribution of CAR for each iteration */
+            ws = wcase.col(s); /* ws = W.case[,s] */
+
+            // remove entry Z[,j] % wcase[,s]*u[s,j] from cwithalls
+	    // remove influence of 1 x nv, u[s] from ns x nv composition of ns x ns, omega and ns x nv, u
+	    cwithalls 	-= ( hmat * trans(umat.row(s)) ) % ws; /* [h_(1)u(1) + ... + h_(nv)u(nv)] % ws */
+	    omega_uall 	-= omega_uall.col(s) * umat.row(s); /* ns x nv */
             for(i = 0; i < nv; i++)
             {
-                c += hmat.col(i) % (wcases*umat.col(i));
                 hws.col(i) = hmat.col(i) % ws;
-                /* mean umat(0), ..., umat(nv) */
-                umatsbar(i) = dot( omegarow, umat.col(i) )/omegaplus(s);
             }
-            c += cminuss;
             // sample umat[s,]
             // construct posterior mean, hs, and precision, phis
-            colvec ytilde = y - c;
+            ytilde = y - cwithalls;
             /* nv x 1 */
-	    es = trans( taue*(trans(ytilde)*hws) + omegaplus(s)*umatsbar*L );
-            phis = taue*trans(hws)*hws + omegaplus(s)*L; /* nv x nv */
-            hs = inv(phis)*es; /* nv x 1*/
-            us = umat.row(s);
-            ths = trans(hs);
-            rmvnrnd(phis, us, ths);
-            umat.row(s) = us.row(0);
+	    // note: omega_uall.row(s) is 1 x nv, t(omega_sbar)*omegaplus(s)
+	    es 			= trans( taue*(trans(ytilde)*hws) + omega_uall.row(s)*L );
+            phis 		= taue*trans(hws)*hws + omegaplus(s)*L; /* nv x nv */
+            us_c.zeros(); /* nv x 1 */
+            rmvnbasic(phis,es,us_c);
+            umat.row(s) 	= us_c.t();
+	    // puts back session s contribution from newly sampled value for 1 x nv, u(s)
+            cwithalls 		+= ( hmat * trans(umat.row(s)) ) % ws;
+	    omega_uall		+= omega_uall.col(s) * umat.row(s);
         } /* end loop over s for sampling umat */
         // post-process umat to subtract out grand mean since CAR prior
         // identified only up to difference in means
         rowvec meang(nv); meang = mean(umat,0); /* dim = 0 is by column */
         mat Meang = repmat(meang,ns,1); /* ns x nv */
         umat -= Meang;
-
-        // determine number of members per group for the ns sessions.
-        // assumes groups arranged in continguous, ordered, disjoint blocks
-        //icolvec positions(ng); positions.zeros();
-        //icolvec::iterator aa = groups.begin();
-        //icolvec::iterator bb = groups.end();
-        //for(icolvec::iterator i = aa; i != bb ; i++)
-        //{
-        //   positions(*i-1) += 1;
-       // }
-        // compute mean of u for each group
-        //int g; int startrow = 0; rowvec meang; mat Meang;
-       // for(g = 0; g < ng; g++)
-       // {
-        //    int nsg = positions(g);
-         //   int endrow = startrow + nsg - 1;
-        //   meang = mean(umat.rows(startrow,endrow),0);
-         //   Meang = repmat(meang,nsg,1);
-         //   umat.rows(startrow,endrow) -= Meang;
-          //  startrow += nsg;
-       // } /* end loop g over nsg groups to subtract out group mean from u */
-
-        // re-set d with final values for u in later posterior draw for tauu
-        // mat omegas = omega; omegas.diag().zeros();
-        // d = (omegas*u) / omegaplus;
 
         // compute npcbt x 1, mm, resulting from mapping u to the npcbt clients
         for(j = 0; j < nv; j++)
@@ -438,6 +413,7 @@ END_RCPP
         END_RCPP
     } /* end function ustep to sample u[1,...,s] */
 
+
     SEXP uindmvstep(const mat& xmat, const mat& wcase,
             const mat& wpers, const mat& hmat, const colvec& zb,
             const colvec& beta, const colvec& y, 
@@ -445,50 +421,49 @@ END_RCPP
             double taue, const mat& L, int ns, int nc)
     {
         BEGIN_RCPP
-        // build portion of offset constant, c, not dependent on u
-        colvec cminuss = alpha + xmat*beta + zb;
-        // set up structures that will set column s of wcase = 0 and
-        // entry s for row s of omega = 0 for sampling u[s]
-        mat wcases; colvec ws(nc), c(nc);
-        int nv = umat.n_cols;
+        int nv = umat.n_cols, i;
+        colvec ws(nc); colvec ytilde(nc);
         colvec es(nv), hs(nv); mat phis(nv,nv);
-        mat us(1,nv); rowvec ths(nv); mat hws(nc,nv);
+        colvec us_c(nv); mat hws(nc,nv);
+
+	// Add in full MM term for cwithalls
+	colvec cwithalls = alpha + xmat*beta + zb; /* nc x 1 */
+        for(i = 0; i < nv; i++)
+        {
+              cwithalls 	+= hmat.col(i) % (wcase*umat.col(i));
+        }
 
         // loop over s to sample umat[s]|umat[-s],..,y
-        int s, i, j;
+        int s, j;
         for(s = 0; s < ns; s++)
         {
             // Set entry s for data to 0
-            umat.row(s).zeros();
-            ws = wcase.col(s); /* w.s = W.case[,s] */
-            wcases = wcase;
-            wcases.col(s).zeros(); /* set W.case[,s] = 0*/
-            // put entry Z[,j]*W.case[,-s]%*%U[-s,j] into c
-            /* adds in nothing for session s */
-            c.zeros(); /* re-zero contribution of terms -s for each iteration */
+            ws = wcase.col(s); /* ws = W.case[,s] */
+
+            // remove entry Z[,j] % wcase[,s]*u[s,j] from cwithalls
+	    // remove influence of 1 x nv, u[s] from ns x nv composition of ns x ns, omega and ns x nv, u
+	    cwithalls 	-= ( hmat * trans(umat.row(s)) ) % ws; /* [h_(1)u(1) + ... + h_(nv)u(nv)] % ws */
             for(i = 0; i < nv; i++)
             {
-                c += hmat.col(i) % (wcases*umat.col(i));
                 hws.col(i) = hmat.col(i) % ws;
             }
-            c += cminuss;
             // sample umat[s,]
             // construct posterior mean, hs, and precision, phis
-            colvec ytilde = y - c;
+            ytilde 		= y - cwithalls;
             /* nv x 1 */
-	    es = taue*trans(hws)*ytilde; /* nv x 1 */
-            phis = taue*trans(hws)*hws + L; /* nv x nv */
-            hs = inv(phis)*es; /* nv x 1*/
-            us = umat.row(s);
-            ths = trans(hs);
-            rmvnrnd(phis, us, ths);
-            umat.row(s) = us.row(0);
+	    es 			= taue*trans(hws)*ytilde; /* nv x 1 */
+            phis 		= taue*trans(hws)*hws + L; /* nv x nv */
+            us_c.zeros();  /* nv x 1 */
+            rmvnbasic(phis,es,us_c);
+            umat.row(s) 	= us_c.t();
+	    // puts back session s contribution from newly sampled value for 1 x nv, u(s)
+            cwithalls 		+= ( hmat * trans(umat.row(s)) ) % ws;
         } /* end loop over s for sampling umat */
 
 	// compute npcbt x 1, mm, resulting from mapping u to the npcbt clients
         for(j = 0; j < nv; j++)
         {
-            mmmat.col(j) = wpers*umat.col(j);
+            mmmat.col(j) 	= wpers*umat.col(j);
         }
 
     	END_RCPP

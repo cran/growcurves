@@ -3,8 +3,8 @@
 #' \tabular{ll}{
 #' Package: \tab growcurves\cr
 #' Type: \tab Package\cr
-#' Version: \tab 0.2.1\cr
-#' Date: \tab 2012-09-28\cr
+#' Version: \tab 0.2.3.1\cr
+#' Date: \tab 2012-12-06\cr
 #' License: \tab GPL (>= 2) \cr
 #' LazyLoad: \tab yes\cr
 #' }

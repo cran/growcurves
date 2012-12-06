@@ -27,7 +27,7 @@ test_that("dp option of dpgrow returns expect objects", {
 	parms		<- samples(DP)
 	pr		<- DP$plot.results
 	num.subj	<- length(unique(datsim$subject))
-	nrandom	<- ncol(srm$Z)
+	nrandom		<- ncol(srm$Z)
 
 	## evaluating class
 	expect_that(DP,is_a("dpgrow"))

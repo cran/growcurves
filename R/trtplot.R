@@ -139,7 +139,12 @@ trtplot <- function(run.objects, run.models, trt.labs, time.points, y.label = NU
   l	<- stat_summary(fun.data = f, geom="boxplot")
   f	<- facet_wrap(~time,scales = "fixed")
   axis	<- labs(x = "Model", y = y.lab)
-  p	<- p + l + f + axis + scale_fill_brewer(palette="OrRd")  ## color scale supports bw printing
+  if ( length(unique(Mu.dat$models)) >= 3 )
+  {
+  	p	<- p + l + f + axis + scale_fill_brewer(palette="OrRd")  ## color scale supports bw printing
+  }else{ ## need >= 3 categories to use OrRd palette
+	p	<- p + l + f + axis
+  }
   dev.new()
   print(p)
 

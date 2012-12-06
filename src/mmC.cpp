@@ -279,40 +279,31 @@ END_RCPP
     {
         BEGIN_RCPP
         // build portion of offset constant, c, not dependent on u
-        colvec cminuss = alpha + xmat*beta + zb;
+        colvec cwithalls = alpha + xmat*beta + zb + wcase*u; 
+	colvec omega_uall = omega*u;
         // set up structures that will set column s of wcase = 0 and
         // entry s for row s of omega = 0 for sampling u[s]
-        mat wcases; rowvec omegarow(ns); colvec ws(nc); colvec c, ytilde;
+        colvec ws(nc); colvec ytilde;
         double es, hs, phis;
 
         // loop over s to sample u[s]|u[-s],..,y
         int s;
         for(s = 0; s < ns; s++)
         {
-            // Set entry s for data to 0
-            u(s) = 0;
-            omegarow = omega.row(s);
-            omegarow(s) = 0;
             ws = wcase.col(s); /* w.s = W.case[,s] */
-            wcases = wcase;
-            wcases.col(s).zeros(); /* set W.case[,s] = 0*/
-            // put entry W.case[,-s]*u[-s] into c
-            c = cminuss + wcases*u; /* adds in nothing for session s */
+            // remove entry W.case[,-s]*u[-s] from cwithalls
+            cwithalls 	-= ws*u(s); /* removes session s MM contribution */
+	    omega_uall	-= omega.col(s)*u(s); 	/* S x 1 vector of omega * u with effect of session s, u(s), removed */
             // sample u[s]
             // construct posterior mean, hs, and precision, phis
-            ytilde = y - c;
-            es = taue*dot(ytilde,ws) + tauu*dot(omegarow,u);
-            phis = taue*dot(ws,ws) + tauu*omegaplus(s);
-            hs = es*(1/phis);
-            u(s) = rnorm( 1, hs, sqrt(1/phis) )[0];
-            
-            //bs = omegaplus(s)*tauu;
-            //ds = dot(omegarow,u)/omegaplus(s);
-            //colvec ytilde = y - c;
-           // es = taue*dot(ytilde,ws) + bs*ds;
-           // phis = taue*dot(ws,ws) + bs;
-            //hs = es*(1/phis);
-            //u(s) = rnorm( 1, hs, sqrt(1/phis) )[0];
+            ytilde 	= y - cwithalls;
+            es 		= taue*dot(ytilde,ws) + tauu*omega_uall(s); /* omega_uall(s) is the product of row s of omega with u, after removing effect, u(s) */
+            phis 	= taue*dot(ws,ws) + tauu*omegaplus(s);
+            hs 		= es*(1/phis);
+            u(s) 	= rnorm( 1, hs, sqrt(1/phis) )[0];
+	    // puts back session s contribution from newly sampled value for u(s)
+            cwithalls 	+= ws*u(s);
+	    omega_uall	+= omega.col(s)*u(s);
         } /* end loop over s for sampling u */
         // post-process u to subtract out group means since CAR prior
         // identified only up to difference in means

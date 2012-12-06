@@ -269,66 +269,65 @@ END_RCPP
         END_RCPP
     } /* end function to sample nf x 1 fixed effects, beta */
 
+    SEXP rmvnsample(const mat& phi, const colvec& h, colvec& b)
+    {
+        BEGIN_RCPP
+        // build posterior variance and mean
+        int p 		= phi.n_cols;
+	colvec noise 	= randn<colvec>(p);
+	b 		= solve(trimatu(chol(phi)),noise) + h;
+       END_RCPP
+    } /* end function rmvnbasic for drawing a single mvn sample */
+
     SEXP rmvnbasic(const mat& phi, const colvec& e, colvec& b)
     {
         BEGIN_RCPP
         // build posterior variance and mean
-        int p = phi.n_cols;
-	mat phiinv = inv(symmatl(phi));
-        colvec h   = phiinv*e;
-	mat U = chol(phiinv);
-	colvec noise = randn<colvec>(p);
-	// return b
-	b = trans(U)*noise + h;
+        int p 		= phi.n_cols;
+        colvec h   	= solve(phi,e);
+	colvec noise 	= randn<colvec>(p);
+	b 		= solve(trimatu(chol(phi)),noise) + h;
        END_RCPP
-    } /* end function rmvnqr for sampling mvn using QR decomposition */
+    } /* end function rmvnbasic for drawing a single mvn sample */
 
     
      SEXP rmvnchol(const mat& xmat, const mat& Pmat, const colvec& y,
             const colvec& c, colvec& b, int p, double taue)
     {
         BEGIN_RCPP
-        // build xbig and ytildebig
-	colvec e = taue*trans(xmat)*(y-c);
-	mat phi = symmatl(taue*trans(xmat)*xmat + Pmat);
-	mat phiinv = symmatl( inv(phi) );
-        colvec h   = phiinv*e;
-	mat U = chol(phiinv);
-	colvec noise = randn<colvec>(p);
-	// return b
-	b = trans(U)*noise + h;
+        // S = P^-1 = (U_p' * U_p) ^-1 = U_p^-1 * (U_p^-1)' = U'U
+ 	// note: U' does not equal U_p^-1
+	// b = U_p^-1 * z + h -> cov(b) = U_p^-1 * (U_p^-1)' = S
+	colvec e 	= taue*trans(xmat)*(y-c);
+	mat phi 	= symmatl(taue*trans(xmat)*xmat + Pmat);
+        colvec h   	= solve(phi,e);
+	colvec noise 	= randn<colvec>(p);
+	b 		= solve(trimatu(chol(phi)),noise) + h; // U_p x = z -> x = solve(U_p,z)
        END_RCPP
-    } /* end function rmvnqr for sampling mvn using QR decomposition */
+    } /* end function rmvnchol for drawing a single mvn sample */
      
      SEXP rmvnlschol(const mat& xmat, const colvec& y,
             const colvec& c, colvec& b, int p, double taue)
     {
         BEGIN_RCPP
-        // build xbig and ytildebig
-	colvec e = taue*trans(xmat)*(y-c);
-	mat phi = symmatl( taue*trans(xmat)*xmat );
-	mat phiinv = symmatl( inv(phi) );
-        colvec h   = phiinv*e;
-	mat U = chol(phiinv);
-	colvec noise = randn<colvec>(p);
-	// return b
-	b = trans(U)*noise + h;
+	colvec e 	= taue*trans(xmat)*(y-c);
+	mat phi 	= symmatl( taue*trans(xmat)*xmat );
+        colvec h   	= solve(phi,e);
+	colvec noise 	= randn<colvec>(p);
+	b 		= solve(trimatu(chol(phi)),noise) + h;
        END_RCPP
-    } /* end function rmvnnichol for non-informative prior */
+    } /* end function rmvnlschol for drawing a single mvn sample */
 
      SEXP rmvnmean(const mat& xmat, const mat& Pmat, const colvec& y,
             const colvec& c, const colvec& m, colvec& b, int p, double taue)
     {
         BEGIN_RCPP
         // build xbig and ytildebig
-	colvec e = taue*trans(xmat)*(y-c) + Pmat*m;
-	mat phi = symmatl(taue*trans(xmat)*xmat + Pmat);
-	mat phiinv = symmatl( inv(phi) );
-        colvec h   = phiinv*e;
-	mat U = chol(phiinv);
-	colvec noise = randn<colvec>(p);
-	// return b
-	b = trans(U)*noise + h;
+	colvec e 	= taue*trans(xmat)*(y-c) + Pmat*m;
+	mat phi 	= symmatl(taue*trans(xmat)*xmat + Pmat);
+        colvec h   	= solve(phi,e);
+	colvec noise 	= randn<colvec>(p);
+	b 		= solve(trimatu(chol(phi)),noise) + h;
        END_RCPP
     } /* end function rmvnqr for sampling mvn using QR decomposition */
 
@@ -337,19 +336,14 @@ END_RCPP
     {
         BEGIN_RCPP
         // for B(n,p), Pmat(p,p), m(p,1)
-        int p = B.n_cols;
-        int n = B.n_rows;
-	mat phiinv = symmatl( inv( symmatl(Pmat) ) );
-	mat U = chol(phiinv);
-        colvec ctr(p);
+        int p 		= B.n_cols;
+        int n 		= B.n_rows;
+	mat U_p		= trimatu(chol(Pmat));
         int i; colvec noise(p);
         for(i = 0; i< n; i++)
         {
-            noise = randn<colvec>(p);
-            ctr = trans(U)*noise;
-            //if( ctr.n_rows != unsigned(p) )
-            //    throw std::range_error("non-conformable size");
-            B.row(i) = trans( ctr ) + m;
+            noise 	= randn<colvec>(p);
+	    B.row(i)	= trans(solve(U_p,noise)) + m;
         }
        END_RCPP
     } /* end function rmvnrd for cholesky decomp sampling of mvn */
@@ -358,17 +352,14 @@ END_RCPP
     {
         BEGIN_RCPP
         // for B(n,p), Pmat(n,n), m(n,1)
-        //int p = B.n_cols;
-        int n = B.n_rows;
-	mat phiinv = symmatl( inv( symmatl(Pmat) ) );
-	mat U = chol(phiinv);
-        colvec ctr(n);
+        //int p 	= B.n_cols;
+        int n 		= B.n_rows;
+	mat U_p		= trimatu(chol(Pmat));
         int k; colvec noise(n);
         for(k = 0; k < n; k++)
         {
-            noise = randn<colvec>(n);
-            ctr = trans(U)*noise;
-            B.col(k) =  ctr + m;
+            noise 		= randn<colvec>(n);
+            B.col(k) 		= solve(U_p,noise)  + m;
         }
        END_RCPP
     } /* end function rmvnrd for cholesky decomp sampling of mvn */

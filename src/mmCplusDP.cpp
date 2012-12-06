@@ -90,6 +90,7 @@ BEGIN_RCPP
     imat S(nkeep,np);
     field<icolvec> Num(nkeep,1);
     field<ucolvec> bigS;
+    field<mat> optPartition(3,1); /* Hold empirical probability of co-clustering matrix, index of L-sq clustering scores objects, and cluster identifiers per iteration */
 
     // Initialize parameter values
     /* cluster capture variables */
@@ -107,6 +108,7 @@ BEGIN_RCPP
     mat qmat = -omega; qmat.diag() = omegaplus;/* prior precision for joint u */
     double conc = 1; /* DP concentration parameter */
     ucolvec ordscore; ordscore.zeros(); /* LS score order */
+    mat phat(np,np); phat.zeros(); /* empirical co-clustering probability matrix */
     /* remaining parameter set */
     colvec beta = randn<colvec>(nf)*sqrt(1/taubeta);
     colvec u = randn<colvec>(ns)*sqrt(1/tauu);
@@ -178,7 +180,10 @@ BEGIN_RCPP
     } /* end MCMC loop over k */
 
     // compute least squares cluster
-    lsqcluster(S, Num, ordscore, bigS);
+    lsqcluster(S, Num, ordscore, phat, bigS);
+    optPartition(0,0) = phat;
+    optPartition(1,0) = conv_to<mat>::from(ordscore);
+    optPartition(2,0) = conv_to<mat>::from(S);
     // DIC
     dic3comp(Deviance, Devmarg, devres); /* devres = c(dic,dbar,dhat,pd) */
     cpo(Devmarg, logcpo, lpml);
@@ -199,9 +204,9 @@ BEGIN_RCPP
                                   Rcpp::Named("Taub") = Taub,
                                   Rcpp::Named("Residuals") = Resid,
                                   Rcpp::Named("M") = numM,
-                                  Rcpp::Named("S") = S,
+                                  //Rcpp::Named("S") = S,
                                   Rcpp::Named("Num") = Num,
-                                  //Rcpp::Named("ordscore") = ordscore,
+                                  Rcpp::Named("optPartition") = optPartition,
                                   Rcpp::Named("bigSmin") = bigS
                                   );
 
@@ -234,7 +239,7 @@ END_RCPP
 
         // sample cluster assignments, s(1), ..., s(np)
         // fixing all other parameters, including bstarmat
-        mat zj, xj, wj, yj, phib(nr,nr), phibinv(nr,nr);
+        mat zj, xj, wj, yj, phib(nr,nr);
         colvec cj, cstarj, ytildej, bstarj(nr), eb(nr), hb(nr);
         double logq0, q0, sweights;
         int startrow = 0;
@@ -298,8 +303,8 @@ END_RCPP
                 logq0 += dnorm(zro, 0.0, sqrt(1/taub(i)), true)[0];
             }
             eb = taue*trans(zj)*ytildej;
-            phib = taue*trans(zj)*zj + pbmat; phibinv = inv(phib);
-            hb = phibinv*eb;
+            phib = taue*trans(zj)*zj + pbmat; 
+	    hb = solve(phib,eb);
             logq0 -= logdens(hb,phib); /* dmvn(hb,phib^-1) */
             q0 = exp(logq0);
 

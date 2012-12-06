@@ -99,6 +99,7 @@ BEGIN_RCPP
     imat S(nkeep,np);
     field<icolvec> Num(nkeep,1);
     field<ucolvec> bigS;
+    field<mat> optPartition(3,1); /* Hold empirical probability of co-clustering matrix, index of L-sq clustering scores objects, and cluster identifiers per iteration */
     // session effect sampling and return structures 
     int i, dim;
     mat Tauu(nkeep,nty); /* return object for tauus for each typet */
@@ -236,6 +237,7 @@ BEGIN_RCPP
     mat pbmat(nr,nr); pbmat.eye();
     /* fit assessment - related measures */
     double deviance = 0;  ucolvec ordscore; ordscore.zeros();
+    mat phat(np,np); phat.zeros(); /* empirical co-clustering probability matrix */
     rowvec devmarg(nc); colvec devres(4); devres.zeros();
     rowvec logcpo(nc); logcpo.zeros(); double lpml;
     
@@ -326,7 +328,10 @@ BEGIN_RCPP
     }
     
     // compute least squares cluster for clustering of subjects
-    lsqcluster(S, Num, ordscore, bigS);
+    lsqcluster(S, Num, ordscore, phat, bigS);
+    optPartition(0,0) = phat;
+    optPartition(1,0) = conv_to<mat>::from(ordscore);
+    optPartition(2,0) = conv_to<mat>::from(S);
     // DIC
     dic3comp(Deviance, Devmarg, devres); /* devres = c(dic,dbar,dhat,pd) */
     cpo(Devmarg, logcpo, lpml);
@@ -351,9 +356,9 @@ BEGIN_RCPP
                                   Rcpp::Named("Taub") = Taub,
                                   Rcpp::Named("Residuals") = Resid,
                                   Rcpp::Named("M") = numM,
-                                  Rcpp::Named("S") = S,
+                                  //Rcpp::Named("S") = S,
                                   Rcpp::Named("Num") = Num,
-                                  //Rcpp::Named("ordscore") = ordscore,
+                                  Rcpp::Named("optPartition") = optPartition,
                                   Rcpp::Named("bigSmin") = bigS
 				  );
 END_RCPP
@@ -668,33 +673,35 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
         // entry s for row s of omega = 0 for sampling u[s]
 	int ns = omega.n_rows;
         int nc = xmat.n_rows;
-        mat wzeros; rowvec omegarow(ns); colvec ws(nc), ytilde(nc);
+        colvec ws(nc), ytilde(nc);
         mat wmat = wmats(treat,0);
 	colvec u = us(treat,0);
         double es, hs, phis;        
 
 	// build portion of offset constant, c, not dependent on u = us(treat,0)
-	colvec cminuss, c; cu(zb, xmat, beta, alpha, wmats, us, cmm, cminuss, treat);
-
+	colvec cwithalls; cu(zb, xmat, beta, alpha, wmats, us, cmm, cwithalls, treat);
+	// S x 1 objects
+	cwithalls 		+= wmat*u; /* cu adds in previously sampled MM term and removes currently sampled.  Add it back in */
+	colvec omega_uall	= omega*u;
         // loop over s to sample u[s]|u[-s],..,y
         for(int s = 0; s < ns; s++)
         {
             // Set entry s for data to 0
-            u(s) = 0;
-            omegarow = omega.row(s);
-            omegarow(s) = 0;
             ws = wmat.col(s); /* w.s = W.mat[,s] */
-            wzeros = wmat;
-            wzeros.col(s).zeros(); /* set W.case[,s] = 0*/
-            // put entry W.zeros[,-s]*u[-s] into c
-            c = cminuss + wzeros*u; /* adds in nothing for session s */
+            // remove entry W.zeros[,s]*u[s] from cwithalls
+	    // removing S x 1 objects based on u(s)
+	    cwithalls 	-= ws*u(s);
+	    omega_uall	-= omega.col(s)*u(s);
             // sample u[s]
             // construct posterior mean, hs, and precision, phis
-            ytilde = y - c;
-            es = taue*dot(ytilde,ws) + tauu*dot(omegarow,u);
-            phis = taue*dot(ws,ws) + tauu*omegaplus(s);
-            hs = es*(1/phis);
-            u(s) = rnorm( 1, hs, sqrt(1/phis) )[0];
+            ytilde 	= y - cwithalls;
+            es 		= taue*dot(ytilde,ws) + tauu*omega_uall(s);
+            phis 	= taue*dot(ws,ws) + tauu*omegaplus(s);
+            hs 		= es*(1/phis);
+            u(s) 	= rnorm( 1, hs, sqrt(1/phis) )[0];
+	    // puts back session s contribution from newly sampled value for u(s)
+            cwithalls 	+= ws*u(s);
+	    omega_uall	+= omega.col(s)*u(s);
         } /* end loop over s for sampling u */
         // post-process u to subtract out group means since CAR prior
         // identified only up to difference in means

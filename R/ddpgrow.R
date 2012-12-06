@@ -55,8 +55,9 @@ NULL
 #'	one set are entered.  If excluded and \code{formula} is entered without a \code{|}, \code{random.only} defaults to 
 #'	\code{FALSE}.
 #' @param data A \code{data.frame} containing the variables named in \code{formula}.
-#' @param dosemat An \code{P x (T+1)} \code{matrix} object that maps \code{subjects} to treatment dosages.  The first column should be an
-#'			intercept column (filled with 1's).
+#' @param dosemat An \code{n x (sum(numdose)+1)} \code{matrix} object that maps \code{subjects} to treatment dosages.  The first column should be an
+#'			intercept column (filled with 1's).  If there is only a single treatment arm, then the number of columns in dosemat should be \code{sum(numdose)}.
+#'			There is always a leave-one-out dosage for \code{dosemat}.  For multiple treatment arms, the null (0) treatment is the one left out.
 #' @param numdose A vector object containing the number of dosages for each treatment.  So the length should be the same as \code{typetreat}.
 #' @param typetreat A vector object specifying the prior formulation for each treatment.   The choices for prior formulations are
 #' 			\code{c("car","mvn","ind")}.
@@ -133,7 +134,7 @@ ddpgrow			<- function(y, subject, trt, time, n.random, n.fix_degree, formula, ra
 ################################################
 ## default dispatch method for mm-session models
 ################################################
-ddpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NULL, n.fix_degree = NULL, formula = NULL, random.only = NULL, data = NULL,
+ddpgrow.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.random = NULL, n.fix_degree = NULL, formula = NULL, random.only = FALSE, data = NULL,
 					dosemat, numdose, typetreat = NULL, labt = NULL, Omega = NULL, n.iter, n.burn, n.thin = 1,
 					shape.dp = 1, rate.dp = 1, M.init = NULL, plot.out = TRUE)
 { ## start function dpgrow.default
@@ -300,7 +301,7 @@ ddpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NUL
   ## construct fixed and random effect design matrices
   ##################################################################
   out 	<- XZcov(time = time , trt = trt, trt.lab = trti.u, subject = subject, n.random = n.random, n.fix_degree = n.fix_degree, formula = formula, 
-		random.only = random.only, data = data)
+		random.only = random.only, data = data) ## re-ordering to contiguous subject for X and Z is contained in the function XZcov
   X	<- out$X
   X.c   <- out$X.c
   X.n   <- out$X.n
@@ -415,21 +416,21 @@ ddpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NUL
     {
     	plot.results$p.gcall = gc.plot$p.gcall; plot.results$p.gcsel = gc.plot$p.gcsel
 	resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, Theta = res$Theta, devres = res$devres, 
-			Num = res$Num, M = res$M, S = res$S, C = res$C, ordscore = res$ordscore, bigSmin = res$bigSmin,
+			Num = res$Num, M = res$M, S = res$optPartition[[3]], C = res$C, phat = res$optPartition[[1]], ordscore = res$optPartition[[2]], bigSmin = res$bigSmin,
 		      	Residuals = res$Residuals, Tau.e = res$Taue, Pmvn = res$Pmvn, Alphacar = res$CAR_Q[[1]], 
 			Taucar = res$CAR_Q[[2]], Tauind = res$Tauind, Lambda = res$Lambda, DoseEffects = res$DoseEffects,
 			summary.results = summary.results,  plot.results = plot.results, residuals = residuals, 
 			dat.growthCurve = gc.plot$plot.dat, dat.gcdata = gc.plot$dat.data)
     }else{ ## is.null(time) == TRUE
     	resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, Theta = res$Theta, devres = res$devres, 
-			Num = res$Num, M = res$M, S = res$S, C = res$C, ordscore = res$ordscore, bigSmin = res$bigSmin,
+			Num = res$Num, M = res$M, S = res$optPartition[[3]], C = res$C, phat = res$optPartition[[1]], ordscore = res$optPartition[[2]], bigSmin = res$bigSmin,
 		      	Residuals = res$Residuals, Tau.e = res$Taue, Pmvn = res$Pmvn, Alphacar = res$CAR_Q[[1]], 
 			Taucar = res$CAR_Q[[2]], Tauind = res$Tauind, Lambda = res$Lambda, DoseEffects = res$DoseEffects,
 			summary.results = summary.results,  plot.results = plot.results, residuals = residuals)	
    } ## end conditional statement on whether is.null(time)
  }else{ ## plot.out = FALSE
     	resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, Theta = res$Theta, devres = res$devres, 
-			Num = res$Num, M = res$M, S = res$S, C = res$C, ordscore = res$ordscore, bigSmin = res$bigSmin,
+			Num = res$Num, M = res$M, S = res$optPartition[[3]], C = res$C, phat = res$optPartition[[1]], ordscore = res$optPartition[[2]], bigSmin = res$bigSmin,
 		      	Residuals = res$Residuals, Tau.e = res$Taue, Pmvn = res$Pmvn, Alphacar = res$CAR_Q[[1]], 
 			Taucar = res$CAR_Q[[2]], Tauind = res$Tauind, Lambda = res$Lambda, DoseEffects = res$DoseEffects,
 			summary.results = summary.results,  residuals = residuals)	
@@ -558,7 +559,7 @@ samples.ddpgrow <- function(object,...)
   typet  		<- object$summary.results$typet
   res 			<- list(Deviance = object$Deviance, Alpha = object$Alpha, Beta = Beta, Theta = Theta, DoseEffects = object$DoseEffects,
 					Residuals = object$Residuals, M = object$M, S = object$S, C = object$C, Num.per.cluster = object$Num, 
-					bigSmin = object$bigSmin, Alphacar = object$Alphacar, Taucar = object$Taucar,
+					bigSmin = object$bigSmin, phat = object$phat, ordscore = object$ordscore, Alphacar = object$Alphacar, Taucar = object$Taucar,
 					Pmvn = object$Pmvn, Tauind = object$Tauind, Lambda = object$Lambda, Tau.e = object$Tau.e)
   if( !any(typet == 1) ) 
   {

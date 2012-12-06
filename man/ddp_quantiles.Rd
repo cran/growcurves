@@ -36,23 +36,48 @@
   \item{beta.summary}{\code{Nfixed x 3} quantile summaries
   of model fixed effects.} \item{alpha.summary}{quantile
   summary of model global intercept parameter.}
-  \item{bmat.summary}{list object of length \code{Nrandom},
-  each cell containing a \code{P x 3} matrix of by-subject
-  parameter quantile summaries.}
-  \item{tauu.summary}{quantile summary for prior precision
-  parameter employed for multiple membership random
-  effects. An \code{nty x 3} matrix in the case of
-  \code{nty} multiple membership effect terms.}
+  \item{theta.summary}{list object of length
+  \code{Nrandom}, each cell containing a \code{n x 3}
+  matrix of by-subject random effect parameter quantile
+  summaries.} \item{lambda.summary}{\code{Nrandom^2 x 3}
+  quantile summaries of by-polynomial order precision
+  parameters used in base distributions.}
+  \item{lambda.mean}{\code{Nrandom x Nrandom} posterior
+  means of by-polynomial order precision parameters used in
+  base distributions.} \item{alphacar.summary}{\code{numcar
+  x 3} quantile summaries of proper CAR strength of
+  correlation parameters for CAR base distribution on
+  subject-dose random effects, where numcar <= nty
+  treatments.} \item{taucar.summary}{\code{numcar x 3}
+  quantile summaries of proper CAR precision parameters for
+  CAR base distribution on subject-dose random effects,
+  where numcar <= nty treatments.}
+  \item{dosetrt.summary}{list object of length \code{nty},
+  each cell containing a \code{Nsubject*(Nrandom*numt[m]) x
+  3} matrix of quantile summaries for subject-dose random
+  effects.} \item{dosetrt.mean}{list object of length
+  \code{nty}, each cell containing a \code{Nsubject x
+  (Nrandom*numt[m])} matrix of posterior mean values for
+  subject-dose random effects.} \item{pind.summary}{list
+  object of length \code{numind}, each cell contains a
+  \code{numt[m] x 3} matrix of quantile summaries for
+  precision values under IND base distribution, where
+  numind <= nty treatments.} \item{pmvn.summary}{list
+  object of length \code{nummvn}, each cell containing
+  quantile summaries for precision parameters used for MVN
+  base distribution on subject-dose random effects, where
+  nummvn <= nty treatments.} \item{pmvn.summary}{list
+  object of length \code{nummvn}, each cell containing
+  posterior mean for \code{numt[m] x numt[m]} matrix of
+  precision parameters used for MVN base distribution on
+  subject-dose random effects, where nummvn <= nty
+  treatments.} \item{doseint.summary}{list object of length
+  \code{Nrandom}, each cell containing a \code{Nsubject x
+  3} matrix of quantile summaries for the intercept
+  parameter in the subject-dose random effects.}
   \item{taue.summary}{quantile summary for model error
-  precision parameter.} \item{taub}{\code{Nrandom x 3}
-  quantile summaries for subject effect precision
-  parameters.} \item{u.summary}{\code{S x 3} quantile
-  summaries for multiple membership random effect
-  parameters. A list of such matrices in the case of
-  \code{nty} multiple membership effect terms.}
-  \item{mm.summary}{\code{P.aff x 3} quantile summaries
-  derived from multiplying the affected subject weight
-  matrix by the multiple membership random effects.}
+  precision parameter.} \item{M.summary}{quantile summary
+  for number of DP posterior clusters formed.}
   \item{Dbar}{Model fit statistics.} \item{pD}{Model fit
   statistics.} \item{pV}{Model fit statistics.}
   \item{DIC}{Model fit statistics.} \item{lpml}{Model fit

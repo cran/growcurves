@@ -70,6 +70,7 @@ BEGIN_RCPP
     imat S(nkeep,np);
     field<icolvec> Num(nkeep,1);
     field<ucolvec> bigS;
+    field<mat> optPartition(3,1); /* Hold empirical probability of co-clustering matrix, index of L-sq clustering scores objects, and cluster identifiers per iteration */
 
     // Initialize parameter values
     /* precision parameters */
@@ -93,6 +94,7 @@ BEGIN_RCPP
     mat pbmat(nr,nr); pbmat.zeros();
     /* fit assessment - related measures */
     double deviance = 0;  ucolvec ordscore; ordscore.zeros();
+    mat phat(np,np); phat.zeros(); /* empirical co-clustering probability matrix */
     rowvec devmarg(nc); colvec devres(4); devres.zeros();
     colvec devres8(4); devres8.zeros();
     rowvec logcpo(nc); logcpo.zeros(); double lpml;
@@ -148,7 +150,10 @@ BEGIN_RCPP
     } /* end MCMC loop over k */
 
     // compute least squares cluster
-    lsqcluster(S, Num, ordscore, bigS);
+    lsqcluster(S, Num, ordscore, phat, bigS);
+    optPartition(0,0) = phat;
+    optPartition(1,0) = conv_to<mat>::from(ordscore);
+    optPartition(2,0) = conv_to<mat>::from(S);
     // DIC
     dic3comp(Deviance, Devmarg, devres); /* devres = c(dic,dbar,dhat,pd) */
     dic8dpcomp(Deviance, Alpha, Beta, B, Taue, xmat, zmat,
@@ -170,9 +175,9 @@ BEGIN_RCPP
                                   Rcpp::Named("Taub") = Taub,
                                   Rcpp::Named("Residuals") = Resid,
                                   Rcpp::Named("M") = numM,
-                                  Rcpp::Named("S") = S,
+                                  //Rcpp::Named("S") = S,
                                   Rcpp::Named("Num") = Num,
-                                  Rcpp::Named("ordscore") = ordscore,
+                                  Rcpp::Named("optPartition") = optPartition,
                                   Rcpp::Named("bigSmin") = bigS
 				  );
 
@@ -205,7 +210,7 @@ END_RCPP
 
         // sample cluster assignments, s(1), ..., s(np)
         // fixing all other parameters, including bstarmat
-        mat zj, xj, yj, phib(nr,nr), phibinv(nr,nr);
+        mat zj, xj, yj, phib(nr,nr);
         colvec cj, cstarj, ytildej, bstarj(nr), eb(nr), hb(nr);
         double logq0, q0, sweights;
         int startrow = 0; 
@@ -268,8 +273,8 @@ END_RCPP
                 logq0 += dnorm(zro, 0.0, sqrt(1/taub(i)), true)[0]; /* true = log */
             }
             eb = taue*trans(zj)*ytildej;
-            phib = taue*trans(zj)*zj + pbmat; phibinv = inv(phib);
-            hb = phibinv*eb;
+            phib = taue*trans(zj)*zj + pbmat; 
+	    hb = solve(phib,eb);
             logq0 -= logdens(hb,phib); /* dmvn(hb,phib^-1) */
             q0 = exp(logq0);
 
@@ -631,33 +636,29 @@ END_RCPP
             const field<colvec>& ytilwedge, colvec& b, double taue)
     {
         BEGIN_RCPP
-        using namespace arma;
         int n = zwedge.n_rows; int p = zwedge(0,0).n_cols;
         mat ztz(p,p); ztz.zeros(); colvec zty(p); zty.zeros();
-        mat phi(p,p), phiinv(p,p), U(p,p);
-        colvec h(p);
+        mat phi(p,p);
         int i;
         for(i = 0; i < n; i++)
         {
            ztz += trans(zwedge(i,0))*zwedge(i,0);
            zty += trans(zwedge(i,0))*ytilwedge(i,0);
         }
-        phi = symmatl(taue*ztz + Pmat); phiinv = symmatl( inv(phi) );
-        h = taue*phiinv*zty;
-        U = chol(phiinv);
-        colvec noisevec = randn<colvec>(p);
-        b = trans(U)*noisevec + h;
+        phi 		= symmatl(taue*ztz + Pmat); 
+	colvec h 	= taue*solve(phi,zty);
+        colvec noise 	= randn<colvec>(p);
+	b 		= solve(trimatu(chol(phi)),noise) + h;
         END_RCPP
     }
 
     SEXP lsqcluster(const imat& S, const field<icolvec>& Num,
-            ucolvec& ordscore, field<ucolvec>& bigS)
+            ucolvec& ordscore, mat& phat, field<ucolvec>& bigS)
     {
         BEGIN_RCPP
 	bigS.set_size(1,1);
         int n = S.n_rows;  int np = S.n_cols;
         mat delta; delta.eye(np,np);
-        mat phat(np,np); phat.zeros();
         mat diffsq(np,np); diffsq.zeros();
         irowvec s(np); colvec score(n);
 	ucolvec ord(np); ord.zeros();

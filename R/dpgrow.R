@@ -125,7 +125,7 @@ dpgrow			<- function(y, subject, trt, time, n.random, n.fix_degree, formula, ran
 ################################################
 ## default dispatch method for mm-session models
 ################################################
-dpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NULL, n.fix_degree = NULL, formula = NULL, random.only = NULL, 
+dpgrow.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.random = NULL, n.fix_degree = NULL, formula = NULL, random.only = FALSE, 
 					data = NULL, n.iter, n.burn, n.thin = 1,
 					shape.dp = 1, rate.dp = 1, plot.out = TRUE, option = "dp")
 { ## start function dpgrow.default
@@ -266,7 +266,7 @@ dpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NULL
   ## construct fixed and random effect design matrices
   ##################################################################
   out 	<- XZcov(time = time , trt = trt, trt.lab = trti.u, subject = subject, n.random = n.random, n.fix_degree = n.fix_degree, formula = formula, 
-		random.only = random.only, data = data)
+		random.only = random.only, data = data) ## re-ordering to contiguous subject for X and Z is contained in the function XZcov
   X	<- out$X
   X.c   <- out$X.c
   X.n   <- out$X.n
@@ -369,8 +369,8 @@ dpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NULL
     	plot.results$p.gcall = gc.plot$p.gcall; plot.results$p.gcsel = gc.plot$p.gcsel
     	if(option == "dp") ## DP
     	{
-    		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, M = res$M, S = res$S, devres = res$devres, 
-			Num = res$Num, ordscore = res$ordscore, bigSmin = res$bigSmin, Residuals = res$Residuals,
+    		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, M = res$M, S = res$optPartition[[3]], devres = res$devres, 
+			Num = res$Num, phat = res$optPartition[[1]], ordscore = res$optPartition[[2]], bigSmin = res$bigSmin, Residuals = res$Residuals,
 			Tau.e = res$Taue, Tau.b = res$Taub, summary.results = summary.results, 
 			plot.results = plot.results, residuals = residuals, dat.growthCurve = gc.plot$plot.dat, dat.gcdata = gc.plot$dat.data)
     	}else{
@@ -381,8 +381,8 @@ dpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NULL
     }else{ ## is.null(time) == TRUE
    	if(option == "dp") ## DP
     	{
-    		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, M = res$M, S = res$S, devres = res$devres, 
-			Num = res$Num, ordscore = res$ordscore, bigSmin = res$bigSmin, Residuals = res$Residuals, Tau.e = res$Taue, Tau.b = res$Taub, 
+    		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, M = res$M, S = res$optPartition[[3]], devres = res$devres, 
+			Num = res$Num, phat = res$optPartition[[1]], ordscore = res$optPartition[[2]], bigSmin = res$bigSmin, Residuals = res$Residuals, Tau.e = res$Taue, Tau.b = res$Taub, 
 			summary.results = summary.results, plot.results = plot.results, residuals = residuals)
     	}else{
 		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, devres = res$devres, devres3 = res$devres3,
@@ -393,8 +393,8 @@ dpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NULL
  }else{ ## plot.out = FALSE
    if(option == "dp") ## DP
    {
-    		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, M = res$M, S = res$S, devres = res$devres, 
-			Num = res$Num, ordscore = res$ordscore, bigSmin = res$bigSmin, Residuals = res$Residuals,
+    		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, M = res$M, S = res$optPartition[[3]], devres = res$devres, 
+			Num = res$Num, phat = res$optPartition[[1]], ordscore = res$optPartition[[2]], bigSmin = res$bigSmin, Residuals = res$Residuals,
 			Tau.e = res$Taue, Tau.b = res$Taub, summary.results = summary.results, residuals = residuals)
    }else{
 		resot = list(Deviance = res$Deviance, Beta = res$Beta, Alpha = res$Alpha, B = res$B, devres = res$devres, devres3 = res$devres3,
@@ -442,7 +442,7 @@ dpgrow.default		<- function(y, subject, trt = NULL, time = NULL, n.random = NULL
 dpPost = function (y, X, Z, subjects, niter, nburn, nthin, shapealph, ratebeta) {
     stopifnot(nrow(X) == nrow(Z))
     stopifnot(length(y) == nrow(X))
-    res <- .Call("DPre", y, X, Z, subjects, niter, nburn, nthin, shapealph, ratebeta, package = "throwcurves")
+    res <- .Call("DPre", y, X, Z, subjects, niter, nburn, nthin, shapealph, ratebeta, package = "growcurves")
 } ## end function dpPost
 
 
@@ -529,7 +529,7 @@ samples.dpgrow <- function(object,...)
   if(object$summary.results$model == "dp")
   {
 	res 		<- list(Deviance = object$Deviance, Alpha = object$Alpha, Beta = Beta, B = B, 
-					Residuals = object$Residuals, M = object$M, S = object$S, Num.per.cluster = object$Num, bigSmin = object$bigSmin,
+					Residuals = object$Residuals, M = object$M, S = object$S, Num.per.cluster = object$Num, bigSmin = object$bigSmin, phat = object$phat, ordscore = object$ordscore,
 					Tau.b = object$Tau.b, Tau.e = object$Tau.e)
   }else{ ## lgm
 	res 		<- list(Deviance = object$Deviance, Alpha = object$Alpha, Beta = Beta, B = B, 
