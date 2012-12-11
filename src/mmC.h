@@ -71,60 +71,66 @@ RcppExport SEXP predmm(SEXP ytvec, SEXP Xtmat, SEXP Ztmat, SEXP Wtcase, SEXP U,
 RcppExport SEXP predmmmv(SEXP ytvec, SEXP Xtmat, SEXP Ztmat, SEXP Wtcase, SEXP U,
            SEXP Alphavec, SEXP Taub,
            SEXP Betamat, SEXP personstvec, SEXP rateSamp);
-SEXP clusterstep(const arma::mat& xmat, const arma::mat& zmat,
-            arma::field<arma::mat>& zsplit,
+SEXP clusterstep(const arma::field<arma::mat>& zsplit, 
+	    const arma::field<arma::mat>& ztzsplit,
+	    const arma::field<arma::mat>& xsplit, 
+	    const arma::field<arma::colvec>& ysplit, 
             arma::field<arma::colvec>& ytilsplit,
-            arma::mat& pbmat, const arma::colvec& y,
+            arma::mat& pbmat, 
             const arma::colvec& beta, double alpha, double taue,
-            const arma::rowvec& taub, arma::icolvec& persons,
+            const arma::rowvec& taub, 
             arma::mat& bstarmat, arma::icolvec& s, arma::icolvec& num,
-            int& M, double& conc, int np, int nr);
-SEXP clustermmstep(const arma::mat& xmat, const arma::mat& zmat,
-            arma::field<arma::mat>& zsplit,
+            int& M, double& conc, int nr);
+SEXP clustermmstep(const arma::field<arma::mat>& zsplit,
+	    const arma::field<arma::mat>& ztzsplit,
+	    const arma::field<arma::mat>& xsplit, 
+	    const arma::field<arma::mat>& wsplit,
+	    const arma::field<arma::colvec>& ysplit,
             arma::field<arma::colvec>& ytilsplit, arma::mat& pbmat,
-            const arma::colvec& y, const arma::mat& wcase,
             const arma::colvec& u,const arma::colvec& beta,
             double alpha, double taue, const arma::rowvec& taub,
-            arma::icolvec& persons, arma::mat& bstarmat,
+            arma::mat& bstarmat,
             arma::icolvec& s, arma::icolvec& num, int& M, double& conc,
-            int np, int nr);
-SEXP clustermvstep(const arma::mat& xmat, const arma::mat& zmat,
-            arma::field<arma::mat>& zsplit,
-            arma::field<arma::colvec>& ytilsplit, const arma::mat& hmat,
+            int nr);
+SEXP clustermvstep(const arma::field<arma::mat>& zsplit, const arma::field<arma::mat>& ztzsplit,
+	    const arma::field<arma::mat>& xsplit, 
+	    const arma::field<arma::mat>& wsplit,
+	    const arma::field<arma::mat>& hsplit,
+	    const arma::field<arma::colvec>& ysplit,
+            arma::field<arma::colvec>& ytilsplit, 
             arma::mat& pbmat,
-            const arma::colvec& y, const arma::mat& wcase,
             const arma::mat& umat,const arma::colvec& beta,
             double alpha, double taue, const arma::rowvec& taub,
-            arma::icolvec& persons, arma::mat& bstarmat,
+            arma::mat& bstarmat,
             arma::icolvec& s, arma::icolvec& num, int& M, double& conc,
-            int np, int nr);
+            int nr);
 SEXP concstep(double& conc, int M, int np,  double a6, double b6);
 SEXP bstep(const arma::mat& xmat, const arma::mat& zmat, const arma::mat& wcase,
                const arma::colvec& y, const arma::colvec& beta,
                const arma::colvec& u, double alpha, double taue,
                const arma::rowvec& taub, arma::icolvec& persons, arma::colvec& zb,
                arma::mat& bmat, int np, int nr);
-SEXP bmvstep(const arma::mat& xmat, const arma::mat& zmat, const arma::mat& hmat,
-               const arma::mat& wcase, const arma::colvec& y,
+SEXP bmvstep(const arma::field<arma::mat>& zsplit, const arma::field<arma::mat>& ztzsplit, const arma::field<arma::mat>& xsplit, 
+               const arma::field<arma::mat>& wsplit, const arma::field<arma::mat>& hsplit, const arma::field<arma::colvec>& ysplit,
                const arma::colvec& beta, const arma::mat& umat, double alpha,
-               double taue, const arma::rowvec& taub, arma::icolvec& persons,
+               double taue, const arma::rowvec& taub, 
                arma::colvec& zb, arma::mat& bmat, int np, int nr);
-SEXP bcholstep(const arma::mat& xmat, const arma::mat& zmat, const arma::mat& wcase,
-               const arma::colvec& y, const arma::colvec& beta,
+SEXP bcholstep(const arma::field<arma::mat>& zsplit, const arma::field<arma::mat>& ztzsplit, const arma::field<arma::mat>& xsplit, 
+               const arma::field<arma::mat>& wsplit, const arma::field<arma::colvec>& ysplit, const arma::colvec& beta,
                const arma::colvec& u, double alpha, double taue,
-               const arma::rowvec& taub, arma::icolvec& persons, arma::colvec& zb,
+               const arma::rowvec& taub, arma::colvec& zb,
                arma::mat& bmat, int np, int nr);
-SEXP blgmstep(const arma::mat& xmat, const arma::mat& zmat,
-               const arma::colvec& y, const arma::colvec& beta,
-               double alpha, double taue,
-               const arma::rowvec& taub, arma::icolvec& persons, arma::colvec& zb,
-               arma::mat& bmat, int np, int nr);
+SEXP blgmstep(const arma::field<arma::mat>& zsplit, const arma::field<arma::mat>& ztzsplit, const arma::field<arma::mat>& xsplit, 
+            const arma::field<arma::colvec>& ysplit, const arma::colvec& beta,
+            double alpha, double taue,
+            const arma::rowvec& taub, arma::colvec& zb,
+            arma::mat& bmat, int nr);
 SEXP bsepstep(const arma::mat& xmat, const arma::mat& zmat, const arma::mat& wcase,
                const arma::colvec& y, const arma::colvec& beta,
                const arma::colvec& u, double alpha, double taue,
                const arma::rowvec& taub, arma::icolvec& persons, arma::colvec& zb,
                arma::mat& bmat, int np, int nr, int npcbt);
-SEXP bstarstep(const arma::field<arma::mat>& zsplit,
+SEXP bstarstep(const arma::field<arma::mat>& zsplit, const arma::field<arma::mat>& ztzsplit,
             const arma::field<arma::colvec>& ytilsplit,
             double taue, const arma::mat& pbmat, const arma::icolvec& s,
             const arma::icolvec& num, arma::mat& bstarmat,
@@ -143,42 +149,45 @@ SEXP betastep(const arma::mat& xmat, const arma::mat& wcase, const arma::colvec&
 SEXP betalsstep(const arma::mat& xmat, const arma::mat& wcase, const arma::colvec& y,
                  arma::colvec& beta, const arma::colvec& u, double alpha, double taue,
                  const arma::colvec& zb, int nc, int nf);
-SEXP betamvstep(const arma::mat& xmat, const arma::mat& wcase,
+SEXP betamvstep(const arma::mat& xmat, const arma::mat& xtx, const arma::mat& wcase,
                 const arma::mat& hmat, const arma::colvec& y,
                 arma::colvec& beta, const arma::mat& umat,
                 double alpha, double taue, double taubeta,
                 const arma::colvec& zb, int nf);
-SEXP betamvlsstep(const arma::mat& xmat, const arma::mat& wcase,
+SEXP betamvlsstep(const arma::mat& xmat, const arma::mat& xtx, const arma::mat& wcase,
                 const arma::mat& hmat, const arma::colvec& y,
                 arma::colvec& beta, const arma::mat& umat,
                 double alpha, double taue, 
                 const arma::colvec& zb, int nf);
-SEXP betacholstep(const arma::mat& xmat, const arma::mat& wcase, const arma::colvec& y,
+SEXP betacholstep(const arma::mat& xmat, const arma::mat& xtx, const arma::mat& wcase, const arma::colvec& y,
                  arma::colvec& beta, const arma::colvec& u, double alpha, double taue,
                  double taubeta, const arma::colvec& zb, int nf);
-SEXP betalscholstep(const arma::mat& xmat, const arma::mat& wcase, const arma::colvec& y,
+SEXP betalscholstep(const arma::mat& xmat, const arma::mat& xtx, const arma::mat& wcase, const arma::colvec& y,
                  arma::colvec& beta, const arma::colvec& u, double alpha, double taue,
                  const arma::colvec& zb, int nf);
-SEXP betalgmstep(const arma::mat& xmat, const arma::colvec& y,
+SEXP betalgmstep(const arma::mat& xmat, const arma::mat& xtx, const arma::colvec& y,
                  arma::colvec& beta, double alpha, double taue,
                  const arma::colvec& zb, int nf);
-SEXP betaDPstep(const arma::mat& xmat, const arma::colvec& y,
+SEXP betaDPstep(const arma::mat& xmat, const arma::mat& xtx, const arma::colvec& y,
                 arma::colvec& beta, double alpha, double taue,
                 const arma::colvec& zb, int nf);
 SEXP ustep(const arma::mat& xmat, const arma::mat& omega, const arma::mat& wcase,
+	       const arma::colvec& wstws,
                const arma::mat& wpers, const arma::colvec& beta,
                const arma::colvec& zb, const arma::colvec& y,
                const arma::colvec& omegaplus, arma::colvec& u,
                arma::colvec& mm,
                double alpha, double taue, double tauu, int ns, int nc);
 SEXP umvstep(const arma::mat& xmat, const arma::mat& omega, const arma::mat& wcase,
-               const arma::mat& wpers, const arma::mat& hmat,
+               const arma::mat& wpers, const arma::mat& hmat, const arma::field<arma::mat>& hmatws, 
+	       const arma::field<arma::mat>& hwsthws,
                const arma::colvec& zb, const arma::colvec& beta,
                const arma::colvec& y, const arma::colvec& omegaplus,
                arma::mat& umat, arma::mat& mmmat, double alpha,
                double taue, const arma::mat& L, int ns, int nc);
 SEXP uindmvstep(const arma::mat& xmat, const arma::mat& wcase,
-               const arma::mat& wpers, const arma::mat& hmat,
+               const arma::mat& wpers, const arma::mat& hmat, const arma::field<arma::mat>& hmatws, 
+	       const arma::field<arma::mat>& hwsthws,
                const arma::colvec& zb, const arma::colvec& beta,
                const arma::colvec& y, 
                arma::mat& umat, arma::mat& mmmat, double alpha,
@@ -189,18 +198,18 @@ SEXP uwbstep(const arma::mat& xmat, const arma::mat& omega, const arma::mat& wca
                const arma::colvec& omegaplus, arma::colvec& u,
                arma::colvec& mm, arma::icolvec& groups,
                double alpha, double taue, double tauu, int ns, int ng, int nc);
-SEXP uindstep(const arma::mat& xmat, const arma::mat& wcase,
+SEXP uindstep(const arma::mat& xmat, const arma::mat& wcase, const arma::mat& wtwmat,
             const arma::mat& wpers, const arma::colvec& beta,
             const arma::colvec& zb, const arma::colvec& y,
             arma::colvec& u, arma::colvec& mm,  double alpha, double taue,
             double tauu, int ns);
-SEXP uindetastep(const arma::mat& xmat, const arma::mat& wcase, const arma::mat& mmat,
+SEXP uindetastep(const arma::mat& xmat, const arma::mat& wcase, const arma::mat& wtwmat, const arma::mat& mmat,
             const arma::mat& wpers, const arma::colvec& beta,
             const arma::colvec& zb, const arma::colvec& y,
             const arma::colvec& eta,
             arma::colvec& u, arma::colvec& mm,  double alpha, double taue,
             double tauu, int ns);
-SEXP etastep(const arma::mat& mmat,
+SEXP etastep(const arma::mat& mmat, const arma::mat& mtmat,
             const arma::colvec& u, arma::colvec &eta,
             double tauu, double taueta);
 SEXP alphastep(const arma::mat& xmat, const arma::mat& wcase, const arma::colvec& beta,
@@ -307,6 +316,26 @@ SEXP taumvdpstep(const arma::mat& bstarmat, const arma::colvec& resid,
             arma::mat& L, arma::rowvec& taub, double& taue, double nu,
             double a2, double a4, double b2, double b4,  int M,
             int ns, int nc, int ng);
+SEXP prodMatOne(const arma::mat& xmat, arma::mat& xtx);
+SEXP prodMatTwo(const arma::mat& xmat, const arma::mat& zmat, arma::mat& xtz);
+SEXP prodMatVec(const arma::mat& xmat, const arma::colvec& yvec, arma::mat& zty);
+SEXP dotMMvecs(const arma::mat& wcase, arma::colvec& wstws);
+SEXP prodHW(const arma::mat& wcase, const arma::mat& hmat, arma::field<arma::mat>& hmatws, arma::field<arma::mat>& hwsthws);
+SEXP CovUnitSplit(const arma::mat& zmat, const arma::mat& xmat, const arma::colvec& y, arma::field<arma::mat>& zsplit, 
+		arma::field<arma::mat>& ztzsplit, arma::field<arma::mat>& xsplit, arma::field<arma::colvec>& ysplit,
+		arma::icolvec& persons);
+SEXP CovUnitSplitMM(const arma::mat& zmat, const arma::mat& xmat, const arma::mat& wmat, const arma::colvec& y, arma::field<arma::mat>& zsplit, 
+		arma::field<arma::mat>& ztzsplit, arma::field<arma::mat>& xsplit, arma::field<arma::mat>& wsplit, arma::field<arma::colvec>& ysplit,
+		arma::icolvec& persons);
+SEXP CovUnitSplitMV(const arma::mat& zmat, const arma::mat& xmat, const arma::mat& wmat, const arma::mat& hmat, const arma::colvec& y, 
+			arma::field<arma::mat>& zsplit, arma::field<arma::mat>& ztzsplit, 
+			arma::field<arma::mat>& xsplit, arma::field<arma::mat>& wsplit, arma::field<arma::mat>& hsplit,
+			arma::field<arma::colvec>& ysplit, arma::icolvec& persons);
+SEXP CovUnitWmatsSplit(const arma::field<arma::mat>& wmats, arma::icolvec& persons, arma::field<arma::mat>& wtwmats, 
+			arma::field<arma::colvec>& wstws, arma::field<arma::mat>& wsplits);
+SEXP CovUnitMmatsSplit(const arma::field<arma::mat>& mmats, arma::field<arma::mat>& mtmats);
+SEXP CovUnitSplitDDP(const arma::mat& zmat, const arma::mat& xmat, const arma::field<arma::mat>& doseperson, const arma::colvec& y, arma::field<arma::mat>& zsplit, 
+			arma::field<arma::mat>& xsplit, arma::field<arma::colvec>& ysplit, arma::field<arma::mat>& dosequad, arma::field<arma::mat>& zbydose, arma::icolvec& persons);
 SEXP rmvnqr(const arma::mat& xmat, const arma::mat& Umat, const arma::colvec& y,
             const arma::colvec& c, arma::colvec& b, int n, int p, double taue);
 SEXP rmvnlsqr(const arma::mat& xmat, const arma::colvec& y,
@@ -315,15 +344,16 @@ SEXP rmvnqrclust(const arma::field<arma::mat>& zsplit, const arma::mat& Umat,
             const arma::field<arma::colvec>& ytilsplit,
             arma::colvec& b, double taue);
 SEXP rmvnsample(const arma::mat& phi, const arma::colvec& h, arma::colvec& b);
-SEXP rmvnchol(const arma::mat& xmat, const arma::mat& Pmat, const arma::colvec& y,
+SEXP rmvnchol(const arma::mat& xmat, const arma::mat& xtx, const arma::mat& Pmat, const arma::colvec& y,
             const arma::colvec& c, arma::colvec& b, int p, double taue);
-SEXP rmvnlschol(const arma::mat& xmat, const arma::colvec& y,
+SEXP rmvnlschol(const arma::mat& xmat, const arma::mat& xtx, const arma::colvec& y,
             const arma::colvec& c, arma::colvec& b, int p, double taue);
 SEXP rmvnbasic(const arma::mat& phi, const arma::colvec& e, arma::colvec& b);
-SEXP rmvnmean(const arma::mat& xmat, const arma::mat& Pmat, const arma::colvec& y,
+SEXP rmvnmean(const arma::mat& xmat, const arma::mat& xtx, const arma::mat& Pmat, const arma::colvec& y,
             const arma::colvec& c, const arma::colvec& m,
             arma::colvec& b, int p, double taue);
-SEXP rmvncholclust(const arma::field<arma::mat>& zwedge, const arma::mat& Pmat,
+SEXP rmvncholclust(const arma::field<arma::mat>& zwedge, const arma::field<arma::mat>& ztzwedge,
+	    const arma::mat& Pmat,
             const arma::field<arma::colvec>& ytilwedge,
             arma::colvec& b, double taue);
 SEXP rmvnrnd(const arma::mat& Pmat, arma::mat& B, arma::rowvec& m);
@@ -397,14 +427,16 @@ SEXP initlogp(const arma::field<arma::mat>& omegamats, const arma::field<arma::r
 SEXP zdcomp(const arma::field<arma::mat>& doseperson, const arma::mat& dmat, 
             const arma::mat& zmat, arma::mat& thetamat, arma::icolvec& persons, 
             arma::colvec& zd);
-SEXP clusterddpstep(const arma::mat& xmat, const arma::mat& zmat, 
-            arma::field<arma::mat>& zsplit, arma::field<arma::colvec>& ytilsplit, 
-            const arma::field<arma::mat>& doseperson, const arma::mat& Pdelt, 
-            const arma::colvec& y, const arma::colvec& beta, double alpha, 
-            double taue, arma::icolvec& persons, arma::mat& dstarmat, 
+SEXP clusterddpstep(const arma::field<arma::mat>& zsplit, const arma::field<arma::mat>& xsplit,
+	    const arma::field<arma::colvec>& ysplit, arma::field<arma::colvec>& ytilsplit, 
+            const arma::field<arma::mat>& doseperson, const arma::mat& Pdelt,
+	    const arma::field<arma::mat>& zbydose, const arma::field<arma::mat>& dosequad,
+            const arma::colvec& beta, double alpha, 
+            double taue, arma::mat& dstarmat, 
             arma::icolvec& s, arma::icolvec& num, int& M, 
             double& conc);
-SEXP dstarstep(const arma::field<arma::mat>& zsplit, const arma::field<arma::colvec>& ytilsplit,
+SEXP dstarstep(const arma::field<arma::colvec>& ytilsplit,
+	    const arma::field<arma::mat>& zbydose, const arma::field<arma::mat>& dosequad,
             double taue, const arma::mat& Pdelt, const arma::field<arma::mat>& doseperson, 
             const arma::icolvec& s, const arma::icolvec& num, arma::mat& dstarmat,
             arma::mat& zd, arma::mat& dmat, arma::mat& thetamat, int nr);
@@ -415,7 +447,7 @@ SEXP precisionddpstep(arma::field<arma::mat>& pmatsmvn, arma::field<arma::rowvec
            const arma::field<arma::rowvec>& omegapluses, const arma::colvec& resid, 
            const arma::icolvec& typet, const arma::icolvec& numt, 
            arma::colvec& logf, arma::field<arma::mat>& qmats, int nc);
-SEXP betaddpstep(const arma::mat& xmat, const arma::colvec& y,
+SEXP betaddpstep(const arma::mat& xmat, const arma::mat& xtx, const arma::colvec& y,
                 arma::colvec& beta, double alpha, double taue,
                 const arma::colvec& zd, int nf);
 SEXP alphaddpstep(const arma::mat& xmat, const arma::colvec& beta,
@@ -427,7 +459,9 @@ SEXP umultsteps(arma::field<arma::colvec>& us, arma::field<arma::colvec>& ustars
            arma::rowvec& concs, arma::irowvec& Ms, arma::field<arma::colvec>& etas, 
            arma::rowvec& tauus, arma::rowvec& tauetas, const arma::field<arma::mat>& omegamats, 
            const arma::field<arma::rowvec>& omegapluses,
-           const arma::field<arma::mat>& wmats, const arma::field<arma::mat>& mmats, 
+           const arma::field<arma::mat>& wmats, 
+	   const arma::field<arma::mat>& wtwmats, const arma::field<arma::colvec>& wstws,
+	   const arma::field<arma::mat>& mmats, const arma::field<arma::mat>& mtmats, 
            const arma::icolvec& ngs, const arma::icolvec& typet, const arma::mat& xmat, 
            const arma::colvec& y, const arma::colvec& beta, const arma::colvec& zb, 
            double alpha, double taue, arma::colvec& cmm, double ustrength);
@@ -441,33 +475,36 @@ SEXP ustarstep(const arma::colvec& ytilde, const arma::mat& wtreat,
 	    double taue, double tauu, double treat);
 SEXP lsqclusteru(const arma::umat& S, arma::ucolvec& ordscore, arma::umat& bigS);
 SEXP ucarstep(const arma::mat& xmat, const arma::colvec& beta, const arma::colvec& zb,
-            const arma::colvec& y, const arma::field<arma::mat>& wmats, 
+            const arma::colvec& y, const arma::field<arma::mat>& wmats, const arma::field<arma::colvec>& wstws,
             arma::field<arma::colvec>& us, const arma::mat& omega, 
             const arma::rowvec& omegaplus,
             double alpha, double taue, double tauu, int treat, arma::colvec& cmm);
 SEXP uistep(const arma::mat& xmat, const arma::colvec& beta, const arma::colvec& zb,
-            const arma::colvec& y, const arma::field<arma::mat>& wmats, 
+            const arma::colvec& y, const arma::field<arma::mat>& wmats, const arma::field<arma::mat>& wtwmats,
             arma::field<arma::colvec>& us,  
             double alpha, double taue, double tauu, int treat, arma::colvec& cmm);
 SEXP uigrpstep(const arma::mat& xmat, const arma::mat& mmat, const arma::colvec& beta, 
             const arma::colvec& zb, const arma::colvec& y, const arma::colvec& eta, 
-            const arma::field<arma::mat>& wmats, arma::field<arma::colvec>& us, 
+            const arma::field<arma::mat>& wmats, const arma::field<arma::mat>& wtwmats, arma::field<arma::colvec>& us, 
             double alpha, double taue, double tauu, int treat, arma::colvec& cmm);
-SEXP etagrpstep(const arma::mat& mmat, arma::colvec& eta, const arma::colvec& u,
+SEXP etagrpstep(const arma::mat& mmat, const arma::mat& mtmat, arma::colvec& eta, const arma::colvec& u,
             double tauu, double taueta);
 SEXP cu(const arma::colvec& zb, const arma::mat& xmat,
             const arma::colvec& beta, double alpha, 
             const arma::field<arma::mat>& wmats, const arma::field<arma::colvec>& us,
 	    arma::colvec& cmm, arma::colvec& c, int treat);
-SEXP clusterbstep(const arma::mat& xmat, const arma::mat& zmat, 
-            const arma::field<arma::mat>& wmats,
-            const arma::field<arma::colvec>& us, arma::field<arma::mat>& zsplit,
-            arma::field<arma::colvec>& ytilsplit, arma::mat& pbmat, const arma::colvec& y, 
+SEXP clusterbstep(const arma::field<arma::mat>& zsplit, const arma::field<arma::mat>& ztzsplit,
+	    const arma::field<arma::mat>& xsplit,
+	    const arma::field<arma::mat>& wsplits,
+	    const arma::field<arma::colvec>& ysplit,
+	    arma::field<arma::colvec>& ytilsplit, 
+            const arma::field<arma::colvec>& us, 
+            arma::mat& pbmat, 
             const arma::colvec& beta, double alpha, double taue, const arma::rowvec& taub,
-            arma::icolvec& persons, arma::mat& bstarmat,
+            arma::mat& bstarmat,
             arma::icolvec& s, arma::icolvec& num, int& M, double& conc,
-            int np, int nr);
-SEXP betalsmultstep(const arma::mat& xmat, const arma::field<arma::mat>& wmats, 
+            int nr);
+SEXP betalsmultstep(const arma::mat& xmat, const arma::mat& xtx, const arma::field<arma::mat>& wmats, 
                 const arma::field<arma::colvec>& us, const arma::colvec& y,
                 arma::colvec& beta, double alpha, double taue,
                 const arma::colvec& zb, int nf);

@@ -53,6 +53,15 @@ BEGIN_RCPP
     colvec y(yr.begin(), nc, false);
     icolvec persons(pr.begin(), nc, false);
 
+    // pre-compute quadratic product of design matrix for use in sampling
+    field<mat> zsplit(np,1); field<mat> ztzsplit(np,1);
+    field<mat> xsplit(np,1); field<mat> wsplit(np,1);
+    field<colvec> ysplit(np,1); 
+    CovUnitSplitMM(zmat, xmat, wcase, y, zsplit, ztzsplit, xsplit, wsplit, ysplit, persons);
+    mat xtx; prodMatOne(xmat,xtx); 
+    mat wtwmat; prodMatOne(wcase,wtwmat); /* joint sampling of MM effects */
+    mat mtmat; prodMatOne(mmat,mtmat); /* sampling of by-group MM effects mean */
+
     // Set random number generator state
     RNGScope scope; /* Rcpp */
     srand ( time(NULL) ); /* arma */
@@ -106,12 +115,12 @@ BEGIN_RCPP
     for(k = 0; k < niter; k++)
     {
         //if( (k % 1000) == 0 ) cout << "Interation: " << k << endl;
-        bcholstep(xmat, zmat, wcase, y, beta, u, alpha, taue, taub,
-            persons, zb, bmat, np, nr);
-        betacholstep(xmat, wcase, y, beta, u, alpha, taue, taubeta, zb, nf);
-        uindetastep(xmat, wcase, wpers, mmat, beta, zb, y, eta, u, mm,
+        bcholstep(zsplit, ztzsplit, xsplit, wsplit, ysplit, beta, u, alpha, taue, taub,
+            zb, bmat, np, nr);
+        betacholstep(xmat, xtx, wcase, y, beta, u, alpha, taue, taubeta, zb, nf);
+        uindetastep(xmat, wcase, wtwmat, wpers, mmat, beta, zb, y, eta, u, mm,
                 alpha, taue, tauu, ns);
-        etastep(mmat, u, eta, tauu, taueta);
+        etastep(mmat, mtmat, u, eta, tauu, taueta);
         alphastep(xmat, wcase, beta, zb, y, u, resid, alpha, taue, taualph, nc);
         tauetastep(bmat, mmat, resid, u, eta, beta, tauu, taub, taue,
                 taualph, taubeta, taueta, alpha, a1, a2, a4, a5, a6, a7, b1, b2,
@@ -175,7 +184,7 @@ BEGIN_RCPP
 END_RCPP
 } /* end MCMC function returning SEXP */
 
-SEXP uindetastep(const mat& xmat, const mat& wcase, const mat& wpers, 
+SEXP uindetastep(const mat& xmat, const mat& wcase, const mat& wtwmat, const mat& wpers, 
             const mat& mmat, const colvec& beta, const colvec& zb,
             const colvec& y, const colvec& eta, colvec& u,
             colvec& mm,  double alpha, double taue,
@@ -187,7 +196,7 @@ SEXP uindetastep(const mat& xmat, const mat& wcase, const mat& wpers,
         mat pu(ns,ns); pu.eye(); pu *= tauu;
         colvec c = alpha + xmat*beta + zb; /* nc x 1 */
         colvec m = mmat*eta; /* ns x 1 */
-        rmvnmean(wcase, pu, y, c, m, u, ns, taue);
+        rmvnmean(wcase, wtwmat, pu, y, c, m, u, ns, taue);
 
        // compute npcbt x 1, mm, resulting from mapping u to the npcbt clients
         mm = wpers*u;
@@ -195,7 +204,7 @@ SEXP uindetastep(const mat& xmat, const mat& wcase, const mat& wpers,
         END_RCPP
     } /* end function to sample nf x 1 fixed effects, beta */
 
-SEXP etastep(const mat& mmat, 
+SEXP etastep(const mat& mmat, const mat& mtmat,
             const colvec& u, colvec &eta,
             double tauu, double taueta)
     {
@@ -205,7 +214,7 @@ SEXP etastep(const mat& mmat,
         int ns = u.n_elem, ng = eta.n_elem;
         mat pu(ng,ng); pu.eye(); pu *= taueta;
         colvec c(ns); c.zeros();
-        rmvnchol(mmat, pu, u, c, eta, ng, tauu);
+        rmvnchol(mmat, mtmat, pu, u, c, eta, ng, tauu);
         // enforce constraint for mean(eta) = 0
         eta -= mean(eta);
 

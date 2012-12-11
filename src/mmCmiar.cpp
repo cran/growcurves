@@ -62,6 +62,16 @@ BEGIN_RCPP
     icolvec groups(gr.begin(), ns, false);
     icolvec persons(pr.begin(), nc, false);
 
+    // pre-compute quadratic product of design matrix for use in sampling
+    field<mat> zsplit(np,1); field<mat> ztzsplit(np,1);
+    field<mat> xsplit(np,1); field<mat> wsplit(np,1);
+    field<mat> hsplit(np,1);
+    field<colvec> ysplit(np,1); 
+    CovUnitSplitMV(zmat, xmat, wcase, hmat, y, zsplit, ztzsplit, xsplit, wsplit, hsplit, ysplit, persons);
+    mat xtx; prodMatOne(xmat,xtx); 
+    field<mat> hmatws(ns,1), hwsthws(ns,1);
+    prodHW(wcase, hmat, hmatws, hwsthws); /* multiple each nc x nv, hmat matrix by column s of wcase, ws - data object to use for sampling MM effects  */
+
     // Set random number generator state
     RNGScope scope; /* Rcpp */
     srand ( time(NULL) ); /* arma */
@@ -149,16 +159,16 @@ BEGIN_RCPP
     for(k = 0; k < niter; k++)
     {
         //if( (k % 1000) == 0 ) Rcout << "Interation: " << k << endl;
-        bmvstep(xmat, zmat, hmat, wcase, y, beta, umat, alpha, taue, taub,
-            persons, zb, bmat, np, nr);
-        betamvlsstep(xmat, wcase, hmat, y, beta, umat, alpha, taue, 
+        bmvstep(zsplit, ztzsplit, xsplit, wsplit, hsplit, ysplit, beta, umat, alpha, taue, taub,
+            zb, bmat, np, nr);
+        betamvlsstep(xmat, xtx, wcase, hmat, y, beta, umat, alpha, taue, 
                     zb, nf);
 	if( typemm == 0)
 	{
-		uindmvstep(xmat, wcase, wpers, hmat, zb, beta, y, umat,
+		uindmvstep(xmat, wcase, wpers, hmat, hmatws, hwsthws, zb, beta, y, umat,
                 	mmmat, alpha, taue, L, ns, nc);
 	}else{ /* typemm == 1, MM-MCAR */
-		umvstep(xmat, omega, wcase, wpers, hmat, zb, beta, y, omegaplus, umat,
+		umvstep(xmat, omega, wcase, wpers, hmat, hmatws, hwsthws, zb, beta, y, omegaplus, umat,
                 	mmmat, alpha, taue, L, ns, nc);
 	}
         alphamvlsstep(xmat, wcase, beta, hmat, zb, y, umat, resid, alpha,
@@ -246,50 +256,35 @@ BEGIN_RCPP
 END_RCPP
 } /* end MCMC function returning SEXP */
 
-// static function to sample random effects
+    // static function to sample random effects
     // updates bmat (npxnr) and zb[{i:person(i)==j}] = {zj * bmat[j,]}
-    SEXP bmvstep(const mat& xmat, const mat& zmat, const mat& hmat,
-            const mat& wcase,const colvec& y, const colvec& beta,
+    SEXP bmvstep(const field<mat>& zsplit, const field<mat>& ztzsplit,
+	    const field<mat>& xsplit, const field<mat>& wsplit, const field<mat>& hsplit,
+            const field<colvec>& ysplit, const colvec& beta,
             const mat& umat, double alpha, double taue,
-            const rowvec& taub, icolvec& persons, colvec& zb,
+            const rowvec& taub, colvec& zb,
             mat& bmat, int np, int nr)
     {
-        BEGIN_RCPP
-        // compute number of cases for each person and store results in
-        // 'positions' (np x 1)
-        icolvec positions(np); positions.zeros();
-        icolvec::iterator aa = persons.begin();
-        icolvec::iterator bb = persons.end();
-        for(icolvec::iterator i = aa; i != bb ; i++)
-        {
-           positions(*i-1) += 1;
-        }
-
+	BEGIN_RCPP
         // Compute cholesky of prior precision, pbmat, for mvn sampling
-        // of bmat through QR decomposition
+        // of bmat through cholesky decomposition
         mat pbmat; pbmat.eye(nr,nr);
-        int i;
+        int i, nj; int startrow = 0, endrow;
         for(i = 0; i < nr; i++)
         {
             pbmat.diag()(i) = taub(i);
         }
-        mat hj, zj, xj, wj, yj;
-        colvec cj, bj(nr);
+        mat zj, wj, hj, zjtzj, xj;
+        colvec cj, yj, bj(nr);
 
         // sample bmat, independently, by person
-        int startrow = 0; int persrow = 0;
-        int j, nj, endrow;
+        int np = zsplit.n_rows;
+        int j;
         for(j=0; j < np; j++)
         {
             /* extract by-person matrix views from data*/
-            nj = positions(j);
-            endrow = startrow + nj - 1;
-            zj = zmat.rows(startrow,endrow);
-            hj = hmat.rows(startrow,endrow);
-            xj = xmat.rows(startrow,endrow);
-            wj = wcase.rows(startrow,endrow);
-            yj = y.rows(startrow,endrow);
-
+	    zj = zsplit(j,0); yj = ysplit(j,0); zjtzj = ztzsplit(j,0); xj = xsplit(j,0);
+	    wj = wsplit(j,0); hj = hsplit(j,0); 
             /* sample posterior of nj block of bmat*/
             cj = alpha + xj*beta;
             int nv = umat.n_cols;
@@ -298,21 +293,21 @@ END_RCPP
                 cj += hj.col(i) % (wj*umat.col(i));
             }
             bj.zeros();
-            //rmvnqr(zj, Ub, yj, cj, bj, nj, nr, taue);
-            rmvnchol(zj, pbmat, yj, cj, bj, nr, taue);
-            bmat.row(persrow) = trans(bj);
+            rmvnchol(zj, zjtzj, pbmat, yj, cj, bj, nr, taue);
+            bmat.row(j) = trans(bj);
 
             // compute zbj (jth piece) of zb = [z1*b1vec,...,znp*bnpvec]
-            zb.rows(startrow,endrow) = zj*bj;
+	    nj 				= zsplit(j,0).n_rows;
+	    endrow 			= startrow + nj - 1;
+            zb.rows(startrow,endrow) 	= zj*bj;
+	    startrow 			+= nj;
 
-            //re-set start positions
-            startrow += nj;
-            persrow++; /*bmat has np rows, increment once for each iteration*/
         } /* end loop j for sampling bj*/
         END_RCPP
+
     } /* end function bstep for sampling bmat and zb */
 
-    SEXP betamvstep(const mat& xmat, const mat& wcase, const mat& hmat,
+    SEXP betamvstep(const mat& xmat, const mat& xtx, const mat& wcase, const mat& hmat,
                 const colvec& y, colvec& beta, const mat& umat, double alpha,
                 double taue, double taubeta, const colvec& zb, int nf)
     {
@@ -327,12 +322,11 @@ END_RCPP
         {
             c += hmat.col(i) % (wcase*umat.col(i));
         }
-        //rmvnqr(xmat, Ubeta, y, c, beta, nc, nf, taue);
-        rmvnchol(xmat, pbetamat, y, c, beta, nf, taue);
+        rmvnchol(xmat, xtx, pbetamat, y, c, beta, nf, taue);
         END_RCPP
     } /* end function to sample nf x 1 fixed effects, beta */
     
-    SEXP betamvlsstep(const mat& xmat, const mat& wcase, const mat& hmat,
+    SEXP betamvlsstep(const mat& xmat, const mat& xtx, const mat& wcase, const mat& hmat, 
                 const colvec& y, colvec& beta, const mat& umat, double alpha,
                 double taue, const colvec& zb, int nf)
     {
@@ -344,12 +338,13 @@ END_RCPP
         {
             c += hmat.col(i) % (wcase*umat.col(i));
         }
-        rmvnlschol(xmat, y, c, beta, nf, taue);
+        rmvnlschol(xmat, xtx, y, c, beta, nf, taue);
         END_RCPP
     } /* end function to sample nf x 1 fixed effects, beta */
 
     SEXP umvstep(const mat& xmat, const mat& omega, const mat& wcase,
-            const mat& wpers, const mat& hmat, const colvec& zb,
+            const mat& wpers, const mat& hmat, const field<mat>& hmatws, 
+	    const field<mat>& hwsthws, const colvec& zb,
             const colvec& beta, const colvec& y, const colvec& omegaplus,
             mat& umat, mat& mmmat, double alpha,
             double taue, const mat& L, int ns, int nc)
@@ -358,7 +353,7 @@ END_RCPP
 	int nv = umat.n_cols, i;
         colvec ws(nc); colvec ytilde(nc);
         colvec es(nv), hs(nv); mat phis(nv,nv);
-        colvec us_c(nv); mat hws(nc,nv);
+        colvec us_c(nv); 
 
 	// Add in full MM term for cwithalls
 	colvec cwithalls = alpha + xmat*beta + zb; /* nc x 1 */
@@ -380,17 +375,13 @@ END_RCPP
 	    // remove influence of 1 x nv, u[s] from ns x nv composition of ns x ns, omega and ns x nv, u
 	    cwithalls 	-= ( hmat * trans(umat.row(s)) ) % ws; /* [h_(1)u(1) + ... + h_(nv)u(nv)] % ws */
 	    omega_uall 	-= omega_uall.col(s) * umat.row(s); /* ns x nv */
-            for(i = 0; i < nv; i++)
-            {
-                hws.col(i) = hmat.col(i) % ws;
-            }
             // sample umat[s,]
             // construct posterior mean, hs, and precision, phis
             ytilde = y - cwithalls;
             /* nv x 1 */
 	    // note: omega_uall.row(s) is 1 x nv, t(omega_sbar)*omegaplus(s)
-	    es 			= trans( taue*(trans(ytilde)*hws) + omega_uall.row(s)*L );
-            phis 		= taue*trans(hws)*hws + omegaplus(s)*L; /* nv x nv */
+	    es 			= trans( taue*(trans(ytilde)*hmatws(s)) + omega_uall.row(s)*L );
+            phis 		= taue*hwsthws(s) + omegaplus(s)*L; /* nv x nv */
             us_c.zeros(); /* nv x 1 */
             rmvnbasic(phis,es,us_c);
             umat.row(s) 	= us_c.t();
@@ -415,7 +406,8 @@ END_RCPP
 
 
     SEXP uindmvstep(const mat& xmat, const mat& wcase,
-            const mat& wpers, const mat& hmat, const colvec& zb,
+            const mat& wpers, const mat& hmat, const field<mat>& hmatws, 
+	    const field<mat>& hwsthws, const colvec& zb,
             const colvec& beta, const colvec& y, 
             mat& umat, mat& mmmat, double alpha,
             double taue, const mat& L, int ns, int nc)
@@ -424,7 +416,7 @@ END_RCPP
         int nv = umat.n_cols, i;
         colvec ws(nc); colvec ytilde(nc);
         colvec es(nv), hs(nv); mat phis(nv,nv);
-        colvec us_c(nv); mat hws(nc,nv);
+        colvec us_c(nv); 
 
 	// Add in full MM term for cwithalls
 	colvec cwithalls = alpha + xmat*beta + zb; /* nc x 1 */
@@ -443,16 +435,12 @@ END_RCPP
             // remove entry Z[,j] % wcase[,s]*u[s,j] from cwithalls
 	    // remove influence of 1 x nv, u[s] from ns x nv composition of ns x ns, omega and ns x nv, u
 	    cwithalls 	-= ( hmat * trans(umat.row(s)) ) % ws; /* [h_(1)u(1) + ... + h_(nv)u(nv)] % ws */
-            for(i = 0; i < nv; i++)
-            {
-                hws.col(i) = hmat.col(i) % ws;
-            }
             // sample umat[s,]
             // construct posterior mean, hs, and precision, phis
             ytilde 		= y - cwithalls;
             /* nv x 1 */
-	    es 			= taue*trans(hws)*ytilde; /* nv x 1 */
-            phis 		= taue*trans(hws)*hws + L; /* nv x nv */
+	    es 			= taue*trans(hmatws(s))*ytilde; /* nv x 1 */
+            phis 		= taue*hwsthws(s) + L; /* nv x nv */
             us_c.zeros();  /* nv x 1 */
             rmvnbasic(phis,es,us_c);
             umat.row(s) 	= us_c.t();
@@ -638,3 +626,24 @@ END_RCPP
         devres(0) = dic; devres(1) = dbar; devres(2) = dhat; devres(3) = pd;
         END_RCPP
     }
+
+     SEXP prodHW(const mat& wcase, const mat& hmat, field<mat>& hmatws, field<mat>& hwsthws)
+     {
+	BEGIN_RCPP
+	// schur multiply mv session effects nc x nv design matrix, hmat, by each column, ws, of wcase to produce an nc x nv matrix
+	// produce quadratic product of that matrix.
+	int ns	= wcase.n_cols;
+	int nv = hmat.n_cols;
+	int nc = hmat.n_rows; int i;
+	colvec ws(ns);	mat hws(nc,nv);
+	for( int s = 0; s < ns; s++ )
+	{
+		hws.zeros();
+		ws		= wcase.col(s);
+	 	for(i = 0; i < nv; i++)
+               		hws.col(i) = hmat.col(i) % ws;
+		hmatws(s,0)	= hws;
+		hwsthws(s,0)	= hws.t() * hws;
+        }
+	END_RCPP
+    } /* end function prodMatTwo to produce quadratic product */

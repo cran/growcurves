@@ -55,8 +55,14 @@ BEGIN_RCPP
     mat wpers(Wp.begin(),npcbt, ns, false); /* mmwt */
     colvec y(yr.begin(), nc, false);
     icolvec persons(pr.begin(), nc, false);
-    field<mat> zsplit(np,1);
-    field<colvec> ytilsplit(np,1);
+    // set up data objects indexed by clustering unit
+    field<mat> zsplit(np,1); field<mat> ztzsplit(np,1);
+    field<mat> xsplit(np,1); field<mat> wsplit(np,1);
+    field<colvec> ysplit(np,1); field<colvec> ytilsplit(np,1);
+    CovUnitSplitMM(zmat, xmat, wcase, y, zsplit, ztzsplit, xsplit, wsplit, ysplit, persons);
+    mat xtx; prodMatOne(xmat,xtx);  /* sampling fixed effects */
+    mat wtwmat; prodMatOne(wcase,wtwmat); /* joint sampling of MM effects */
+    mat mtmat; prodMatOne(mmat,mtmat); /* sampling of by-group MM effects mean */
 
     // Set random number generator state
     RNGScope scope; /* Rcpp */
@@ -128,17 +134,17 @@ BEGIN_RCPP
     for(k = 0; k < niter; k++)
     {
         //if( (k % 1000) == 0 ) cout << "Interation: " << k << endl;
-        clustermmstep(xmat, zmat, zsplit, ytilsplit, pbmat, y,
-                wcase, u, beta, alpha,
-                taue, taub, persons, bstarmat, s, num, M, conc,
-                np, nr);
+        clustermmstep(zsplit, ztzsplit, xsplit, wsplit, ysplit, ytilsplit, pbmat, 
+                u, beta, alpha,
+                taue, taub, bstarmat, s, num, M, conc,
+                nr);
         concstep(conc, M, np, a8, b8);
-        bstarstep(zsplit, ytilsplit, taue, pbmat, s, num, bstarmat,
+        bstarstep(zsplit, ztzsplit, ytilsplit, taue, pbmat, s, num, bstarmat,
                 zb, bmat, np, nr);
-        betalscholstep(xmat, wcase, y, beta, u, alpha, taue, zb, nf);
-        uindetastep(xmat, wcase, wpers, mmat, beta, zb, y, eta, u, mm,
+        betalscholstep(xmat, xtx, wcase, y, beta, u, alpha, taue, zb, nf);
+        uindetastep(xmat, wcase, wtwmat, wpers, mmat, beta, zb, y, eta, u, mm,
                 alpha, taue, tauu, ns);
-        etastep(mmat, u, eta, tauu, taueta);
+        etastep(mmat, mtmat, u, eta, tauu, taueta);
         alphalsstep(xmat, wcase, beta, zb, y, u, resid, alpha, taue, nc);
         taummigdpstep(bstarmat, mmat, resid, u, eta, tauu, taub, taue,
                 taueta, a1, a2, a4, a7, b1, b2, b4, b7, M, ns, nc, ng);

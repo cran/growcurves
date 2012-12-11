@@ -64,8 +64,15 @@ BEGIN_RCPP
     colvec omegaplus(opr.begin(), ns, false);
     // icolvec groups(gr.begin(), ns, false);
     icolvec persons(pr.begin(), nc, false);
-    field<mat> zsplit(np,1);
-    field<colvec> ytilsplit(np,1);
+    // set up data objects indexed by clustering unit
+    field<mat> zsplit(np,1); field<mat> ztzsplit(np,1);
+    field<mat> xsplit(np,1); field<mat> wsplit(np,1);
+    field<mat> hsplit(np,1);
+    field<colvec> ysplit(np,1); field<colvec> ytilsplit(np,1);
+    CovUnitSplitMV(zmat, xmat, wcase, hmat, y, zsplit, ztzsplit, xsplit, wsplit, hsplit, ysplit, persons);
+    mat xtx; prodMatOne(xmat,xtx); 
+    field<mat> hmatws(ns,1), hwsthws(ns,1);
+    prodHW(wcase, hmat, hmatws, hwsthws); /* multiple each nc x nv, hmat matrix by column s of wcase, ws - data object to use for sampling MM effects  */
 
     // Set random number generator state
     RNGScope scope; /* Rcpp */
@@ -169,21 +176,20 @@ BEGIN_RCPP
     for(k = 0; k < niter; k++)
     {
         //if( (k % 1000) == 0 ) Rcout << "Interation: " << k << endl;
-        clustermvstep(xmat, zmat, zsplit, ytilsplit, hmat, pbmat, y,
-                wcase, umat, beta, alpha,
-                taue, taub, persons, bstarmat, s, num, M, conc,
-                np, nr);
+        clustermvstep(zsplit, ztzsplit, xsplit, wsplit, hsplit, ysplit, 
+		ytilsplit, pbmat, umat, beta, alpha, taue, taub, 
+		bstarmat, s, num, M, conc, nr);
         concstep(conc, M, np, a7, b7);
-        bstarstep(zsplit, ytilsplit, taue, pbmat, s, num, bstarmat,
+        bstarstep(zsplit, ztzsplit, ytilsplit, taue, pbmat, s, num, bstarmat,
                 zb, bmat, np, nr);
-        betamvlsstep(xmat, wcase, hmat, y, beta, umat, alpha, taue, 
+        betamvlsstep(xmat, xtx, wcase, hmat, y, beta, umat, alpha, taue, 
                     zb, nf);
 	if( typemm == 0)
 	{
-		uindmvstep(xmat, wcase, wpers, hmat, zb, beta, y, umat,
+		uindmvstep(xmat, wcase, wpers, hmat, hmatws, hwsthws, zb, beta, y, umat,
                 	mmmat, alpha, taue, L, ns, nc);
 	}else{ /* typemm == 1, MM-MCAR */
-		umvstep(xmat, omega, wcase, wpers, hmat, zb, beta, y, omegaplus, umat,
+		umvstep(xmat, omega, wcase, wpers, hmat, hmatws, hwsthws, zb, beta, y, omegaplus, umat,
                 	mmmat, alpha, taue, L, ns, nc);
 	}
         alphamvlsstep(xmat, wcase, beta, hmat, zb, y, umat, resid, alpha,
@@ -283,45 +289,29 @@ END_RCPP
 
     // static function to sample random effects
     // updates bmat (npxnr) and zb[{i:person(i)==j}] = {zj * bmat[j,]}
-    SEXP clustermvstep(const mat& xmat, const mat& zmat, field<mat>& zsplit,
-            field<colvec>& ytilsplit, const mat& hmat,
-            mat& pbmat, const colvec& y,
-            const mat& wcase, const mat& umat,
+    SEXP clustermvstep(const field<mat>& zsplit, const field<mat>& ztzsplit,
+	    const field<mat>& xsplit, const field<mat>& wsplit, const field<mat>& hsplit,
+            const field<colvec>& ysplit, field<colvec>& ytilsplit, 
+            mat& pbmat, const mat& umat,
             const colvec& beta, double alpha, double taue, const rowvec& taub,
-            icolvec& persons, mat& bstarmat,
+            mat& bstarmat,
             icolvec& s, icolvec& num, int& M, double& conc,
-            int np, int nr)
+            int nr)
     {
         BEGIN_RCPP
-        // compute number of cases for each person and store results in
-        // 'positions' (np x 1)
-        icolvec positions(np); positions.zeros();
-        icolvec::iterator aa = persons.begin();
-        icolvec::iterator bb = persons.end();
-        for(icolvec::iterator i = aa; i != bb ; i++)
-        {
-           positions(*i-1) += 1;
-        }
-
         // sample cluster assignments, s(1), ..., s(np)
         // fixing all other parameters, including bstarmat
-        mat hj, zj, xj, wj, yj, phib(nr,nr);
-        colvec cj, cstarj, ytildej, bstarj(nr), eb(nr), hb(nr);
+        mat zj, zjtzj, hj, xj, wj, phib(nr,nr);
+        colvec cj, cstarj, yj, ytildej, bstarj(nr), eb(nr), hb(nr);
+	int np = zsplit.n_rows;
         double logq0, q0, sweights;
-        int startrow = 0;
-        int i, j, l, m, nj, endrow;
+        int i, j, l, m;
         for(j = 0; j < np; j++)
         {
             // store by-person data cuts for later sampling of clust locs
             /* extract by-person matrix views from data*/
-            nj = positions(j);
-            endrow = startrow + nj - 1;
-            zj = zmat.rows(startrow,endrow);
-            hj = hmat.rows(startrow,endrow);
-            xj = xmat.rows(startrow,endrow);
-            wj = wcase.rows(startrow,endrow);
-            yj = y.rows(startrow,endrow);
-            zsplit(j,0) = zj; /* np rows */
+            zj = zsplit(j,0); yj = ysplit(j,0); zjtzj = ztzsplit(j,0);
+	    wj = wsplit(j,0); hj = hsplit(j,0); xj = xsplit(j,0);
 
             /* subtracting cj eliminates need to t-fer xj to sample bstar */
             cj = alpha + xj*beta;
@@ -374,11 +364,11 @@ END_RCPP
                 pbmat.diag()(i) = taub(i);
                 logq0 += dnorm(zro, 0.0, sqrt(1/taub(i)), true)[0];
             }
-            eb = taue*trans(zj)*ytildej;
-            phib = taue*trans(zj)*zj + pbmat; 
-	    hb = solve(phib,eb);
-            logq0 -= logdens(hb,phib); /* dmvn(hb,phib^-1) */
-            q0 = exp(logq0);
+            eb 		= taue*trans(zj)*ytildej;
+            phib 	= taue*zjtzj + pbmat; 
+	    hb 		= solve(phib,eb);
+            logq0 	-= logdens(hb,phib); /* dmvn(hb,phib^-1) */
+            q0 		= exp(logq0);
 
             // construct posterior sampling weights to sample s(j)
             colvec weights(M+1); weights.zeros();
@@ -413,8 +403,7 @@ END_RCPP
             if(s(j) == M)
             {
                 bstarj.zeros();
-                //rmvnqr(zj, Ub, yj, cj, bstarj, nj, nr, taue);
-                rmvnchol(zj, pbmat, yj, cj, bstarj, nr, taue);
+                rmvnchol(zj, zjtzj, pbmat, yj, cj, bstarj, nr, taue);
                 bstarmat.insert_rows(M,1);
                 num.insert_rows(M,1);
                 bstarmat.row(M) = trans(bstarj);
@@ -426,8 +415,6 @@ END_RCPP
                 num(s(j)) += 1;
             }
 
-            //re-set start positions
-            startrow += nj;
         } /* end loop j for cluster assignment */
         END_RCPP
     } /* end function bstep for cluster assignments, s, and computing zb */
@@ -458,3 +445,45 @@ END_RCPP
         taue = rgamma(1, a, (1/b))[0];
         END_RCPP
     } /* end function taustep to sample precision parameters */
+
+    SEXP CovUnitSplitMV(const mat& zmat, const mat& xmat, const mat& wmat, const mat& hmat, const colvec& y, field<mat>& zsplit, field<mat>& ztzsplit, 
+			field<mat>& xsplit, field<mat>& wsplit, field<mat>& hsplit, field<colvec>& ysplit, icolvec& persons)
+   {
+	BEGIN_RCPP
+	// initialize objects
+	int np = zsplit.n_rows; 
+	int startrow, endrow, nj, j;
+	mat zj, xj, wj, hj; colvec yj;
+
+	// compute number of repeated measures for each unit.
+ 	// assumes repeated units listed in nested / block fashion under unit
+	icolvec positions(np); positions.zeros();
+        icolvec::iterator aa = persons.begin();
+        icolvec::iterator bb = persons.end();
+        for(icolvec::iterator i = aa; i != bb ; i++)
+        {
+           positions(*i-1) += 1;
+        }
+
+	startrow = 0;
+    	for(j = 0; j < np; j++)
+        {
+            // store by-person data cuts for later sampling of clust locs
+            /* extract by-person matrix views from data*/
+            nj = positions(j);
+            endrow = startrow + nj - 1;
+            zj = zmat.rows(startrow,endrow);
+            xj = xmat.rows(startrow,endrow);
+	    wj = wmat.rows(startrow,endrow);
+	    hj = hmat.rows(startrow,endrow);
+            yj = y.rows(startrow,endrow);
+            zsplit(j,0) = zj; /* np rows */
+	    ztzsplit(j,0) = zj.t()*zj;
+	    xsplit(j,0) = xj;
+	    wsplit(j,0) = wj;
+	    hsplit(j,0) = hj;
+	    ysplit(j,0) = yj;
+	    startrow	+= nj;
+	}
+	END_RCPP
+    } /* end function splitting design objects by clustering unit */

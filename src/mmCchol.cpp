@@ -83,6 +83,14 @@ BEGIN_RCPP
     //colvec Taualph(nkeep);
     colvec Taue(nkeep);
 
+    // set up data objects indexed by clustering unit
+    field<mat> zsplit(np,1); field<mat> ztzsplit(np,1);
+    field<mat> xsplit(np,1); field<mat> wsplit(np,1);
+    field<colvec> ysplit(np,1);
+    CovUnitSplitMM(zmat, xmat, wcase, y, zsplit, ztzsplit, xsplit, wsplit, ysplit, persons);
+    mat xtx; prodMatOne(xmat,xtx); 
+    colvec wstws(ns); dotMMvecs(wcase, wstws); /* sequential, by effect, sampling of MM effects */
+
     // Initialize parameter values
     double tauu, taubeta, taualph, taue;
     tauu = taubeta = taualph = taue = 1;
@@ -113,11 +121,11 @@ BEGIN_RCPP
     for(k = 0; k < niter; k++)
     {
         //if( (k % 1000) == 0 ) cout << "Interation: " << k << endl;
-        bcholstep(xmat, zmat, wcase, y, beta, u, alpha, taue, taub,
-            persons, zb, bmat, np, nr);
+        bcholstep(zsplit, ztzsplit, xsplit, wsplit, ysplit, beta, u, alpha, taue, taub,
+            zb, bmat, np, nr);
         // betacholstep(xmat, wcase, y, beta, u, alpha, taue, taubeta, zb, nf);
-        betalscholstep(xmat, wcase, y, beta, u, alpha, taue, zb, nf);
-        ustep(xmat, omega, wcase, wpers, beta, zb, y, omegaplus, u, mm, alpha, taue, tauu, ns, nc);
+        betalscholstep(xmat, xtx, wcase, y, beta, u, alpha, taue, zb, nf);
+        ustep(xmat, omega, wcase, wstws, wpers, beta, zb, y, omegaplus, u, mm, alpha, taue, tauu, ns, nc);
         // alphastep(xmat, wcase, beta, zb, y, u, resid, alpha, taue, taualph, nc);
         alphalsstep(xmat, wcase, beta, zb, y, u, resid, alpha, taue, nc);
         //taustep(bmat, resid, qmat, u, beta, tauu, taub, taue,
@@ -185,65 +193,49 @@ END_RCPP
 
     // static function to sample random effects
     // updates bmat (npxnr) and zb[{i:person(i)==j}] = {zj * bmat[j,]}
-    SEXP bcholstep(const mat& xmat, const mat& zmat, const mat& wcase,
-            const colvec& y, const colvec& beta,
+    SEXP bcholstep(const field<mat>& zsplit, const field<mat>& ztzsplit, const field<mat>& xsplit, 
+            const field<mat>& wsplit, const field<colvec>& ysplit, const colvec& beta,
             const colvec& u, double alpha, double taue,
-            const rowvec& taub, icolvec& persons, colvec& zb,
+            const rowvec& taub, colvec& zb,
             mat& bmat, int np, int nr)
     {
-        BEGIN_RCPP
-        // compute number of cases for each person and store results in
-        // 'positions' (np x 1)
-        icolvec positions(np); positions.zeros();
-        icolvec::iterator aa = persons.begin();
-        icolvec::iterator bb = persons.end();
-        for(icolvec::iterator i = aa; i != bb ; i++)
-        {
-           positions(*i-1) += 1;
-        }
-
+	BEGIN_RCPP
         // Compute cholesky of prior precision, pbmat, for mvn sampling
         // of bmat through cholesky decomposition
         mat pbmat; pbmat.eye(nr,nr);
-        int i;
+        int i, nj; int startrow = 0, endrow;
         for(i = 0; i < nr; i++)
         {
             pbmat.diag()(i) = taub(i);
         }
-        mat zj, xj, wj, yj;
-        colvec cj, bj(nr);
+        mat zj, wj, zjtzj, xj;
+        colvec cj, yj, bj(nr);
 
         // sample bmat, independently, by person
-        int startrow = 0; int persrow = 0;
-        int j, nj, endrow;
+        int np = zsplit.n_rows;
+        int j;
         for(j=0; j < np; j++)
         {
             /* extract by-person matrix views from data*/
-            nj = positions(j);
-            endrow = startrow + nj - 1;
-            zj = zmat.rows(startrow,endrow);
-            xj = xmat.rows(startrow,endrow);
-            wj = wcase.rows(startrow,endrow);
-            yj = y.rows(startrow,endrow);
-
+	    zj = zsplit(j,0); yj = ysplit(j,0); zjtzj = ztzsplit(j,0); xj = xsplit(j,0);
+	    wj = wsplit(j,0);
             /* sample posterior of nj block of bmat*/
             cj = alpha + xj*beta + wj*u;
             bj.zeros();
-            //rmvnqr(zj, Ub, yj, cj, bj, nj, nr, taue);
-            rmvnchol(zj, pbmat, yj, cj, bj, nr, taue);
-            bmat.row(persrow) = trans(bj);
+            rmvnchol(zj, zjtzj, pbmat, yj, cj, bj, nr, taue);
+            bmat.row(j) = trans(bj);
 
             // compute zbj (jth piece) of zb = [z1*b1vec,...,znp*bnpvec]
-            zb.rows(startrow,endrow) = zj*bj;
+	    nj 				= zsplit(j,0).n_rows;
+	    endrow 			= startrow + nj - 1;
+            zb.rows(startrow,endrow) 	= zj*bj;
+	    startrow 			+= nj;
 
-            //re-set start positions
-            startrow += nj;
-            persrow++; /*bmat has np rows, increment once for each iteration*/
         } /* end loop j for sampling bj*/
         END_RCPP
     } /* end function bstep for sampling bmat and zb */
 
-    SEXP betacholstep(const mat& xmat, const mat& wcase, const colvec& y,
+    SEXP betacholstep(const mat& xmat, const mat& xtx, const mat& wcase, const colvec& y,
                 colvec& beta, const colvec& u, double alpha, double taue,
                 double taubeta, const colvec& zb, int nf)
     {
@@ -253,21 +245,44 @@ END_RCPP
 
         // Sample posterior of beta (nf x 1) from posterior Gaussian
         colvec c = alpha + zb + wcase*u; /* nc x 1 */
-        //rmvnqr(xmat, Ubeta, y, c, beta, nc, nf, taue);
-        rmvnchol(xmat, pbetamat, y, c, beta, nf, taue);
+        rmvnchol(xmat, xtx, pbetamat, y, c, beta, nf, taue);
         END_RCPP
     } /* end function to sample nf x 1 fixed effects, beta */
     
-    SEXP betalscholstep(const mat& xmat, const mat& wcase, const colvec& y,
+    SEXP betalscholstep(const mat& xmat, const mat& xtx, const mat& wcase, const colvec& y,
                 colvec& beta, const colvec& u, double alpha, double taue,
                 const colvec& zb, int nf)
     {
         BEGIN_RCPP
         // Sample posterior of beta (nf x 1) from posterior Gaussian
         colvec c = alpha + zb + wcase*u; /* nc x 1 */
-        rmvnlschol(xmat, y, c, beta, nf, taue);
+        rmvnlschol(xmat, xtx, y, c, beta, nf, taue);
         END_RCPP
     } /* end function to sample nf x 1 fixed effects, beta */
+
+    SEXP prodMatOne(const mat& xmat, mat& xtx)
+    {
+	BEGIN_RCPP
+	// input a data matrix and square it
+	xtx 		= xmat.t() * xmat;
+	END_RCPP
+    } /* end function prodMatOne to produce quadratic product */
+
+    SEXP prodMatTwo(const mat& xmat, const mat& zmat, mat& xtz)
+    {
+	BEGIN_RCPP
+	// input a data matrix and square it
+	xtz 		= xmat.t() * zmat;
+	END_RCPP
+    } /* end function prodMatTwo to produce quadratic product */
+
+    SEXP prodMatVec(const mat& xmat, const colvec& yvec, mat& zty)
+    {
+	BEGIN_RCPP
+	// input a data matrix and square it
+	zty 		= xmat.t() * yvec;
+	END_RCPP
+    } /* end function prodMatTwo to produce quadratic product */
 
     SEXP rmvnsample(const mat& phi, const colvec& h, colvec& b)
     {
@@ -291,7 +306,7 @@ END_RCPP
     } /* end function rmvnbasic for drawing a single mvn sample */
 
     
-     SEXP rmvnchol(const mat& xmat, const mat& Pmat, const colvec& y,
+     SEXP rmvnchol(const mat& xmat, const mat& xtx, const mat& Pmat, const colvec& y,
             const colvec& c, colvec& b, int p, double taue)
     {
         BEGIN_RCPP
@@ -299,32 +314,35 @@ END_RCPP
  	// note: U' does not equal U_p^-1
 	// b = U_p^-1 * z + h -> cov(b) = U_p^-1 * (U_p^-1)' = S
 	colvec e 	= taue*trans(xmat)*(y-c);
-	mat phi 	= symmatl(taue*trans(xmat)*xmat + Pmat);
+	// mat phi 	= symmatl(taue*trans(xmat)*xmat + Pmat);
+	mat phi 	= symmatl(taue*xtx + Pmat);
         colvec h   	= solve(phi,e);
 	colvec noise 	= randn<colvec>(p);
 	b 		= solve(trimatu(chol(phi)),noise) + h; // U_p x = z -> x = solve(U_p,z)
        END_RCPP
     } /* end function rmvnchol for drawing a single mvn sample */
      
-     SEXP rmvnlschol(const mat& xmat, const colvec& y,
+     SEXP rmvnlschol(const mat& xmat, const mat& xtx, const colvec& y,
             const colvec& c, colvec& b, int p, double taue)
     {
         BEGIN_RCPP
 	colvec e 	= taue*trans(xmat)*(y-c);
-	mat phi 	= symmatl( taue*trans(xmat)*xmat );
+	// mat phi 	= symmatl( taue*trans(xmat)*xmat );
+	mat phi 	= symmatl( taue*xtx );
         colvec h   	= solve(phi,e);
 	colvec noise 	= randn<colvec>(p);
 	b 		= solve(trimatu(chol(phi)),noise) + h;
        END_RCPP
     } /* end function rmvnlschol for drawing a single mvn sample */
 
-     SEXP rmvnmean(const mat& xmat, const mat& Pmat, const colvec& y,
+     SEXP rmvnmean(const mat& xmat, const mat& xtx, const mat& Pmat, const colvec& y,
             const colvec& c, const colvec& m, colvec& b, int p, double taue)
     {
         BEGIN_RCPP
         // build xbig and ytildebig
 	colvec e 	= taue*trans(xmat)*(y-c) + Pmat*m;
-	mat phi 	= symmatl(taue*trans(xmat)*xmat + Pmat);
+	// mat phi 	= symmatl(taue*trans(xmat)*xmat + Pmat);
+	mat phi 	= symmatl(taue*xtx + Pmat);
         colvec h   	= solve(phi,e);
 	colvec noise 	= randn<colvec>(p);
 	b 		= solve(trimatu(chol(phi)),noise) + h;

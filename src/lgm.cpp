@@ -45,6 +45,13 @@ BEGIN_RCPP
     colvec y(yr.begin(), nc, false);
     icolvec persons(pr.begin(), nc, false);
 
+    // set up data objects indexed by clustering unit
+    field<mat> zsplit(np,1); field<mat> ztzsplit(np,1);
+    field<mat> xsplit(np,1);
+    field<colvec> ysplit(np,1); field<colvec> ytilsplit(np,1);
+    CovUnitSplit(zmat, xmat, y, zsplit, ztzsplit, xsplit, ysplit, persons);
+    mat xtx; prodMatOne(xmat,xtx); 
+
     // Set random number generator state
     RNGScope scope; /* Rcpp */
     srand ( time(NULL) ); /* arma */
@@ -88,9 +95,9 @@ BEGIN_RCPP
     for(k = 0; k < niter; k++)
     {
         //if( (k % 1000) == 0 ) cout << "Interation: " << k << endl;
-        blgmstep(xmat, zmat, y, beta, alpha, taue, taub,
-            persons, zb, bmat, np, nr);
-        betalgmstep(xmat, y, beta, alpha, taue, zb, nf);
+        blgmstep(zsplit, ztzsplit, xsplit, ysplit, beta, alpha, taue, taub,
+            zb, bmat, nr);
+        betalgmstep(xmat, xtx, y, beta, alpha, taue, zb, nf);
         alphalgmstep(xmat, beta, zb, y, resid, alpha, taue, nc);
         taulgmstep(bmat, resid, taub, taue, a2, a4, b2, b4, np, nc);
         if(k >= nburn)
@@ -143,70 +150,55 @@ BEGIN_RCPP
 END_RCPP
 } /* end MCMC function returning SEXP */
 
- SEXP blgmstep(const mat& xmat, const mat& zmat,
-            const colvec& y, const colvec& beta,
+ SEXP blgmstep(const field<mat>& zsplit, const field<mat>& ztzsplit, const field<mat>& xsplit, 
+            const field<colvec>& ysplit, const colvec& beta,
             double alpha, double taue,
-            const rowvec& taub, icolvec& persons, colvec& zb,
-            mat& bmat, int np, int nr)
+            const rowvec& taub, colvec& zb,
+            mat& bmat, int nr)
     {
         BEGIN_RCPP
-        // compute number of cases for each person and store results in
-        // 'positions' (np x 1)
-        icolvec positions(np); positions.zeros();
-        icolvec::iterator aa = persons.begin();
-        icolvec::iterator bb = persons.end();
-        for(icolvec::iterator i = aa; i != bb ; i++)
-        {
-           positions(*i-1) += 1;
-        }
-
         // Compute cholesky of prior precision, pbmat, for mvn sampling
         // of bmat through cholesky decomposition
         mat pbmat; pbmat.eye(nr,nr);
-        int i;
+        int i, nj; int startrow = 0, endrow;
         for(i = 0; i < nr; i++)
         {
             pbmat.diag()(i) = taub(i);
         }
-        mat zj, xj, yj;
-        colvec cj, bj(nr);
+        mat zj, zjtzj, xj;
+        colvec cj, yj, bj(nr);
 
         // sample bmat, independently, by person
-        int startrow = 0; int persrow = 0;
-        int j, nj, endrow;
+        int np = zsplit.n_rows;
+        int j;
         for(j=0; j < np; j++)
         {
             /* extract by-person matrix views from data*/
-            nj = positions(j);
-            endrow = startrow + nj - 1;
-            zj = zmat.rows(startrow,endrow);
-            xj = xmat.rows(startrow,endrow);
-            yj = y.rows(startrow,endrow);
-
+	    zj = zsplit(j,0); yj = ysplit(j,0); zjtzj = ztzsplit(j,0); xj = xsplit(j,0);
             /* sample posterior of nj block of bmat*/
             cj = alpha + xj*beta;
             bj.zeros();
-            rmvnchol(zj, pbmat, yj, cj, bj, nr, taue);
-            bmat.row(persrow) = trans(bj);
+            rmvnchol(zj, zjtzj, pbmat, yj, cj, bj, nr, taue);
+            bmat.row(j) = trans(bj);
 
             // compute zbj (jth piece) of zb = [z1*b1vec,...,znp*bnpvec]
-            zb.rows(startrow,endrow) = zj*bj;
+	    nj 				= zsplit(j,0).n_rows;
+	    endrow 			= startrow + nj - 1;
+            zb.rows(startrow,endrow) 	= zj*bj;
+	    startrow 			+= nj;
 
-            //re-set start positions
-            startrow += nj;
-            persrow++; /*bmat has np rows, increment once for each iteration*/
         } /* end loop j for sampling bj*/
         END_RCPP
     } /* end function bstep for sampling bmat and zb */
 
-    SEXP betalgmstep(const mat& xmat, const colvec& y,
+    SEXP betalgmstep(const mat& xmat, const mat& xtx, const colvec& y,
                 colvec& beta, double alpha, double taue,
                 const colvec& zb, int nf)
     {
         BEGIN_RCPP
         // Sample posterior of beta (nf x 1) from posterior Gaussian
         colvec c = alpha + zb; /* nc x 1 */
-        rmvnlschol(xmat, y, c, beta, nf, taue);
+        rmvnlschol(xmat, xtx, y, c, beta, nf, taue);
         END_RCPP
     } /* end function to sample nf x 1 fixed effects, beta */
 

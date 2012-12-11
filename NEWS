@@ -1,4 +1,4 @@
-Version 0.2.3.1
+Version 0.2.3.2
 -------------------------------------------------------------------------
 
 FEATURES
@@ -40,9 +40,13 @@ CHANGES
 * Added additional return object, phat, the n x n matrix of pairwise clustering probabilities obtained from sampled clusters.  This object may be employed in a deterministic
 * clustering scheme as an alternative to using the optimal clustering, BigSmin, returned from the least squares clustering algorithm of Dahl (2006).
 
-12/06/2010
+12/06/2012
 ----------
 * updated all multivariate normal sampling functions to avoid inverse computation of precision matrix. Now directly draws samples from cholesky
 decomposition of precision matrix.
 * updated multiple membership (MM) .cpp models for more efficient posterior sampling of MM random effects
 * fixed an error that inadvertantly sorted subj.aff (post numerical re-labeling for internal use) such that the labels no longer corresponded with the rows of W.subj.aff
+
+12/11/2012
+----------
+* updated all engine functions to pre-compute quadratic products of data matrices and their slices for more efficient computation.

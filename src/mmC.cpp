@@ -101,6 +101,9 @@ BEGIN_RCPP
     rowvec devmarg(nc);
     rowvec logcpo(nc); logcpo.zeros(); double lpml;
 
+    // pre-compute quadratic product of design matrix for use in sampling
+    colvec wstws(ns); dotMMvecs(wcase, wstws); /* sequential, by effect, sampling of MM effects */
+
     // set hyperparameter values
     double a1, a2, a4, b1, b2, b4;
     a1 = b1 = ustrength; /* tauu */
@@ -118,7 +121,7 @@ BEGIN_RCPP
             persons, zb, bmat, np, nr);
         //betastep(xmat, wcase, y, beta, u, alpha, taue, taubeta, zb, nc, nf);
         betalsstep(xmat, wcase, y, beta, u, alpha, taue, zb, nc, nf);
-        ustep(xmat, omega, wcase, wpers, beta, zb, y, omegaplus, u, mm, alpha,
+        ustep(xmat, omega, wcase, wstws, wpers, beta, zb, y, omegaplus, u, mm, alpha,
                 taue, tauu, ns, nc);
         //alphastep(xmat, wcase, beta, zb, y, u, resid, alpha, taue, taualph, nc);
         alphalsstep(xmat, wcase, beta, zb, y, u, resid, alpha, taue, nc);
@@ -272,7 +275,7 @@ END_RCPP
     } /* end function to sample nf x 1 fixed effects, beta */
 
     SEXP ustep(const mat& xmat, const mat& omega, const mat& wcase,
-            const mat& wpers, const colvec& beta, const colvec& zb,
+            const colvec& wstws, const mat& wpers, const colvec& beta, const colvec& zb,
             const colvec& y, const colvec& omegaplus, colvec& u, 
             colvec& mm,  double alpha, double taue,
             double tauu, int ns, int nc)
@@ -298,7 +301,7 @@ END_RCPP
             // construct posterior mean, hs, and precision, phis
             ytilde 	= y - cwithalls;
             es 		= taue*dot(ytilde,ws) + tauu*omega_uall(s); /* omega_uall(s) is the product of row s of omega with u, after removing effect, u(s) */
-            phis 	= taue*dot(ws,ws) + tauu*omegaplus(s);
+            phis 	= taue*wstws(s) + tauu*omegaplus(s);
             hs 		= es*(1/phis);
             u(s) 	= rnorm( 1, hs, sqrt(1/phis) )[0];
 	    // puts back session s contribution from newly sampled value for u(s)
@@ -568,4 +571,16 @@ END_RCPP
 
     // double s2 = std::inner_product(y.begin(),y.end(),y.begin(),double());
 
-
+    SEXP dotMMvecs(const mat& wcase, colvec& wstws)
+    {
+	BEGIN_RCPP
+	// split MM weight matrix by MM effect and compute inner product
+	int ns	= wcase.n_cols;
+	colvec ws(ns);	
+	for(int s = 0; s < ns; s++)
+	{
+		ws		= wcase.col(s);
+		wstws(s)	= dot(ws,ws);
+	}
+	END_RCPP
+    } /* end function prodMatTwo to produce quadratic product */

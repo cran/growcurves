@@ -50,11 +50,18 @@ BEGIN_RCPP
     colvec y(yr.begin(), nc, false);
     icolvec persons(pr.begin(), nc, false);
     /* use for transferring by-subject objects from clustering to sampling locations for DP(subjects) */
-    field<mat> zsplit(np,1);
-    field<colvec> ytilsplit(np,1);
+    field<mat> zsplit(np,1); field<mat> ztzsplit(np,1);
+    field<mat> xsplit(np,1);
+    field<colvec> ysplit(np,1); field<colvec> ytilsplit(np,1);
+    /* pull by-subject/person design matrix objects for use in DP sampling */
+    CovUnitSplit(zmat, xmat, y, zsplit, ztzsplit, xsplit, ysplit, persons);
+    mat xtx; prodMatOne(xmat,xtx); 
     /* objects for sampling sessions, us */
     icolvec typet(typeT.begin(), nty, false);
     field<mat> wmats(nty,1);  /* multiple membership matrices mapping sessions to subjects for each treatment */
+    field<mat> wtwmats(nty,1); /* quadratic product of wmats(i,0) for use in sampling MM effects */
+    field<colvec> wstws(nty,1); /* sequential, by effect(session), set of quadratic products, wstws, of columns of wmats(i,0) for i = 1,..,nty to sample session effects under CAR prior */
+    field<mat> wsplits(nty,np); /* contains weight matrices indexed by person for use in clustering step */
     icolvec numt(nty);
     for(int i = 0; i < nty; i++)
     {
@@ -72,6 +79,9 @@ BEGIN_RCPP
             }
         }
     }
+
+    /* Pre-define data objects employed in sampling clustering, MM and fixed effects */ 
+    CovUnitWmatsSplit(wmats, persons, wtwmats, wstws, wsplits);
     
     // capture number of MM terms (treatments).
     // use to dimension return objects.
@@ -118,6 +128,7 @@ BEGIN_RCPP
     field<colvec> etas; /* mmigrp */
     rowvec tauetas; /* mmigrp */
     field<mat> mmats; /* S x G session mapping to group for mmigrp */
+    field<mat> mtmats; /* quadratic product of mmats(i,0) for use in sampling MM effects under independent - group mean prior */
     icolvec ngs;  /*  mmcar */
     field<mat> omegamats;  /* CAR */
     field<rowvec> omegapluses; /* CAR */
@@ -200,6 +211,7 @@ BEGIN_RCPP
         etas.set_size(numigp,1);
         tauetas.set_size(numigp); tauetas.ones();
         mmats.set_size(numigp,1);
+	mtmats.set_size(numigp,1);
         for(i = 0; i < numigp; i++)
         {
             /* sampling objects */
@@ -211,6 +223,9 @@ BEGIN_RCPP
         }
     }
     
+    /* Compute quadratic product of ns x ng design matrix, M, that maps group means to MM effects for sampling under mm-igrp prior */ 
+    CovUnitMmatsSplit(mmats, mtmats); /* note: mmats may have 0 rows (if numigrp == 0), in which case mtmats will have 0 rows */
+
     // Initialize other (non-session) parameter values
     /* subjects cluster capture variables */
     double taue = 1;
@@ -253,15 +268,15 @@ BEGIN_RCPP
     for(k = 0; k < niter; k++)
     {
 	//if( (k % 1000) == 0 ) Rcout << "Interation: " << k << endl;
-        clusterbstep(xmat, zmat, wmats, us, zsplit, ytilsplit, pbmat, y, 
-            beta, alpha, taue, taub, persons, bstarmat, s, num, M, conc,
-            np, nr);
+        clusterbstep(zsplit, ztzsplit, xsplit, wsplits, ysplit, ytilsplit, us, 
+            pbmat, beta, alpha, taue, taub, bstarmat, s, num, M, conc,
+            nr);
         concstep(conc, M, np, a6, b6);
-        bstarstep(zsplit, ytilsplit, taue, pbmat, s, num, bstarmat,
+        bstarstep(zsplit, ztzsplit, ytilsplit, taue, pbmat, s, num, bstarmat,
                 zb, bmat, np, nr);
-        betalsmultstep(xmat, wmats, us, y, beta, alpha, taue, zb, nf);
+        betalsmultstep(xmat, xtx, wmats, us, y, beta, alpha, taue, zb, nf);
         umultsteps(us, ustars, nums, ss, concs, Ms, etas, tauus, tauetas, omegamats, 
-             omegapluses, wmats, mmats, ngs, typet, xmat, y, beta, zb, alpha, taue, cmm,
+             omegapluses, wmats, wtwmats, wstws, mmats, mtmats, ngs, typet, xmat, y, beta, zb, alpha, taue, cmm,
              ustrength);
         alphalsmultstep(xmat, wmats, us, beta, zb, y, resid, alpha, taue, nc);
         taumultstep(bstarmat, resid, taub, taue, M, nc);
@@ -368,7 +383,9 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
            field<ucolvec>& ss, rowvec& concs, irowvec& Ms, field<colvec>& etas, 
            rowvec& tauus, rowvec& tauetas, const field<mat>& omegamats, 
            const field<rowvec>& omegapluses, const field<mat>& wmats, 
-           const field<mat>& mmats, const icolvec& ngs, const icolvec& typet, 
+           const field<mat>& wtwmats,  const field<colvec>& wstws, const field<mat>& mmats, 
+	   const field<mat>& mtmats, 
+	   const icolvec& ngs, const icolvec& typet, 
            const mat& xmat, const colvec& y,  const colvec& beta, const colvec& zb, 
            double alpha, double taue, colvec& cmm, double ustrength)
     {
@@ -383,7 +400,7 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
             if(typet(k) == 1) /* mmcar */
             {
                 sel = countcar;
-                ucarstep(xmat, beta, zb, y, wmats, us, omegamats(sel,0), 
+                ucarstep(xmat, beta, zb, y, wmats, wstws, us, omegamats(sel,0), 
                         omegapluses(sel,0), alpha, taue, tauus(k), k, cmm);
                 qmat = -omegamats(sel,0); qmat.diag() = omegapluses(sel,0);
 		if(ngs.n_elem > 1)
@@ -401,7 +418,7 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
                 if(typet(k) == 2) /* ind */
                 {
                     sel = countind;
-                    uistep(xmat, beta, zb, y, wmats, us, alpha, taue, tauus(k), k, cmm);
+                    uistep(xmat, beta, zb, y, wmats, wtwmats, us, alpha, taue, tauus(k), k, cmm);
                     ns = wmats(k,0).n_cols;
                     a = 0.5*double(ns) + ustrength;
                     b = 0.5* dot( us(k,0) , us(k,0) ) + ustrength;
@@ -414,8 +431,8 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
                         ns = mmats(sel,0).n_rows;
                         ng = mmats(sel,0).n_cols;
                         uigrpstep(xmat, mmats(sel,0), beta, zb, y, etas(sel,0), 
-                                wmats, us, alpha, taue, tauus(k), k, cmm);
-                        etagrpstep(mmats(sel,0), etas(sel,0), us(k,0),
+                                wmats, wtwmats, us, alpha, taue, tauus(k), k, cmm);
+                        etagrpstep(mmats(sel,0), mtmats(sel,0), etas(sel,0), us(k,0),
                                 tauus(k,0), tauetas(sel));
                         /* tauu */
                         a = 0.5*double(ns)+ ustrength;
@@ -587,7 +604,8 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
 	}
         mat pmat = tauu*eye<mat>(M,M);
 	colvec cons(nc); cons.zeros();
-        rmvnchol(wtreat*C, pmat, ytilde, cons, ustar, M, taue);
+	mat wC = wtreat*C; mat t_wC_wC = wC.t() * wC;
+        rmvnchol(wC, t_wC_wC, pmat, ytilde, cons, ustar, M, taue);
         us(treat,0) = ustar.elem(s);
 
         END_RCPP
@@ -664,7 +682,7 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
     } /* end function lsqclusteru */
 
     SEXP ucarstep(const mat& xmat, const colvec& beta, const colvec& zb,
-            const colvec& y, const field<mat>& wmats, field<colvec>& us,
+            const colvec& y, const field<mat>& wmats, const field<colvec>& wstws, field<colvec>& us,
 	    const mat& omega, const rowvec& omegaplus,
             double alpha, double taue, double tauu, int treat, colvec& cmm)
     {
@@ -675,6 +693,7 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
         int nc = xmat.n_rows;
         colvec ws(nc), ytilde(nc);
         mat wmat = wmats(treat,0);
+	colvec wstws_t = wstws(treat,0);
 	colvec u = us(treat,0);
         double es, hs, phis;        
 
@@ -696,7 +715,7 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
             // construct posterior mean, hs, and precision, phis
             ytilde 	= y - cwithalls;
             es 		= taue*dot(ytilde,ws) + tauu*omega_uall(s);
-            phis 	= taue*dot(ws,ws) + tauu*omegaplus(s);
+            phis 	= taue*wstws_t(s) + tauu*omegaplus(s);
             hs 		= es*(1/phis);
             u(s) 	= rnorm( 1, hs, sqrt(1/phis) )[0];
 	    // puts back session s contribution from newly sampled value for u(s)
@@ -712,7 +731,7 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
     } /* end function ustep to sample u[1,...,s] */
     
     SEXP uistep(const mat& xmat, const colvec& beta, const colvec& zb,
-            const colvec& y, const field<mat>& wmats, field<colvec>& us,  
+            const colvec& y, const field<mat>& wmats, const field<mat>& wtwmats, field<colvec>& us,  
             double alpha, double taue, double tauu, int treat, colvec& cmm)
     {
         BEGIN_RCPP
@@ -722,7 +741,7 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
         // compute prior precision matrix
         mat pu(ns,ns); pu.eye(); pu *= tauu;
         colvec c; cu(zb, xmat, beta, alpha, wmats, us, cmm, c, treat); /* nc x 1 */
-        rmvnchol(wmats(treat,0), pu, y, c, u, ns, taue);
+        rmvnchol(wmats(treat,0), wtwmats(treat,0), pu, y, c, u, ns, taue);
         us(treat,0) = u;
 
         END_RCPP
@@ -730,7 +749,7 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
     
     SEXP uigrpstep(const mat& xmat, const mat& mmat, const colvec& beta, 
             const colvec& zb, const colvec& y, const colvec& eta, 
-            const field<mat>& wmats, field<colvec>& us, double alpha, double taue,
+            const field<mat>& wmats, const field<mat>& wtwmats, field<colvec>& us, double alpha, double taue,
             double tauu, int treat, colvec& cmm)
     {
         BEGIN_RCPP
@@ -742,13 +761,13 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
         mat pu(ns,ns); pu.eye(); pu *= tauu;
         colvec c; cu(zb, xmat, beta, alpha, wmats, us, cmm, c, treat); /* nc x 1 */
         colvec m = mmat*eta; /* ns x 1 */
-        rmvnmean(wmats(treat,0), pu, y, c, m, u, ns, taue);
+        rmvnmean(wmats(treat,0), wtwmats(treat,0), pu, y, c, m, u, ns, taue);
         us(treat,0) = u;
 
         END_RCPP
     } /* end function to sample nf x 1 fixed effects, beta */
     
-    SEXP etagrpstep(const mat& mmat, colvec& eta, const colvec& u,
+    SEXP etagrpstep(const mat& mmat, const mat& mtmat, colvec& eta, const colvec& u,
             double tauu, double taueta)
     {
         BEGIN_RCPP
@@ -757,7 +776,7 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
         int ns = u.n_elem, ng = eta.n_elem;
         mat pu(ng,ng); pu.eye(); pu *= taueta;
         colvec cons(ns); cons.zeros();
-        rmvnchol(mmat, pu, u, cons, eta, ng, tauu);
+        rmvnchol(mmat, mtmat, pu, u, cons, eta, ng, tauu);
         // enforce constraint for mean(eta) = 0
         eta -= mean(eta);
 
@@ -784,52 +803,31 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
     	END_RCPP
     }
 
-    SEXP clusterbstep(const mat& xmat, const mat& zmat, const field<mat>& wmats,
-            const field<colvec>& us, field<mat>& zsplit,
-            field<colvec>& ytilsplit, mat& pbmat, const colvec& y, 
+    SEXP clusterbstep(const field<mat>& zsplit, const field<mat>& ztzsplit,
+	    const field<mat>& xsplit, const field<mat>& wsplits, const field<colvec>& ysplit,
+	    field<colvec>& ytilsplit, const field<colvec>& us, mat& pbmat, 
             const colvec& beta, double alpha, double taue, const rowvec& taub,
-            icolvec& persons, mat& bstarmat,
+            mat& bstarmat,
             icolvec& s, icolvec& num, int& M, double& conc,
-            int np, int nr)
+            int nr)
     {
         BEGIN_RCPP
-        // compute number of cases for each person and store results in
-        // 'positions' (np x 1)
-        icolvec positions(np); positions.zeros();
-        icolvec::iterator aa = persons.begin();
-        icolvec::iterator bb = persons.end();
-        for(icolvec::iterator i = aa; i != bb ; i++)
-        {
-           positions(*i-1) += 1;
-        }
-
         // sample cluster assignments, s(1), ..., s(np)
         // fixing all other parameters, including bstarmat
-        int nty = wmats.n_rows;
-        field<mat> wjs(nty,1);
-        mat zj, xj, yj, phib(nr,nr), phibinv(nr,nr);
-        colvec cj, cstarj, ytildej, bstarj(nr), eb(nr), hb(nr);
+        int nty = wsplits.n_rows; /* nty x np */
+	int np 	= zsplit.n_rows;
+        mat zj, zjtzj, xj, phib(nr,nr);
+        colvec cj, cstarj, yj, ytildej, bstarj(nr), eb(nr), hb(nr);
         double logq0, q0, sweights;
-        int startrow = 0; 
-        int j, l, m, nj, endrow;
+        int j, l, m;
         for(j = 0; j < np; j++)
         {
-            // store by-person data cuts for later sampling of clust locs
-            /* extract by-person matrix views from data*/
-            nj = positions(j);
-            endrow = startrow + nj - 1;
-            zj = zmat.rows(startrow,endrow);
-            xj = xmat.rows(startrow,endrow);
-            yj = y.rows(startrow,endrow);
-            
-            zsplit(j,0) = zj; /* np rows */
-
             /* subtracting cj eliminates need to t-fer xj to sample bstar */
-            cj = alpha + xj*beta;
+	    zj = zsplit(j,0); yj = ysplit(j,0); zjtzj = ztzsplit(j,0);
+            cj = alpha + xsplit(j,0)*beta;
             for(l = 0; l < nty; l++)
             {
-                wjs(l,0) = wmats(l,0).rows(startrow,endrow);
-                cj += wjs(l,0)*us(l,0);
+                cj += wsplits(l,j)*us(l,0);
             }
             ytildej = yj - cj;
             ytilsplit(j,0) = ytildej;
@@ -876,8 +874,8 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
                 logq0 += dnorm(zro, 0.0, sqrt(1/taub(i)), true)[0]; /* true = log */
             }
             eb = taue*trans(zj)*ytildej;
-            phib = taue*trans(zj)*zj + pbmat; phibinv = inv(phib);
-            hb = phibinv*eb;
+            phib = taue*zjtzj + pbmat; 
+            hb = solve(phib,eb);
             logq0 -= logdens(hb,phib); /* dmvn(hb,phib^-1) */
             q0 = exp(logq0);
 
@@ -914,8 +912,7 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
             if(s(j) == M)
             {
                 bstarj.zeros();
-                //rmvnqr(zj, Ub, yj, cj, bstarj, nj, nr, taue);
-                rmvnchol(zj, pbmat, yj, cj, bstarj, nr, taue);
+                rmvnchol(zj, zjtzj, pbmat, yj, cj, bstarj, nr, taue);
                 bstarmat.insert_rows(M,1);
                 num.insert_rows(M,1);
                 bstarmat.row(M) = trans(bstarj);
@@ -927,13 +924,11 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
                 num(s(j)) += 1;
             }
             
-            //re-set start positions
-            startrow += nj;
         } /* end loop j for cluster assignment */
         END_RCPP
     } /* end function bstep for cluster assignments, s, and computing zb */
 
-    SEXP betalsmultstep(const mat& xmat, const field<mat>& wmats, 
+    SEXP betalsmultstep(const mat& xmat, const mat& xtx, const field<mat>& wmats, 
                 const field<colvec>& us, const colvec& y,
                 colvec& beta, double alpha, double taue,
                 const colvec& zb, int nf)
@@ -946,7 +941,7 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
         {
             c += wmats(i,0)*us(i,0);
         }
-        rmvnlschol(xmat, y, c, beta, nf, taue);
+        rmvnlschol(xmat, xtx, y, c, beta, nf, taue);
         END_RCPP
     } /* end function to sample nf x 1 fixed effects, beta */
     
@@ -992,3 +987,54 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
         taue = rgamma(1, a, (1/b))[0];
         END_RCPP
     } /* end function taustep to sample precision parameters */
+
+    SEXP CovUnitWmatsSplit(const field<mat>& wmats, icolvec& persons, field<mat>& wtwmats, field<colvec>& wstws, field<mat>& wsplits)
+    {
+	BEGIN_RCPP
+	// initialize objects
+	int np 		= wsplits.n_cols; /* nty x np */
+	int nty 	= wmats.n_rows; 
+	int startrow, endrow, nj, j, i, ns_i;
+	// compute number of repeated measures for each unit.
+ 	// assumes repeated units listed in nested / block fashion under unit
+	icolvec positions(np); positions.zeros();
+        icolvec::iterator aa = persons.begin();
+        icolvec::iterator bb = persons.end();
+        for(icolvec::iterator i = aa; i != bb ; i++)
+        {
+           positions(*i-1) += 1;
+        }
+	for(i = 0; i < nty; i++)
+	{
+		wtwmats(i,0)	= wmats(i,0).t() * wmats(i,0);
+		/* compute (scalar) quadratic product of each column of wmats(i,0) for sequential scan sampling of session effects under CAR prior */
+		ns_i 		= wmats(i,0).n_cols;
+		colvec wstws_i(ns_i); wstws_i.zeros();
+		dotMMvecs(wmats(i,0), wstws_i);
+		wstws(i,0)	= wstws_i;
+
+		/* extract by-person matrix views from data*/
+		startrow 	= 0;
+    		for(j = 0; j < np; j++)
+        	{
+            	// store by-person data cuts for later sampling of clust locs
+            	nj 		= positions(j);
+            	endrow 		= startrow + nj - 1;
+	    	wsplits(i,j)	= wmats(i,0).rows(startrow,endrow);
+		startrow	+= nj;
+		}
+	}
+	END_RCPP
+    } /* end function splitting design objects by clustering unit */
+
+    SEXP CovUnitMmatsSplit(const field<mat>& mmats, field<mat>& mtmats)
+    {
+	BEGIN_RCPP
+	int numigrp	= mmats.n_rows;
+	if( numigrp > 0 )
+	{
+		for( int i = 0; i < numigrp; i++ )
+			mtmats(i,0)	= mmats(i,0).t() * mmats(i,0);
+	}
+	END_RCPP		
+    } /* end function to produce quadratic product of ns x ng, M, design matrix mapping group means to MM effects (sessions) */

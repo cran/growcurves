@@ -51,6 +51,14 @@ BEGIN_RCPP
     colvec y(yr.begin(), nc, false);
     icolvec persons(pr.begin(), nc, false);
 
+    // pre-compute quadratic product of design matrix for use in sampling
+    field<mat> zsplit(np,1); field<mat> ztzsplit(np,1);
+    field<mat> xsplit(np,1); field<mat> wsplit(np,1);
+    field<colvec> ysplit(np,1); 
+    CovUnitSplitMM(zmat, xmat, wcase, y, zsplit, ztzsplit, xsplit, wsplit, ysplit, persons);
+    mat xtx; prodMatOne(xmat,xtx); 
+    mat wtwmat; prodMatOne(wcase,wtwmat); /* joint sampling of MM effects */
+
     // Set random number generator state
     RNGScope scope; /* Rcpp */
     srand ( time(NULL) ); /* arma */
@@ -100,10 +108,10 @@ BEGIN_RCPP
     for(k = 0; k < niter; k++)
     {
         //if( (k % 1000) == 0 ) cout << "Interation: " << k << endl;
-        bcholstep(xmat, zmat, wcase, y, beta, u, alpha, taue, taub,
-            persons, zb, bmat, np, nr);
-        betacholstep(xmat, wcase, y, beta, u, alpha, taue, taubeta, zb, nf);
-        uindstep(xmat, wcase, wpers, beta, zb, y, u, mm,
+        bcholstep(zsplit, ztzsplit, xsplit, wsplit, ysplit, beta, u, alpha, taue, taub,
+            zb, bmat, np, nr);
+        betacholstep(xmat, xtx, wcase, y, beta, u, alpha, taue, taubeta, zb, nf);
+        uindstep(xmat, wcase, wtwmat, wpers, beta, zb, y, u, mm,
                 alpha, taue, tauu, ns);
         alphastep(xmat, wcase, beta, zb, y, u, resid, alpha, taue, taualph, nc);
         tauindstep(bmat, resid, u, beta, tauu, taub, taue,
@@ -164,7 +172,7 @@ BEGIN_RCPP
 END_RCPP
 } /* end MCMC function returning SEXP */
 
-SEXP uindstep(const mat& xmat, const mat& wcase,
+SEXP uindstep(const mat& xmat, const mat& wcase, const mat& wtwmat,
             const mat& wpers, const colvec& beta, const colvec& zb,
             const colvec& y, colvec& u, colvec& mm,  double alpha, double taue,
             double tauu, int ns)
@@ -174,7 +182,7 @@ SEXP uindstep(const mat& xmat, const mat& wcase,
         // compute prior precision matrix
         mat pu(ns,ns); pu.eye(); pu *= tauu;
         colvec c = alpha + xmat*beta + zb; /* nc x 1 */
-        rmvnchol(wcase, pu, y, c, u, ns, taue);
+        rmvnchol(wcase, wtwmat, pu, y, c, u, ns, taue);
 
        // compute npcbt x 1, mm, resulting from mapping u to the npcbt clients
         mm = wpers*u;
