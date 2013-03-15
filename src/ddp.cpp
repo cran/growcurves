@@ -130,7 +130,8 @@ BEGIN_RCPP
         for(i = 0; i < nummvn; i++)
         {
             int dosei = numt(posmvn(i)); /* number of treatments for type i */
-            Pmvn(i,0).set_size(nkeep,pow(dosei,2));
+	    Pmvn(i,0).set_size(nkeep,(dosei * dosei));
+            // Pmvn(i,0).set_size(nkeep,pow(dosei,2));
             pmvn = 0.1*eye<mat>(dosei,dosei);
             pmatsmvn(i,0) = pmvn;    /* initialize sampling object */
         } 
@@ -178,8 +179,8 @@ BEGIN_RCPP
     
     // Build covariance matrix, Lambda, for the number of random effects
     mat lambda = 0.1*eye(nr,nr); /* sampling object */
-    rowvec lambdavec(1,pow(nr,2)); /* vectorize lambda to return in Lambda */
-    mat Lambda(nkeep,pow(nr,2)); /* return object */
+    rowvec lambdavec(1,(nr*nr)); /* vectorize lambda to return in Lambda */
+    mat Lambda(nkeep,(nr*nr)); /* return object */
     
     // Finally compose the covariance matrix for the nr*ntr x 1, delta(i)
     mat Pdelt = kron(lambda,Ptr); /* (nr*ntr) x (nr*ntr) */
@@ -304,11 +305,11 @@ BEGIN_RCPP
                     for(i = 0; i <nummvn; i++)
                     {
                         dim = pmatsmvn(i,0).n_rows;
-                        rowvec pmativec = reshape(pmatsmvn(i,0),1,pow(dim,2)); /* by column */
+			rowvec pmativec = reshape(pmatsmvn(i,0),1,(dim * dim)); /* by column */
                         Pmvn(i,0).row(oo) = pmativec; 
                     }
                 }
-                lambdavec = reshape(lambda,1,pow(nr,2)); /* by column */
+                lambdavec = reshape(lambda,1,(nr*nr)); /* by column */
                 Lambda.row(oo) = lambdavec;
                 Taue(oo) = taue;
                 Resid.row(oo) = trans(resid);

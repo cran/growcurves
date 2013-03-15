@@ -1,6 +1,6 @@
-d501a00fe3c9b4dfe02277232b88d8b9 *DESCRIPTION
+97ee8f0a8aea8a7d49d8cf6eee99b9f1 *DESCRIPTION
 2f9a43db429458aa51f11e8400b690f3 *NAMESPACE
-292a9247d5fed2507a6515eb9fc1a530 *NEWS
+0e3440bec15a1e3f73b2b6ae0b11416a *NEWS
 d98d285444add1eacc8cba59e938f3ab *R/XZcov.R
 b5efbee844d2c9d2ea22592a7de5aabc *R/datbrghtmodterms.R
 b7679f19a4b14468a4b0e0e034df9bff *R/datbrghtterms.R
@@ -19,7 +19,7 @@ f9eb29c05aadf65942750d80a0d37c59 *R/dpgrow.R
 d85bb9531fdeceaca20c275061d1daed *R/getmf.R
 c0566c5f341f4918c51ba18819c0f198 *R/growplot.R
 6e00aefc6eb41593e170cdd1a60dd2c5 *R/growthCurve.R
-c2b0c8457eadcb839b270bb7eb6d0d97 *R/help.R
+7895983b3ac6bce1c288e21432ede288 *R/help.R
 72977353266891e4ab3db64668c543b6 *R/mcmcPlots.R
 66465b57926131ecf0474aa98255cb52 *R/relabel.R
 ba7dc8550cd17e9eed2660c44554e596 *R/summary_quantiles.R
@@ -86,7 +86,7 @@ c976bebc39888c55ba7ace557ff55af0 *man/trtplot.Rd
 7e8911337056f8f8e645790e83c17c28 *src/DPre.cpp
 0f1a40a0332b53478498eb27a2cc5933 *src/Makevars
 d4c51fa17e01830cae5c9d785fa41eb4 *src/Makevars.win
-3f2a18e50569cffef6739128740aa622 *src/ddp.cpp
+f6ab90319486b4d5f1de482bc744151d *src/ddp.cpp
 67cf3e0cd0e550c1b8e59c72fb33c884 *src/lgm.cpp
 00764faeca713713b924d74ef14c5c64 *src/mmC.cpp
 1bdce58390da02a32dfc0d9bfae99360 *src/mmC.h
