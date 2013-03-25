@@ -101,13 +101,16 @@ NULL
 #' data(datsim)
 #' ## attach(datsim)
 #' ## run dpgrow mixed effects model; returns object of class "dpgrow"
-#' shape.dp			= 4
-#' res				= dpgrow(y = datsim$y, subject = datsim$subject, trt = datsim$trt, time = datsim$time,
-#'						n.random = datsim$n.random, n.fix_degree = 2, n.iter = 10000, n.burn = 2000, 
-#'						n.thin = 10, shape.dp = shape.dp, option = "dp")
-#' plot.results			= plot(res) ## ggplot2 plot objects, including growth curves
-#' summary.results		= summary(res) ## parameter credible intervals and fit statistics
-#' samples.posterior		= samples(res) ## posterior sampled values
+#' shape.dp	= 4
+#' res		= dpgrow(y = datsim$y, subject = datsim$subject, 
+#'			trt = datsim$trt, time = datsim$time,
+#'			n.random = datsim$n.random, 
+#'			n.fix_degree = 2, n.iter = 10000, 
+#'			n.burn = 2000, n.thin = 10,
+#'			shape.dp = shape.dp, option = "dp")
+#' plot.results	= plot(res) ## ggplot2 plot objects, including growth curves
+#' summary.results = summary(res) ## parameter credible intervals,  fit statistics
+#' samples.posterior = samples(res) ## posterior sampled values
 #' }
 #' @aliases dpgrow
 #' @aliases dpgrow.default

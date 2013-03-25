@@ -125,7 +125,7 @@ ddp_quantiles = function(model.output, dosemat, Nfixed, Nrandom, Nsubject, typet
   	 	mcmc.low			= apply(mcmc.data,2,function(x){quantile(x,probs = 0.025)})
  	 	mcmc.high			= apply(mcmc.data,2,function(x){quantile(x,probs = 0.975)})
 		pmvn.summary[[countmvn]]	= t(rbind(mcmc.low,mcmc.mean,mcmc.high)) 
-		pmvn.mean[[countmvn]]		= matrix(pmvn.summary[[m]][,2], numt[m], numt[m], byrow = FALSE) ## loading by column reverses vectorization in DDP.cpp
+		pmvn.mean[[countmvn]]		= matrix(pmvn.summary[[countmvn]][,2], numt[m], numt[m], byrow = FALSE) ## loading by column reverses vectorization in DDP.cpp
 		countmvn			= countmvn + 1
 	}else{ 	
 		if( typet[m] == 3 ) ## typet[m] == 3, ind

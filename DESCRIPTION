@@ -2,8 +2,8 @@ Package: growcurves
 Type: Package
 Title: Bayesian semi and nonparametric growth curve models that
         additionally include multiple membership random effects.
-Version: 0.2.3.4
-Date: 2013-03-15
+Version: 0.2.3.5
+Date: 2013-03-25
 Author: Terrance Savitsky
 Maintainer: "terrance savitsky" <tds151@gmail.com>
 Description: Employs a non-parametric formulation for by-subject random
@@ -22,15 +22,14 @@ LazyLoad: yes
 Depends: Rcpp (>= 0.10.1), RcppArmadillo (>= 0.3.4.4), reshape2 (>=
         1.2.1), scales (>= 0.2.0), ggplot2 (>= 0.9.2), Formula (>=
         1.0-0), testthat (>= 0.5)
-LinkingTo: Rcpp, RcppArmadillo, reshape2, scales, ggplot2, Formula,
-        testthat
+LinkingTo: Rcpp, RcppArmadillo
 Collate: 'summary_quantiles.R' 'mcmcPlots.R' 'relabel.R' 'getmf.R'
         'XZcov.R' 'growthCurve.R' 'dpgrowmm.R' 'dpgrow.R' 'help.R'
         'growplot.R' 'trtplot.R' 'datsim.R' 'datsimcov.R'
         'datsimmult.R' 'dpgrowmult.R' 'effectsplot.R' 'ddp_quantiles.R'
         'ddpeffectsplot.R' 'ddpMCMCplots.R' 'ddpgrow.R'
         'datbrghtterms.R' 'dateduc.R' 'datbrghtmodterms.R'
-Packaged: 2013-03-15 22:14:24 UTC; savitsky
+Packaged: 2014-01-02 14:02:21 UTC; ripley
 NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2013-03-16 07:46:26
+Date/Publication: 2014-01-02 15:15:14

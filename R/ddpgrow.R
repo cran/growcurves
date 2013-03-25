@@ -108,15 +108,18 @@ NULL
 #' data(datddpsim)
 #' ## attach(datddpsim)
 #' ## run dpgrow mixed effects model; returns object of class "ddpgrow"
-#' shape.dp			= 4
-#' res				= ddpgrow(y = dat$y, subject = dat$subject, trt = dat$trt, time = dat$time,
-#'						typetreat = c("mvn","car","ind","car"), numdose = dat$numdose, 
-#'						labt = dat$labt, dosemat = dat$dosemat, Omega = dat$Omega, n.random = dat$n.random, 
-#'						n.fix_degree = 2, n.iter = 10000, n.burn = 2000, 
-#'						n.thin = 10, shape.dp = 1)
-#' plot.results			= plot(res) ## ggplot2 plot objects, including growth curves
-#' summary.results		= summary(res) ## parameter credible intervals and fit statistics
-#' samples.posterior		= samples(res) ## posterior sampled values
+#' shape.dp	= 4
+#' res		= ddpgrow(y = dat$y, subject = dat$subject, 
+#'			trt = dat$trt, time = dat$time,
+#'			typetreat = c("mvn","car","ind","car"), 
+#'			numdose = dat$numdose, 
+#'			labt = dat$labt, dosemat = dat$dosemat, 
+#'			Omega = dat$Omega, n.random = dat$n.random, 
+#'			n.fix_degree = 2, n.iter = 10000, n.burn = 2000, 
+#'			n.thin = 10, shape.dp = 1)
+#' plot.results	= plot(res) ## ggplot2 plot objects, including growth curves
+#' summary.results = summary(res) ## parameter credible intervals,  fit statistics
+#' samples.posterior = samples(res) ## posterior sampled values
 #' }
 #' @aliases ddpgrow
 #' @aliases ddpgrow.default

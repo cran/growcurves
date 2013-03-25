@@ -6,8 +6,8 @@
 \title{Bayesian semi and nonparametric growth curve models with employment of multiple membership random effects for longitudinal data.}
 \description{
   \tabular{ll}{ Package: \tab growcurves\cr Type: \tab
-  Package\cr Version: \tab 0.2.3.3\cr Date: \tab
-  2012-01-24\cr License: \tab GPL (>= 2) \cr LazyLoad: \tab
+  Package\cr Version: \tab 0.2.3.5\cr Date: \tab
+  2013-03-25\cr License: \tab GPL (>= 2) \cr LazyLoad: \tab
   yes\cr }
 }
 \details{
@@ -162,34 +162,51 @@ library(growcurves)
 data(datsim)
 ## attach(datsim)
 ## run dpgrow mixed effects model, returning object of class "dpgrow"
-shape.dp			= 4
-res				= dpgrow(y = datsim$y, subject = datsim$subject, trt = datsim$trt, time = datsim$time,
-						n.random = 3, n.fix_degree = 2, n.iter = 10000, n.burn = 2000,
-						n.thin = 10, shape.dp = shape.dp, option = "dp")
-## Each plot is a "ggplot2" object saved in a list to plot.results
-plot.results			= plot(res) ## includes subject and treatment growth curves
-## Extract credible interval summary (2.5\%, mean, 97.5\%) values for each sampled parameter set,
-## including deviance.  Includes fit statistics, such as Dbar, DIC, pD, lpml.  Note: DIC is
-## the DIC3 of Celeaux et. al. (2006) for option = "dp".  Finally, the constructed fixed and random effects
-## matrices, X and Z, are returned with growth curve covariates appended to user submitted nuisance covariates.
-summary.results		= summary(res)
+shape.dp	= 4
+res		= dpgrow(y = datsim$y, subject = datsim$subject,
+				trt = datsim$trt, time = datsim$time,
+				n.random = 3, n.fix_degree = 2,
+				n.iter = 10000, n.burn = 2000,
+				n.thin = 10, shape.dp = shape.dp,
+				option = "dp")
+## Each plot is a "ggplot2" object saved in
+## a list to plot.results
+plot.results	= plot(res) ## includes subject and
+##                    treatment growth curves
+## Extract credible intervals (2.5\%, mean, 97.5\%).
+## Includes fit statistics:  Dbar, DIC, pD, lpml.
+## Note: DIC is the DIC3 of Celeaux et. al. (2006)
+## for option = "dp".  Finally, the constructed fixed
+## and random effects matrices, X and Z, are returned
+## with growth curve covariates appended
+## to user submitted nuisance covariates.
+summary.results = summary(res)
 ## View the summary results in the console
 print(summary.results)
-## Collect posterior sampled values over the (n.iter - n.burn) retained iterations for each
-## sampled parameter.
-samples.posterior		= samples(res)
-residuals			= resid(res) ## model residuals (y - fit)
-## Model with DP on clients effects, but now INCLUDE session random effects
-## in a multiple membership construction communicated with the N x S matrix, W.subj.aff.
+## Collect posterior sampled values over
+## the (n.iter - n.burn) retained iterations
+## for each sampled parameter.
+samples.posterior	= samples(res)
+## model residuals (y - fit)
+residuals		= resid(res)
+## Model with DP on clients effects, but
+## now INCLUDE session random effects
+## in a multiple membership construction
+## communicated with the N x S matrix, W.subj.aff.
 ## Returns object, res.mm, of class "dpgrowmm".
-shape.dp			= 4
-strength.mm			= 0.1
-res.mm			= dpgrowmm(y = datsim$y, subject = datsim$subject, trt = datsim$trt, time = datsim$time, n.random = 3,
-						Omega = datsim$Omega, group = datsim$group, subj.aff = datsim$subj.aff,
-						W.subj.aff = datsim$W.subj.aff, n.iter = 10000, n.burn = 2000, n.thin = 10,
-						strength.mm = strength.mm, shape.dp = shape.dp,
-						option = "mmcar")
-plot.results			= plot(res.mm)
+shape.dp	= 4
+strength.mm	= 0.1
+res.mm	= dpgrowmm(y = datsim$y, subject = datsim$subject,
+                     trt = datsim$trt, time = datsim$time,
+			n.random = 3,
+			Omega = datsim$Omega, group = datsim$group,
+			subj.aff = datsim$subj.aff,
+			W.subj.aff = datsim$W.subj.aff,
+			n.iter = 10000, n.burn = 2000, n.thin = 10,
+			strength.mm = strength.mm,
+			shape.dp = shape.dp,
+			option = "mmcar")
+plot.results		= plot(res.mm)
 }
 }
 \author{

@@ -260,14 +260,18 @@ data(datsimmult)
 ## Model with DP on clients effects, but now INCLUDE session random effects
 ## in a multiple membership construction communicated with the N x S matrix, W.subj.aff.
 ## Returns object, res.mm, of class "dpgrowmm".
-shape.dp			= 3
-res.mult			= dpgrowmult(y = datsimmult$y, subject = datsimmult$subject, trt = datsimmult$trt, time = datsimmult$time,
-						n.random = datsimmult$n.random, Omega = datsimmult$Omega, group = datsimmult$group,
-						subj.aff = datsimmult$subj.aff, W.subj.aff = datsimmult$W.subj.aff, n.iter = 10000,
-						n.burn = 2000, n.thin = 10, shape.dp = shape.dp, option = c("mmi","mmcar"))
-plot.results			= plot(res.mult) ## ggplot2 plot objects, including growth curves
-summary.results		= summary(res.mult) ## parameter credible intervals and fit statistics
-samples.posterior		= samples(res.mult) ## posterior sampled values
+shape.dp	= 3
+res.mult	= dpgrowmult(y = datsimmult$y, subject = datsimmult$subject,
+			trt = datsimmult$trt, time = datsimmult$time,
+			n.random = datsimmult$n.random, Omega = datsimmult$Omega,
+			group = datsimmult$group,
+			subj.aff = datsimmult$subj.aff,
+			W.subj.aff = datsimmult$W.subj.aff, n.iter = 10000,
+			n.burn = 2000, n.thin = 10, shape.dp = shape.dp,
+			option = c("mmi","mmcar"))
+plot.results	= plot(res.mult) ## ggplot2 plot objects, including growth curves
+summary.results = summary(res.mult) ## parameter credible intervals, fit statistics
+samples.posterior = samples(res.mult) ## posterior sampled values
 }
 }
 \author{

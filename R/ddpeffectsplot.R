@@ -390,7 +390,7 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
 
 		## select doses to plot
 		dose.plot						<- vector("list",nt)
-		for(m in 1:nt) {dose.plot[[m]]		<- sample(dose.lab[[m]],n.dose.plot,replace = FALSE)}
+		for(m in 1:nt) {dose.plot[[m]]		<- sample(dose.lab[[m]],min(length(dose.lab[[m]]),n.dose.plot),replace = FALSE)}
 		dose.plot						<- unlist(dose.plot)
 		## dose.plot					<- c(4,5,6,7,9,10,11,12,16,18,22,23,25,26,29,35,42,45,47,52)
 		dat.gcplot			<- subset(dat.gc, dose %in% dose.plot)

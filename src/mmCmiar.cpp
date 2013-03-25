@@ -356,6 +356,8 @@ END_RCPP
         colvec us_c(nv); 
 
 	// Add in full MM term for cwithalls
+	// nc x 1, c = \alpha + X\beta + zb + sum_{j=1}^{nv}[h_{j} % (W\gamma_{j})], where h_{j} is nc x 1, W is nc x ns, \gamma_{j} i ns x 1
+	// this is equivalent to c_{i} = \alpha + x_{i}'\beta + zb_{i} + w_{i}'\Gamma h_{i}, for ns x 1, w_{i}, ns x nv \Gamma and nv x 1, h_{i}
 	colvec cwithalls = alpha + xmat*beta + zb; /* nc x 1 */
         for(i = 0; i < nv; i++)
         {
@@ -372,9 +374,10 @@ END_RCPP
             ws = wcase.col(s); /* ws = W.case[,s] */
 
             // remove entry Z[,j] % wcase[,s]*u[s,j] from cwithalls
-	    // remove influence of 1 x nv, u[s] from ns x nv composition of ns x ns, omega and ns x nv, u
-	    cwithalls 	-= ( hmat * trans(umat.row(s)) ) % ws; /* [h_(1)u(1) + ... + h_(nv)u(nv)] % ws */
-	    omega_uall 	-= omega_uall.col(s) * umat.row(s); /* ns x nv */
+	    // remove influence of 1 x nv, u[s] from ns x nv composition of ns x ns, omega and ns x nv, umat
+	    // subtract off sum_{j=1}^{q}[h_{j} % (ws\gamma_{sj})] = ws %(\sum_{j=1}^{nv}[h_{j}\gamma_{sj}] = ws % [H\gamma_{s}], where ws is column s of W and \gamma_{s} is nv x 1
+	    cwithalls 	-= ( hmat * trans(umat.row(s)) ) % ws; /* [h_(1)u(s,1) + ... + h_(nv)u(s,nv)] % ws */
+	    omega_uall 	-= omega.col(s) * umat.row(s); /* ns x nv */
             // sample umat[s,]
             // construct posterior mean, hs, and precision, phis
             ytilde = y - cwithalls;
@@ -387,7 +390,7 @@ END_RCPP
             umat.row(s) 	= us_c.t();
 	    // puts back session s contribution from newly sampled value for 1 x nv, u(s)
             cwithalls 		+= ( hmat * trans(umat.row(s)) ) % ws;
-	    omega_uall		+= omega_uall.col(s) * umat.row(s);
+	    omega_uall		+= omega.col(s) * umat.row(s);
         } /* end loop over s for sampling umat */
         // post-process umat to subtract out grand mean since CAR prior
         // identified only up to difference in means

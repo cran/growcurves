@@ -1,4 +1,4 @@
-Version 0.2.3.4
+Version 0.2.3.5
 -------------------------------------------------------------------------
 
 FEATURES
@@ -60,3 +60,11 @@ decomposition of precision matrix.
 3/15/2013
 ----------
 * fixed an error in ddp.cpp to eliminate use of pow(&int,int), which is not allowed.
+
+3/25/2013
+---------
+* fixed an error in ddp_quantiles.R to select the correct index when computing the mean covariance matrix, P_mvn[[countmvn]], (for each treatment under "mvn")
+* fixed an error in dpgrowmm under "multi=TRUE" to create "omega.plus" matrix from Omega
+* fixed an error in dpgrowmm under option "multi=TRUE" and "option = "mmcar" for computation of the posterior mean of conditionally sampled nv x 1 session effects
+* fixed a potential error in dpgrowmm where W.subj is set equal to W.subj.aff under all subjects receiving treatment.  Coerced W.subj to matrix in the case the user
+* inputs W.subj.aff as a data.frame object.   W.subj is subsequently used in growthCurves function to differentiate a dpgrowmm object (matrix) from a dpgrowmult object (list).

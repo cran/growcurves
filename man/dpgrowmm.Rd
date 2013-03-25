@@ -258,15 +258,21 @@ data(datsim)
 ## Model with DP on clients effects, but now INCLUDE session random effects
 ## in a multiple membership construction communicated with the N x S matrix, W.subj.aff.
 ## Returns object, res.mm, of class "dpgrowmm".
-shape.dp		= 3
-strength.mm		= 0.001
-res.mm			= dpgrowmm(y = datsim$y, subject = datsim$subject, trt = datsim$trt, time = datsim$time, n.random = datsim$n.random,
-						n.fix_degree = 2, Omega = datsim$Omega, group = datsim$group, subj.aff = datsim$subj.aff,
-						W.subj.aff = datsim$W.subj.aff, n.iter = 10000, n.burn = 2000, n.thin = 10,
-						shape.dp = shape.dp, rate.dp = rate.dp, strength.mm = strength.mm, option = "mmcar")
-plot.results			= plot(res.mm) ## ggplot2 plot objects, including growth curves
-summary.results		= summary(res.mm) ## parameter credible intervals and fit statistics
-samples.posterior		= samples(res.mm) ## posterior sampled values
+shape.dp	= 3
+strength.mm	= 0.001
+res.mm	= dpgrowmm(y = datsim$y, subject = datsim$subject,
+			trt = datsim$trt, time = datsim$time,
+			n.random = datsim$n.random,
+			n.fix_degree = 2, Omega = datsim$Omega,
+			group = datsim$group,
+			subj.aff = datsim$subj.aff,
+			W.subj.aff = datsim$W.subj.aff,
+			n.iter = 10000, n.burn = 2000, n.thin = 10,
+			shape.dp = shape.dp, rate.dp = rate.dp,
+			strength.mm = strength.mm, option = "mmcar")
+plot.results		= plot(res.mm) ## ggplot2 plot objects,
+summary.results	= summary(res.mm) ## credible intervals and fit statistics
+samples.posterior	= samples(res.mm) ## posterior sampled values
 }
 }
 \author{
