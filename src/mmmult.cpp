@@ -544,7 +544,7 @@ SEXP umultsteps(field<colvec>& us, field<colvec>& ustars, field<icolvec>& nums,
             for (l = 0; l < M; l++) /* cycle through all clusters for s(j) */
             {
                 s(j) = l; /* will compute likelihoods for every cluster */
-                ustarj = ustar.row(s(j));
+                ustarj = arma::as_scalar(ustar.row(s(j)));
                 cstarj = cj + wj*ustarj;
                 ytildej = y - cstarj;
 

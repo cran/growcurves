@@ -1,5 +1,5 @@
-2b52ccad1b43f2b1b746bf8750c15b18 *DESCRIPTION
-2f9a43db429458aa51f11e8400b690f3 *NAMESPACE
+e2a695d9050a4318691c56ef29edc448 *DESCRIPTION
+17b62947debc61147952c83d71c4dc4c *NAMESPACE
 e32feb85e3b925b5eb2b3af3d3bdca49 *NEWS
 d98d285444add1eacc8cba59e938f3ab *R/XZcov.R
 b5efbee844d2c9d2ea22592a7de5aabc *R/datbrghtmodterms.R
@@ -98,5 +98,5 @@ c1aa88ed43c9b80e42aca2379491bf89 *src/mmCplusDP.cpp
 f93caa9e0798577a7c2033c39dfe65c4 *src/mmIgroup.cpp
 341ee3eaa3ce29fab2604322dbcce26c *src/mmIgroupDP.cpp
 04af6d7a2b712c96100e88d212a0019c *src/mmIplusDP.cpp
-16bbaaf4dfcd3f22aa6976a2242540db *src/mmmult.cpp
+4f6376b2db1f7395a6ccec6295f25726 *src/mmmult.cpp
 116f0b9afa24e2116f0f835748d30bc0 *tests/run-all.R
