@@ -2,7 +2,7 @@
 \alias{plot.ddpgrow}
 \title{Produce model plots}
 \usage{
-  \method{plot}{ddpgrow} (x, plot.out = TRUE, ...)
+\method{plot}{ddpgrow}(x, plot.out = TRUE, ...)
 }
 \arguments{
   \item{x}{A \code{dpgrow} object}
@@ -13,24 +13,24 @@
   \item{...}{Ignored}
 }
 \value{
-  res a list object of class \code{plot.dpgrow} of two
-  items: \item{plot.results}{ \code{ggplot2} plot objects.
-  See \code{\link{ddpMCMCplots}}. } \item{dat.growcurve}{ A
-  \code{data.frame} containing fields
-  \code{c("fit","time","subject","trt")} with \code{P*T}
-  rows, where \code{P} is the length of \code{subject} and
-  \code{T = 10} are the number of in-subject predictions
-  for each subject.  This object may be used to construct
-  additional growth curves using - see
-  \code{\link{growplot}}.} \item{dat.gcdata}{ A
-  \code{data.frame} containing fields
-  \code{c("fit","time","subject","trt")} with \code{N}
-  rows, where \code{N} are the number of subject-time
-  cases.  This object contains the actual data for all
-  subjects used to co-plot with predicted growth curves.}
+res a list object of class \code{plot.dpgrow} of two items:
+\item{plot.results}{ \code{ggplot2} plot objects.  See
+\code{\link{ddpMCMCplots}}. } \item{dat.growcurve}{ A
+\code{data.frame} containing fields
+\code{c("fit","time","subject","trt")} with \code{P*T}
+rows, where \code{P} is the length of \code{subject} and
+\code{T = 10} are the number of in-subject predictions for
+each subject.  This object may be used to construct
+additional growth curves using - see
+\code{\link{growplot}}.} \item{dat.gcdata}{ A
+\code{data.frame} containing fields
+\code{c("fit","time","subject","trt")} with \code{N} rows,
+where \code{N} are the number of subject-time cases.  This
+object contains the actual data for all subjects used to
+co-plot with predicted growth curves.}
 }
 \description{
-  Builds model plots, including MCMC trace plots, analysis
-  of subject effects and subject growth curves
+Builds model plots, including MCMC trace plots, analysis of
+subject effects and subject growth curves
 }
 

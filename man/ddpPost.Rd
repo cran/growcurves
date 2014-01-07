@@ -2,9 +2,8 @@
 \alias{ddpPost}
 \title{Run a Bayesian mixed effects model for by-subject random effects with DDP prior}
 \usage{
-  ddpPost(y, X, Z, subject, dosemat, numt, typet, Omega,
-    omegaplus, n.iter, n.burn, n.thin, shapealph, ratebeta,
-    M.init)
+ddpPost(y, X, Z, subject, dosemat, numt, typet, Omega, omegaplus, n.iter,
+  n.burn, n.thin, shapealph, ratebeta, M.init)
 }
 \arguments{
   \item{y}{An \emph{N x 1} response (of subject-measure
@@ -64,20 +63,19 @@
   \code{length(unique(subject))}.}
 }
 \value{
-  res A list object containing MCMC runs for all model
-  parameters.
+res A list object containing MCMC runs for all model
+parameters.
 }
 \description{
-  An internal function to \code{\link{ddpgrow}}
+An internal function to \code{\link{ddpgrow}}
 }
 \note{
-  Intended as an internal function for
-  \code{\link{ddpgrow}}
+Intended as an internal function for \code{\link{ddpgrow}}
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{dpgrow}}
+\code{\link{dpgrow}}
 }
 

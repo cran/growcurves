@@ -33,7 +33,7 @@
 #'     \item{p.Umm}{plot of "mm = W.subj.aff %*% u" for those clients attending assessions.}
 #'     \item{p.Ub0}{plot of " mm + b0", the total random intercept, for those clients attending sessions.} 
 #'     \item{p.Ub}{plot of "mm + b" for multivariate MM effects with order equal to "Nrandom".}
-#'     \item{p.b}{stacked plots of b0,...,b(q-1) - vertical lines for each client span 2.5% - 97.5% values with mean noted.} 
+#'     \item{p.b}{stacked plots of b0,...,b(q-1) - vertical lines for each client span 2.5\% - 97.5\% values with mean noted.} 
 #'     \item{p.M}{MCMC trace plot of M, number of clusters.} 
 #'     \item{p.tauu}{MCMC trace plots of tau.u. Plot is faceted for more than one set of effect terms.} 
 #'     \item{p.taue}{MCMC trace plots of tau.e.} 

@@ -2,11 +2,10 @@
 \alias{growthCurve}
 \title{Within subject model-predicted growth curve}
 \usage{
-  growthCurve(y.case, B, Alpha, Beta, U = NULL,
-    aff.clients = NULL, W.subj = NULL, X.n = NULL,
-    Z.n = NULL, trt.case, trt.lab, subject.case,
-    subject.lab, T, min.T, max.T, n.thin, n.waves = NULL,
-    time.case, n.fix_degree, Nrandom = NULL)
+growthCurve(y.case, B, Alpha, Beta, U = NULL, aff.clients = NULL,
+  W.subj = NULL, X.n = NULL, Z.n = NULL, trt.case, trt.lab, subject.case,
+  subject.lab, T, min.T, max.T, n.thin, n.waves = NULL, time.case,
+  n.fix_degree, Nrandom = NULL)
 }
 \arguments{
   \item{y.case}{The \code{N x 1} (subject-time case) vector
@@ -101,38 +100,35 @@
   to input if employ nuisance random effects.}
 }
 \value{
-  A list object containing the following \code{data.frames}
-  and plots: \item{plot.dat}{A \code{data.frame} object
-  containing the within-subjects predicted growth curves.
-  Fields are titled,
-  \code{c("fit","time","subject","trt")}.}
-  \item{dat.data}{A \code{data.frame} object containing
-  actual by-subject data for each measurement occasion.
-  Fields are titled,
-  \code{c("fit","time","subject","trt")}.} \item{p.gcall}{A
-  \code{ggplot2} object that aggregates growth curves by
-  treatment type.} \item{p.gcsel}{A \code{ggplot2} object
-  that plots growth curves with associated data points for
-  10 randomly selected subjects.}
+A list object containing the following \code{data.frames}
+and plots: \item{plot.dat}{A \code{data.frame} object
+containing the within-subjects predicted growth curves.
+Fields are titled, \code{c("fit","time","subject","trt")}.}
+\item{dat.data}{A \code{data.frame} object containing
+actual by-subject data for each measurement occasion.
+Fields are titled, \code{c("fit","time","subject","trt")}.}
+\item{p.gcall}{A \code{ggplot2} object that aggregates
+growth curves by treatment type.} \item{p.gcsel}{A
+\code{ggplot2} object that plots growth curves with
+associated data points for 10 randomly selected subjects.}
 }
 \description{
-  Produces a set of predicted response values, by subject,
-  at \code{T} time points.  The response values are
-  predicted by employing the posterior samples of model
-  parameters where the resultant response values for each
-  subject are composed by averaging over all posterior
-  samples in a Rao-Blackwellizing fashion.
+Produces a set of predicted response values, by subject, at
+\code{T} time points.  The response values are predicted by
+employing the posterior samples of model parameters where
+the resultant response values for each subject are composed
+by averaging over all posterior samples in a
+Rao-Blackwellizing fashion.
 }
 \note{
-  Intended as an internal function for
-  \code{\link{dpgrow}}, \code{\link{dpgrowmm}}, and
-  \code{\link{dpgrowmult}}
+Intended as an internal function for \code{\link{dpgrow}},
+\code{\link{dpgrowmm}}, and \code{\link{dpgrowmult}}
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{dpgrowmm}}, \code{\link{dpgrow}},
-  \code{\link{dpgrowmult}}
+\code{\link{dpgrowmm}}, \code{\link{dpgrow}},
+\code{\link{dpgrowmult}}
 }
 

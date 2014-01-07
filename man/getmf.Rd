@@ -3,7 +3,7 @@
 \alias{getmf}
 \title{Produce fixed and random effects design matrices from single formula input}
 \usage{
-  getmf(formula, random.only, data, na.action)
+getmf(formula, random.only, data, na.action)
 }
 \arguments{
   \item{formula}{A formula of format \code{y ~ x_1 +
@@ -27,21 +27,21 @@
   automatically set to \code{na.fail}.}
 }
 \value{
-  res A list object containing \code{list(y = y, x = x, z =
-  z, m = m, mf = mf)}.
+res A list object containing \code{list(y = y, x = x, z =
+z, m = m, mf = mf)}.
 }
 \description{
-  An internal function to \code{\link{dpgrow}} and
-  \code{\link{dpgrowmm}}
+An internal function to \code{\link{dpgrow}} and
+\code{\link{dpgrowmm}}
 }
 \note{
-  Intended as an internal function for \code{\link{dpgrow}}
-  and \code{\link{dpgrowmm}}
+Intended as an internal function for \code{\link{dpgrow}}
+and \code{\link{dpgrowmm}}
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{dpgrow}} \code{\link{dpgrowmm}}
+\code{\link{dpgrow}} \code{\link{dpgrowmm}}
 }
 

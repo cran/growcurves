@@ -2,8 +2,8 @@
 \alias{trtplot}
 \title{Plot comparison of Mean Effects for Any Two Treatments}
 \usage{
-  trtplot(run.objects, run.models, trt.labs, time.points,
-    y.label = NULL, time.labels = NULL, n.thin = 10)
+trtplot(run.objects, run.models, trt.labs, time.points, y.label = NULL,
+  time.labels = NULL, n.thin = 10)
 }
 \arguments{
   \item{run.objects}{A list object where each entry is
@@ -36,26 +36,25 @@
   faster plot generation.}
 }
 \value{
-  A list object containing quantile summaries for all
-  sampled model parameters.  \item{dat.trt}{A
-  \code{data.frame} object used to generate the fixed
-  effects mean comparison for two chosen treatments.
-  Fields are titled, \code{c("Mu_diff","models","time")}.}
-  \item{p.trt}{A \code{ggplot2} object of box plots split
-  by time point.}
+A list object containing quantile summaries for all sampled
+model parameters.  \item{dat.trt}{A \code{data.frame}
+object used to generate the fixed effects mean comparison
+for two chosen treatments.  Fields are titled,
+\code{c("Mu_diff","models","time")}.} \item{p.trt}{A
+\code{ggplot2} object of box plots split by time point.}
 }
 \description{
-  Produces a set of box plots of the posterior
-  distributions of the fixed effects mean difference
-  between any 2 chosen treatments across a chosen subset
-  models (priors) at each of a selection of time points.
-  Each box plot spans the 95% credible interval.
+Produces a set of box plots of the posterior distributions
+of the fixed effects mean difference between any 2 chosen
+treatments across a chosen subset models (priors) at each
+of a selection of time points.  Each box plot spans the 95%
+credible interval.
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{dpgrowmm}}, \code{\link{dpgrow}},
-  \code{\link{dpgrowmult}}
+\code{\link{dpgrowmm}}, \code{\link{dpgrow}},
+\code{\link{dpgrowmult}}
 }
 

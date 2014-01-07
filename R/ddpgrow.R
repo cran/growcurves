@@ -608,7 +608,7 @@ plot.ddpgrow <- function(x, plot.out = TRUE, ...)
   	l.pr 	= length(x$plot.results)
   	for(i in 1:l.pr)
   	{
-		windows()
+		dev.new()
 		print(x$plot.results[[i]])
   	}
   }

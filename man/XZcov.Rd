@@ -3,9 +3,9 @@
 \alias{XZcov}
 \title{generate fixed and random design matrices, X and Z}
 \usage{
-  XZcov(time = NULL, trt = NULL, trt.lab = NULL,
-    subject = NULL, n.random = NULL, n.fix_degree = NULL,
-    formula = NULL, random.only = NULL, data = NULL)
+XZcov(time = NULL, trt = NULL, trt.lab = NULL, subject = NULL,
+  n.random = NULL, n.fix_degree = NULL, formula = NULL,
+  random.only = NULL, data = NULL)
 }
 \arguments{
   \item{time}{A vector of length{N} (number of subject-time
@@ -51,24 +51,24 @@
   variables in \code{formula}}
 }
 \value{
-  A list object containing composed fixed and random effect
-  design matrices, \code{X} and \code{Z}, with column names
-  and subsets: \code{c(X.n, Z.n)} nuisance and \code{c(X.c,
-  Z.c)} growth curve design matrices.  Also returns data
-  output, y, if included with formula; otherwise returns y
-  = NULL.
+A list object containing composed fixed and random effect
+design matrices, \code{X} and \code{Z}, with column names
+and subsets: \code{c(X.n, Z.n)} nuisance and \code{c(X.c,
+Z.c)} growth curve design matrices.  Also returns data
+output, y, if included with formula; otherwise returns y =
+NULL.
 }
 \description{
-  Constructs fixed and random design matrices compromised
-  of either or both growth curve (time-based) components
-  and user-defined nuisance fixed or random effects (input
-  via a formula).  Used to conduct Bayesian mixed effects
-  modeling and to produce growth curve output.
+Constructs fixed and random design matrices compromised of
+either or both growth curve (time-based) components and
+user-defined nuisance fixed or random effects (input via a
+formula).  Used to conduct Bayesian mixed effects modeling
+and to produce growth curve output.
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{dpgrowmm}}, \code{\link{dpgrow}}
+\code{\link{dpgrowmm}}, \code{\link{dpgrow}}
 }
 

@@ -2,7 +2,7 @@
 \alias{lgmPost}
 \title{Run a Bayesian mixed effects model for by-subject random effects with an independent Gaussian prior}
 \usage{
-  lgmPost(y, X, Z, subjects, niter, nburn, nthin)
+lgmPost(y, X, Z, subjects, niter, nburn, nthin)
 }
 \arguments{
   \item{y}{An \emph{N x 1} response (of subject-measure
@@ -25,19 +25,19 @@
   The rate parameter is set of \code{1}.}
 }
 \value{
-  res A list object containing MCMC runs for all model
-  parameters.
+res A list object containing MCMC runs for all model
+parameters.
 }
 \description{
-  An internal function to \code{\link{dpgrow}}
+An internal function to \code{\link{dpgrow}}
 }
 \note{
-  Intended as an internal function for \code{\link{dpgrow}}
+Intended as an internal function for \code{\link{dpgrow}}
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{dpgrow}}
+\code{\link{dpgrow}}
 }
 

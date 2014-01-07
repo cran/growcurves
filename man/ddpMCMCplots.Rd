@@ -3,11 +3,10 @@
 \alias{ddpplots}
 \title{generate plots of posterior samples under \code{ddpgrow} model}
 \usage{
-  ddpMCMCplots(subjecti.u, labt = NULL, typet, numt,
-    theta.summary, lambda.mean, pmvn.mean = NULL,
-    taucar.summary = NULL, alphacar.summary = NULL,
-    Taucar = NULL, Alphacar = NULL, tauind.summary = NULL,
-    Tauind = NULL, M, Taue, Deviance)
+ddpMCMCplots(subjecti.u, labt = NULL, typet, numt, theta.summary, lambda.mean,
+  pmvn.mean = NULL, taucar.summary = NULL, alphacar.summary = NULL,
+  Taucar = NULL, Alphacar = NULL, tauind.summary = NULL, Tauind = NULL,
+  M, Taue, Deviance)
 }
 \arguments{
   \item{subjecti.u}{A vector of length \code{P}, number of
@@ -89,46 +88,44 @@
   samples for the model deviance.}
 }
 \value{
-  A list of plot objects of class \code{ggplot2} including:
-  \item{p.theta}{stacked plots of b0,...,b(q-1) - vertical
-  lines for each client span 2.5% - 97.5% values with mean
-  noted.} \item{p.M}{MCMC trace plot of M, number of
-  clusters.} \item{p.acar}{MCMC trace plots of alphacar,
-  the CAR strength parameter. Plot is faceted for more than
-  one set of treatments under \code{"car"}.}
-  \item{p.tcar}{MCMC trace plots of alphacar, the CAR
-  precision parameter. Plot is faceted for more than one
-  set of treatments under \code{"car"}.} \item{p.taue}{MCMC
-  trace plots of tau.e.} \item{p.dev}{MCMC trace plots of
-  deviance.} \item{p.lam}{Heatmap (tiled) plot of posterior
-  mean covariance, Lambda, of polynomial orders of random
-  effects, Delta_i.} \item{p.mvn}{Heatmap plots of
-  posterior mean covariance, Pmvn, of treatment dosages
-  under \code{"mvn"} base distribution.  Plots are faceted
-  by treatment.} \item{p.aband}{95\% credible bands for
-  alphacar CAR strength parameters associated to treatments
-  under \code{"car"} base distribution.}
-  \item{p.tband}{95\% credible bands for taucar CAR
-  precision parameters associated to treatments under
-  \code{"car"} base distribution.} \item{p.iband}{95\%
-  credible bands for tauind dose precision parameters for
-  \code{"ind"} base distribution, faceted by treatment (if
-  more than one).}
+A list of plot objects of class \code{ggplot2} including:
+\item{p.theta}{stacked plots of b0,...,b(q-1) - vertical
+lines for each client span 2.5% - 97.5% values with mean
+noted.} \item{p.M}{MCMC trace plot of M, number of
+clusters.} \item{p.acar}{MCMC trace plots of alphacar, the
+CAR strength parameter. Plot is faceted for more than one
+set of treatments under \code{"car"}.} \item{p.tcar}{MCMC
+trace plots of alphacar, the CAR precision parameter. Plot
+is faceted for more than one set of treatments under
+\code{"car"}.} \item{p.taue}{MCMC trace plots of tau.e.}
+\item{p.dev}{MCMC trace plots of deviance.}
+\item{p.lam}{Heatmap (tiled) plot of posterior mean
+covariance, Lambda, of polynomial orders of random effects,
+Delta_i.} \item{p.mvn}{Heatmap plots of posterior mean
+covariance, Pmvn, of treatment dosages under \code{"mvn"}
+base distribution.  Plots are faceted by treatment.}
+\item{p.aband}{95\% credible bands for alphacar CAR
+strength parameters associated to treatments under
+\code{"car"} base distribution.} \item{p.tband}{95\%
+credible bands for taucar CAR precision parameters
+associated to treatments under \code{"car"} base
+distribution.} \item{p.iband}{95\% credible bands for
+tauind dose precision parameters for \code{"ind"} base
+distribution, faceted by treatment (if more than one).}
 }
 \description{
-  Constructs plots for subject effects, theta, with
-  credible intervals as well as selected trace plots.
-  Returns a list of objects of class \code{ggplot}.
+Constructs plots for subject effects, theta, with credible
+intervals as well as selected trace plots. Returns a list
+of objects of class \code{ggplot}.
 }
 \note{
-  Intended as an internal function for
-  \code{\link{ddpgrow}}
+Intended as an internal function for \code{\link{ddpgrow}}
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{ddpgrow}}, \code{\link{dpgrowmm}},
-  \code{\link{dpgrow}}, \code{\link{dpgrowmult}}
+\code{\link{ddpgrow}}, \code{\link{dpgrowmm}},
+\code{\link{dpgrow}}, \code{\link{dpgrowmult}}
 }
 

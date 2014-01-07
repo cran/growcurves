@@ -3,9 +3,8 @@
 \alias{mmCplusDpPost}
 \title{Bayesian mixed effects model with a DP prior on by-subject effects and CAR prior on a set of multiple membership effects}
 \usage{
-  mmCplusDpPost(y, X, Z, Wcase, Wsubject, Omega, omegaplus,
-    groups, subjects, niter, nburn, nthin, strength.mm,
-    shapealph, ratebeta)
+mmCplusDpPost(y, X, Z, Wcase, Wsubject, Omega, omegaplus, groups, subjects,
+  niter, nburn, nthin, strength.mm, shapealph, ratebeta)
 }
 \arguments{
   \item{y}{An \emph{N x 1} response (of subject-measure
@@ -59,20 +58,19 @@
   \code{1}.}
 }
 \value{
-  res A list object containing MCMC runs for all model
-  parameters.
+res A list object containing MCMC runs for all model
+parameters.
 }
 \description{
-  An internal function to \code{\link{dpgrowmm}}
+An internal function to \code{\link{dpgrowmm}}
 }
 \note{
-  Intended as an internal function for
-  \code{\link{dpgrowmm}}
+Intended as an internal function for \code{\link{dpgrowmm}}
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{dpgrow}}
+\code{\link{dpgrow}}
 }
 

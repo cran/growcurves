@@ -1,4 +1,4 @@
-Version 0.2.3.5
+Version 0.2.3.7
 -------------------------------------------------------------------------
 
 FEATURES
@@ -68,3 +68,14 @@ decomposition of precision matrix.
 * fixed an error in dpgrowmm under option "multi=TRUE" and "option = "mmcar" for computation of the posterior mean of conditionally sampled nv x 1 session effects
 * fixed a potential error in dpgrowmm where W.subj is set equal to W.subj.aff under all subjects receiving treatment.  Coerced W.subj to matrix in the case the user
 * inputs W.subj.aff as a data.frame object.   W.subj is subsequently used in growthCurves function to differentiate a dpgrowmm object (matrix) from a dpgrowmult object (list).
+
+1/07/2014
+---------
+* change deprecated method to pull elements of a vector for Armadillo 4.000
+* and the companion RcppArmadillo 0.4.000.
+* in particular, update method of pulling scalar views of vectors to no longer use 
+* ".row" or ".column", which are now constrained to return matrix objects, not scalars
+* Instead of creating a subview like so:
+*    ustarj = ustar.row(s(j));
+* use this:
+*     ustarj = ustar(s(j));

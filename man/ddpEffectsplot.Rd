@@ -2,10 +2,10 @@
 \alias{ddpEffectsplot}
 \title{Plot by-subject and by-treatment posterior mean values for dossage random effects}
 \usage{
-  ddpEffectsplot(object, subjects.plot = NULL, n.plot = 3,
-    trts.plot = NULL, x.axis.label = NULL, smoother = TRUE,
-    re.order = TRUE, cred.intervals = TRUE,
-    map.group = NULL, n.dose.plot = 5, orderto = NULL)
+ddpEffectsplot(object, subjects.plot = NULL, n.plot = 3, trts.plot = NULL,
+  x.axis.label = NULL, smoother = TRUE, re.order = TRUE,
+  cred.intervals = TRUE, map.group = NULL, n.dose.plot = 5,
+  orderto = NULL)
 }
 \arguments{
   \item{object}{A \code{ddpgrow} object.}
@@ -55,58 +55,58 @@
   within cluster and treatment.}
 }
 \value{
-  A list object containing a faceted set of heat maps (one
-  per subject), a faceted set of effect point plots, and
-  the associated \code{data.frame} objct.  \item{dat.se}{A
-  \code{data.frame} object used to generate the trt-subject
-  faceted plots for effect means Fields are titled,
-  \code{c("order","dose","trt","subject","effects")}.}
-  \item{dat.ci}{A \code{data.frame} object used to generate
-  the trt-subject faceted plots for effect credible
-  intervals Fields are titled,
-  \code{c("order","dose","trt","subject","quantile","effects")}.}
-  \item{dat.clust}{A \code{data.frame} object used to
-  generate the trt-group faceted plots for effect means
-  Fields are titled,
-  \code{c("order","dose","trt","cluster","effects")}.}
-  \item{dat.clust.ci}{A \code{data.frame} object used to
-  generate the trt-group faceted plots for effect credible
-  intervals Fields are titled,
-  \code{c("order","dose","trt","cluster","quantile","effects")}.}
-  \item{dat.gc}{A \code{data.frame} object used to generate
-  the by-dose growth curves (for multivariate polynomial
-  effects) Fields are titled,
-  \code{c("fit","time","cluster","trt","dose")}.}
-  \item{p.hm}{A \code{ggplot2} object of heat maps for mean
-  random effect values, faceted by trt and subject
-  combinations.} \item{p.pp}{A \code{ggplot2} object of
-  point plots for mean random effect values or credible
-  intervals, faceted by trt and subject combinations.}
-  \item{pc.m}{A \code{ggplot2} object of point plots for
-  mean random effect values, faceted by trt and group
-  combinations.} \item{pc.ci}{A \code{ggplot2} object of
-  point plots for credible intervals of random effect
-  values, faceted by trt and cluster combinations.}
-  \item{pc.gc}{A \code{ggplot2} growth curve plots for each
-  dose where the does effects are multivariate polynomial.}
+A list object containing a faceted set of heat maps (one
+per subject), a faceted set of effect point plots, and the
+associated \code{data.frame} objct.  \item{dat.se}{A
+\code{data.frame} object used to generate the trt-subject
+faceted plots for effect means Fields are titled,
+\code{c("order","dose","trt","subject","effects")}.}
+\item{dat.ci}{A \code{data.frame} object used to generate
+the trt-subject faceted plots for effect credible intervals
+Fields are titled,
+\code{c("order","dose","trt","subject","quantile","effects")}.}
+\item{dat.clust}{A \code{data.frame} object used to
+generate the trt-group faceted plots for effect means
+Fields are titled,
+\code{c("order","dose","trt","cluster","effects")}.}
+\item{dat.clust.ci}{A \code{data.frame} object used to
+generate the trt-group faceted plots for effect credible
+intervals Fields are titled,
+\code{c("order","dose","trt","cluster","quantile","effects")}.}
+\item{dat.gc}{A \code{data.frame} object used to generate
+the by-dose growth curves (for multivariate polynomial
+effects) Fields are titled,
+\code{c("fit","time","cluster","trt","dose")}.}
+\item{p.hm}{A \code{ggplot2} object of heat maps for mean
+random effect values, faceted by trt and subject
+combinations.} \item{p.pp}{A \code{ggplot2} object of point
+plots for mean random effect values or credible intervals,
+faceted by trt and subject combinations.} \item{pc.m}{A
+\code{ggplot2} object of point plots for mean random effect
+values, faceted by trt and group combinations.}
+\item{pc.ci}{A \code{ggplot2} object of point plots for
+credible intervals of random effect values, faceted by trt
+and cluster combinations.} \item{pc.gc}{A \code{ggplot2}
+growth curve plots for each dose where the does effects are
+multivariate polynomial.}
 }
 \description{
-  Each \code{ddpgrow} object contains posterior mean
-  estimates for the \code{q} x \code{T} matrix of
-  by-subject random effects that is extracted from the
-  \code{ddpgrow} object that is input to
-  \code{ddpEffectsplot}. This function produces a \code{q}
-  x \code{T.m} heat map plot of posterior mean effect
-  values for the dosages in treatment \code{m} faceted on a
-  set of chosen subjects.  The resulting plot produces a
-  heatmap for each trt-subject combination.  Both a ggplot2
-  plot object and a \code{data.frame} object are returned.
+Each \code{ddpgrow} object contains posterior mean
+estimates for the \code{q} x \code{T} matrix of by-subject
+random effects that is extracted from the \code{ddpgrow}
+object that is input to \code{ddpEffectsplot}. This
+function produces a \code{q} x \code{T.m} heat map plot of
+posterior mean effect values for the dosages in treatment
+\code{m} faceted on a set of chosen subjects.  The
+resulting plot produces a heatmap for each trt-subject
+combination.  Both a ggplot2 plot object and a
+\code{data.frame} object are returned.
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{ddpgrow}}, \code{\link{dpgrow}},
-  \code{\link{dpgrowmm}}, \code{\link{dpgrowmult}}
+\code{\link{ddpgrow}}, \code{\link{dpgrow}},
+\code{\link{dpgrowmm}}, \code{\link{dpgrowmult}}
 }
 

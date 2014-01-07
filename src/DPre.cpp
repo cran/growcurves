@@ -481,6 +481,19 @@ END_RCPP
         return(logdens);
     }
 
+    double logmatrixdens(const mat& B_m, const mat& P, const mat& Q)
+    {
+        // NumericVector r(resid);
+        // devvec is an nc x 1 vector
+        double val_p, val_q, sign_p, sign_q;
+        log_det(val_p,sign_p,P); log_det(val_q,sign_q,Q);
+	int T = B_m.n_cols;
+	int S = B_m.n_rows;
+        double c = log(2*M_PI)*(-0.5*T*S);
+	double logdens = c + 0.5*T*val_p + 0.5*S*val_q - 0.5*as_scalar( trace(Q*trans(B_m)*P*B_m) );
+        return(logdens);
+    }
+
 
     SEXP dmarg(const colvec& resid, double taue, rowvec& devmarg)
     {

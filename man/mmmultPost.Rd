@@ -2,9 +2,8 @@
 \alias{mmmultPost}
 \title{Bayesian mixed effects model with a DP prior on by-subject effects and more than one multiple membership random effects term}
 \usage{
-  mmmultPost(y, X, Z, Wcases, Mmats, Omegas, omegapluses,
-    ngs, subjects, typet, niter, nburn, nthin, shapealph,
-    ratebeta, strength.mm)
+mmmultPost(y, X, Z, Wcases, Mmats, Omegas, omegapluses, ngs, subjects, typet,
+  niter, nburn, nthin, shapealph, ratebeta, strength.mm)
 }
 \arguments{
   \item{y}{An \emph{N x 1} response (of subject-measure
@@ -71,20 +70,20 @@
   \eqn{\tau_{\gamma}}}
 }
 \value{
-  res A list object containing MCMC runs for all model
-  parameters.
+res A list object containing MCMC runs for all model
+parameters.
 }
 \description{
-  An internal function to \code{\link{dpgrowmult}}
+An internal function to \code{\link{dpgrowmult}}
 }
 \note{
-  Intended as an internal function for
-  \code{\link{dpgrowmult}}
+Intended as an internal function for
+\code{\link{dpgrowmult}}
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{dpgrowmm}}
+\code{\link{dpgrowmm}}
 }
 

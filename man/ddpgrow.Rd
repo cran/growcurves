@@ -1,12 +1,10 @@
 \name{ddpgrow}
 \alias{ddpgrow}
-\alias{ddpgrow.default}
 \title{Bayesian semiparametric growth curve models.}
 \usage{
-  ddpgrow(y, subject, trt, time, n.random, n.fix_degree,
-    formula, random.only, data, dosemat, numdose,
-    typetreat, labt, Omega, n.iter, n.burn, n.thin,
-    shape.dp, rate.dp, M.init, plot.out)
+ddpgrow(y, subject, trt, time, n.random, n.fix_degree, formula, random.only,
+  data, dosemat, numdose, typetreat, labt, Omega, n.iter, n.burn, n.thin,
+  shape.dp, rate.dp, M.init, plot.out)
 }
 \arguments{
   \item{y}{A univariate continuous response, specified as
@@ -147,58 +145,57 @@
   to \code{TRUE}.}
 }
 \value{
-  S3 \code{dpgrow} object, for which many methods are
-  available to return and view results.  Generic functions
-  applied to an object, \code{res} of class \code{dpgrow},
-  includes: \item{summary(res)}{ returns \code{call}, the
-  function call made to \code{dpgrow} and
-  \code{summary.results}, which contains a list of objects
-  that include \emph{95\%} credible intervals for each set
-  of sampled parameters, specified as (\code{2.5\%}, mean,
-  \emph{97.5\%}, including fixed and random effects.  Also
-  contains model fit statistics, including \code{DIC} (and
-  associated \code{Dbar}, \code{Dhat}, \code{pD},
-  \code{pV}), as well as the log pseudo marginal likelihood
-  (LPML), a leave-one-out fit statistic.  Note that
-  \code{DIC} is constructed as \code{DIC3} (see Celeaux et.
-  al. 2006), where the conditional likehihood evaluated at
-  the posterior mode is replaced by the marginal predictive
-  density.  Lastly, the random and fixed effects design
-  matrices, \code{X, Z}, are returned that include both the
-  user input nuisance covariates appended to the time and
-  treatment-based covariates constructed by \code{dpgrow}.}
-  \item{print(summary(res))}{ prints contents of summary to
-  console.} \item{plot(res)}{ returns results plots,
-  including the set of subject random effects values and
-  credible intervals, a sample of by-subject growth curves,
-  mean growth curves split by each treatment and control,
-  as well as selected trace plots for number of clusters
-  and for precision parameters for the likehilood and
-  random effects.  Lastly, a trace plot for the deviance
-  statistic is also included.} \item{samples(res)}{
-  contains (\code{n.iter - n.burn}) posterior sampling
-  iterations for every model parameter, including fixed and
-  random effects.} \item{resid(res)}{ contains the model
-  residuals.}
+S3 \code{dpgrow} object, for which many methods are
+available to return and view results.  Generic functions
+applied to an object, \code{res} of class \code{dpgrow},
+includes: \item{summary(res)}{ returns \code{call}, the
+function call made to \code{dpgrow} and
+\code{summary.results}, which contains a list of objects
+that include \emph{95\%} credible intervals for each set of
+sampled parameters, specified as (\code{2.5\%}, mean,
+\emph{97.5\%}, including fixed and random effects.  Also
+contains model fit statistics, including \code{DIC} (and
+associated \code{Dbar}, \code{Dhat}, \code{pD}, \code{pV}),
+as well as the log pseudo marginal likelihood (LPML), a
+leave-one-out fit statistic.  Note that \code{DIC} is
+constructed as \code{DIC3} (see Celeaux et. al. 2006),
+where the conditional likehihood evaluated at the posterior
+mode is replaced by the marginal predictive density.
+Lastly, the random and fixed effects design matrices,
+\code{X, Z}, are returned that include both the user input
+nuisance covariates appended to the time and
+treatment-based covariates constructed by \code{dpgrow}.}
+\item{print(summary(res))}{ prints contents of summary to
+console.} \item{plot(res)}{ returns results plots,
+including the set of subject random effects values and
+credible intervals, a sample of by-subject growth curves,
+mean growth curves split by each treatment and control, as
+well as selected trace plots for number of clusters and for
+precision parameters for the likehilood and random effects.
+Lastly, a trace plot for the deviance statistic is also
+included.} \item{samples(res)}{ contains (\code{n.iter -
+n.burn}) posterior sampling iterations for every model
+parameter, including fixed and random effects.}
+\item{resid(res)}{ contains the model residuals.}
 }
 \description{
-  Employs an anova Dependent Dirichlet Process (DDP) prior
-  on the set of by-subject random effect parameters with
-  dependence indexed by multiple membership effects under
-  repeated waves of measurements to allow the number of
-  random effect parameters specified per subject, \code{q},
-  to be equal to the number of measurement waves, \code{T}.
-  Random effects are grouped by subject and all \code{q}
-  parameters receive the DP prior.  The resulting joint
-  marginal distribution over the data is a DP mixture.
+Employs an anova Dependent Dirichlet Process (DDP) prior on
+the set of by-subject random effect parameters with
+dependence indexed by multiple membership effects under
+repeated waves of measurements to allow the number of
+random effect parameters specified per subject, \code{q},
+to be equal to the number of measurement waves, \code{T}.
+Random effects are grouped by subject and all \code{q}
+parameters receive the DP prior.  The resulting joint
+marginal distribution over the data is a DP mixture.
 }
 \note{
-  The intended focus for this package are data where both
-  number of subjects and number of repeated measures are
-  limited.  This function places a DDP prior on the set of
-  subject effects.  This means that the unnknown (random)
-  prior on subject effects is indexed by the subject dosage
-  patterns across one or more treatments.
+The intended focus for this package are data where both
+number of subjects and number of repeated measures are
+limited.  This function places a DDP prior on the set of
+subject effects.  This means that the unnknown (random)
+prior on subject effects is indexed by the subject dosage
+patterns across one or more treatments.
 }
 \examples{
 \dontrun{
@@ -222,23 +219,23 @@ samples.posterior = samples(res) ## posterior sampled values
 }
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com} Susan Paddock
-  \email{paddock@rand.org}
+Terrance Savitsky \email{tds151@gmail.com} Susan Paddock
+\email{paddock@rand.org}
 }
 \references{
-  T. D. Savitsky and S. M. Paddock (2011) Bayesian
-  Hierarchical Semiparametric Modeling of Longitudinal
-  Post-treatment Outcomes from Open-enrollment Therapy
-  Groups, submitted to: JRSS Series A (Statistics in
-  Society).
+T. D. Savitsky and S. M. Paddock (2011) Bayesian
+Hierarchical Semiparametric Modeling of Longitudinal
+Post-treatment Outcomes from Open-enrollment Therapy
+Groups, submitted to: JRSS Series A (Statistics in
+Society).
 
-  T. D. Savitsky and S. M. Paddock (2011) Visual Sufficient
-  Statistics for Repeated Measures data with growcurves for
-  R, submitted to: Journal of Statistical Software.
+T. D. Savitsky and S. M. Paddock (2011) Visual Sufficient
+Statistics for Repeated Measures data with growcurves for
+R, submitted to: Journal of Statistical Software.
 }
 \seealso{
-  \code{\link{dpgrowmult}}, \code{\link{dpgrowmm}},
-  \code{\link{dpgrow}}
+\code{\link{dpgrowmult}}, \code{\link{dpgrowmm}},
+\code{\link{dpgrow}}
 }
 \keyword{model}
 

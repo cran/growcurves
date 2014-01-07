@@ -2,10 +2,9 @@
 \alias{effectsplot}
 \title{Plot comparison of Effect parameters of a Multiple membership (MM) term under varied prior formulations}
 \usage{
-  effectsplot(objects, mm.terms = NULL, prior.labs = NULL,
-    center = TRUE, axis.labs = NULL, group.plot = NULL,
-    smoother = FALSE, order = FALSE, orderto = NULL,
-    label.mm = NULL)
+effectsplot(objects, mm.terms = NULL, prior.labs = NULL, center = TRUE,
+  axis.labs = NULL, group.plot = NULL, smoother = FALSE, order = FALSE,
+  orderto = NULL, label.mm = NULL)
 }
 \arguments{
   \item{objects}{A list object where each entry is an
@@ -63,39 +62,38 @@
   terms or groups per object.}
 }
 \value{
-  A list object containing a plot objects and associated
-  plot data.frames \item{dat.term}{A \code{data.frame}
-  object used to generate a plot comparing a specific term
-  or group from an MM object with field titles,
-  \code{c("session","group","low","mean","high","prior")},
-  where \code{session} denotes the MM effect labels,
-  \code{group} the sub-group labels within the focus MM
-  terms, and \code{prior}, the model identifiers.}
-  \item{p.term}{A \code{ggplot2} object of effect plots for
-  chosen object terms.} \item{p.all}{A \code{ggplot2} plots
-  effects, by term and/or compatible group, for each
-  object.  Only renders if the number of effects in terms
-  and/or groups are compatible between objects.}
-  \item{dat.all}{A \code{data.frame} object used to
-  generate \code{p.all} with field titles,
-  \code{c("prior","session","block","low","mean","high")},
-  where \code{block} denotes labels for MM terms or groups
-  included.}
+A list object containing a plot objects and associated plot
+data.frames \item{dat.term}{A \code{data.frame} object used
+to generate a plot comparing a specific term or group from
+an MM object with field titles,
+\code{c("session","group","low","mean","high","prior")},
+where \code{session} denotes the MM effect labels,
+\code{group} the sub-group labels within the focus MM
+terms, and \code{prior}, the model identifiers.}
+\item{p.term}{A \code{ggplot2} object of effect plots for
+chosen object terms.} \item{p.all}{A \code{ggplot2} plots
+effects, by term and/or compatible group, for each object.
+Only renders if the number of effects in terms and/or
+groups are compatible between objects.} \item{dat.all}{A
+\code{data.frame} object used to generate \code{p.all} with
+field titles,
+\code{c("prior","session","block","low","mean","high")},
+where \code{block} denotes labels for MM terms or groups
+included.}
 }
 \description{
-  Produces an overlaid plot of multiple membership effect
-  values under chosen prior formulations.  The effect
-  values for a focus (or all) multiple membership term(s)
-  or group(s) may be compared under different model
-  formulations (one vs. multiple terms, or multivariate vs.
-  univariate) for differing prior formulations (e.g.
-  "mmcar" vs. "mmi").
+Produces an overlaid plot of multiple membership effect
+values under chosen prior formulations.  The effect values
+for a focus (or all) multiple membership term(s) or
+group(s) may be compared under different model formulations
+(one vs. multiple terms, or multivariate vs. univariate)
+for differing prior formulations (e.g. "mmcar" vs. "mmi").
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{dpgrowmm}}, \code{\link{dpgrowmult}},
-  \code{\link{ddpgrow}}
+\code{\link{dpgrowmm}}, \code{\link{dpgrowmult}},
+\code{\link{ddpgrow}}
 }
 

@@ -2,8 +2,7 @@
 \alias{dpPost}
 \title{Run a Bayesian mixed effects model for by-subject random effects with DP prior}
 \usage{
-  dpPost(y, X, Z, subjects, niter, nburn, nthin, shapealph,
-    ratebeta)
+dpPost(y, X, Z, subjects, niter, nburn, nthin, shapealph, ratebeta)
 }
 \arguments{
   \item{y}{An \emph{N x 1} response (of subject-measure
@@ -34,19 +33,19 @@
   \code{1}.}
 }
 \value{
-  res A list object containing MCMC runs for all model
-  parameters.
+res A list object containing MCMC runs for all model
+parameters.
 }
 \description{
-  An internal function to \code{\link{dpgrow}}
+An internal function to \code{\link{dpgrow}}
 }
 \note{
-  Intended as an internal function for \code{\link{dpgrow}}
+Intended as an internal function for \code{\link{dpgrow}}
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{dpgrow}}
+\code{\link{dpgrow}}
 }
 

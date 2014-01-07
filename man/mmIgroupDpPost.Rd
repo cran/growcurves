@@ -3,8 +3,8 @@
 \alias{mmIgroupDpPost}
 \title{Bayesian mixed effects model with a DP prior on by-subject effects and use of group means for multiple membership effects}
 \usage{
-  mmIgroupDpPost(y, X, Z, Wcase, Wsubject, M, subjects,
-    niter, nburn, nthin, strength.mm, shapealph, ratebeta)
+mmIgroupDpPost(y, X, Z, Wcase, Wsubject, M, subjects, niter, nburn, nthin,
+  strength.mm, shapealph, ratebeta)
 }
 \arguments{
   \item{y}{An \emph{N x 1} response (of subject-measure
@@ -51,20 +51,19 @@
   \code{1}.}
 }
 \value{
-  res A list object containing MCMC runs for all model
-  parameters.
+res A list object containing MCMC runs for all model
+parameters.
 }
 \description{
-  An internal function to \code{\link{dpgrowmm}}
+An internal function to \code{\link{dpgrowmm}}
 }
 \note{
-  Intended as an internal function for
-  \code{\link{dpgrowmm}}
+Intended as an internal function for \code{\link{dpgrowmm}}
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{dpgrowmm}}
+\code{\link{dpgrowmm}}
 }
 

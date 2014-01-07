@@ -2,8 +2,7 @@
 \alias{ddp_quantiles}
 \title{Produce quantile summaries of model posterior samples}
 \usage{
-  ddp_quantiles(model.output, dosemat, Nfixed, Nrandom,
-    Nsubject, typet)
+ddp_quantiles(model.output, dosemat, Nfixed, Nrandom, Nsubject, typet)
 }
 \arguments{
   \item{model.output}{A list vector of objects returned by
@@ -30,67 +29,65 @@
   \code{3 = "ind"}.}
 }
 \value{
-  A list object containing quantile summaries for all
-  sampled model parameters.  \item{deviance.summary}{vector
-  of length 3 summarizing quantiles for model deviance.}
-  \item{beta.summary}{\code{Nfixed x 3} quantile summaries
-  of model fixed effects.} \item{alpha.summary}{quantile
-  summary of model global intercept parameter.}
-  \item{theta.summary}{list object of length
-  \code{Nrandom}, each cell containing a \code{n x 3}
-  matrix of by-subject random effect parameter quantile
-  summaries.} \item{lambda.summary}{\code{Nrandom^2 x 3}
-  quantile summaries of by-polynomial order precision
-  parameters used in base distributions.}
-  \item{lambda.mean}{\code{Nrandom x Nrandom} posterior
-  means of by-polynomial order precision parameters used in
-  base distributions.} \item{alphacar.summary}{\code{numcar
-  x 3} quantile summaries of proper CAR strength of
-  correlation parameters for CAR base distribution on
-  subject-dose random effects, where numcar <= nty
-  treatments.} \item{taucar.summary}{\code{numcar x 3}
-  quantile summaries of proper CAR precision parameters for
-  CAR base distribution on subject-dose random effects,
-  where numcar <= nty treatments.}
-  \item{dosetrt.summary}{list object of length \code{nty},
-  each cell containing a \code{Nsubject*(Nrandom*numt[m]) x
-  3} matrix of quantile summaries for subject-dose random
-  effects.} \item{dosetrt.mean}{list object of length
-  \code{nty}, each cell containing a \code{Nsubject x
-  (Nrandom*numt[m])} matrix of posterior mean values for
-  subject-dose random effects.} \item{pind.summary}{list
-  object of length \code{numind}, each cell contains a
-  \code{numt[m] x 3} matrix of quantile summaries for
-  precision values under IND base distribution, where
-  numind <= nty treatments.} \item{pmvn.summary}{list
-  object of length \code{nummvn}, each cell containing
-  quantile summaries for precision parameters used for MVN
-  base distribution on subject-dose random effects, where
-  nummvn <= nty treatments.} \item{pmvn.summary}{list
-  object of length \code{nummvn}, each cell containing
-  posterior mean for \code{numt[m] x numt[m]} matrix of
-  precision parameters used for MVN base distribution on
-  subject-dose random effects, where nummvn <= nty
-  treatments.} \item{doseint.summary}{list object of length
-  \code{Nrandom}, each cell containing a \code{Nsubject x
-  3} matrix of quantile summaries for the intercept
-  parameter in the subject-dose random effects.}
-  \item{taue.summary}{quantile summary for model error
-  precision parameter.} \item{M.summary}{quantile summary
-  for number of DP posterior clusters formed.}
-  \item{Dbar}{Model fit statistics.} \item{pD}{Model fit
-  statistics.} \item{pV}{Model fit statistics.}
-  \item{DIC}{Model fit statistics.} \item{lpml}{Model fit
-  statistics.}
+A list object containing quantile summaries for all sampled
+model parameters.  \item{deviance.summary}{vector of length
+3 summarizing quantiles for model deviance.}
+\item{beta.summary}{\code{Nfixed x 3} quantile summaries of
+model fixed effects.} \item{alpha.summary}{quantile summary
+of model global intercept parameter.}
+\item{theta.summary}{list object of length \code{Nrandom},
+each cell containing a \code{n x 3} matrix of by-subject
+random effect parameter quantile summaries.}
+\item{lambda.summary}{\code{Nrandom^2 x 3} quantile
+summaries of by-polynomial order precision parameters used
+in base distributions.} \item{lambda.mean}{\code{Nrandom x
+Nrandom} posterior means of by-polynomial order precision
+parameters used in base distributions.}
+\item{alphacar.summary}{\code{numcar x 3} quantile
+summaries of proper CAR strength of correlation parameters
+for CAR base distribution on subject-dose random effects,
+where numcar <= nty treatments.}
+\item{taucar.summary}{\code{numcar x 3} quantile summaries
+of proper CAR precision parameters for CAR base
+distribution on subject-dose random effects, where numcar
+<= nty treatments.} \item{dosetrt.summary}{list object of
+length \code{nty}, each cell containing a
+\code{Nsubject*(Nrandom*numt[m]) x 3} matrix of quantile
+summaries for subject-dose random effects.}
+\item{dosetrt.mean}{list object of length \code{nty}, each
+cell containing a \code{Nsubject x (Nrandom*numt[m])}
+matrix of posterior mean values for subject-dose random
+effects.} \item{pind.summary}{list object of length
+\code{numind}, each cell contains a \code{numt[m] x 3}
+matrix of quantile summaries for precision values under IND
+base distribution, where numind <= nty treatments.}
+\item{pmvn.summary}{list object of length \code{nummvn},
+each cell containing quantile summaries for precision
+parameters used for MVN base distribution on subject-dose
+random effects, where nummvn <= nty treatments.}
+\item{pmvn.summary}{list object of length \code{nummvn},
+each cell containing posterior mean for \code{numt[m] x
+numt[m]} matrix of precision parameters used for MVN base
+distribution on subject-dose random effects, where nummvn
+<= nty treatments.} \item{doseint.summary}{list object of
+length \code{Nrandom}, each cell containing a
+\code{Nsubject x 3} matrix of quantile summaries for the
+intercept parameter in the subject-dose random effects.}
+\item{taue.summary}{quantile summary for model error
+precision parameter.} \item{M.summary}{quantile summary for
+number of DP posterior clusters formed.} \item{Dbar}{Model
+fit statistics.} \item{pD}{Model fit statistics.}
+\item{pV}{Model fit statistics.} \item{DIC}{Model fit
+statistics.} \item{lpml}{Model fit statistics.}
 }
 \description{
-  Inputs MCMC samples for model parameters and constructs
-  c(2.5\%,50\%,97.5\%) quantile summaries.
+Inputs MCMC samples for model parameters and constructs
+c(2.5\%,50\%,97.5\%) quantile summaries.
 }
 \author{
-  Terrance Savitsky \email{tds151@gmail.com}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \seealso{
-  \code{\link{dpgrowmm}}, \code{\link{dpgrow}}
+\code{\link{dpgrowmm}}, \code{\link{dpgrow}}
 }
 
