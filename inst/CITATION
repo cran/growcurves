@@ -1,0 +1,20 @@
+citHeader("To cite growcurves in publications use:")
+
+citEntry(entry = "Article",
+  title        = "{B}ayesian Semi- and Non-Parametric Models for Longitudinal Data with Multiple Membership Effects in {R}",
+  author       = personList(as.person("Terrance D. Savitsky"),
+                   as.person("Susan M. Paddock")),
+  journal      = "Journal of Statistical Software",
+  year         = "2014",
+  volume       = "57",
+  number       = "3",
+  pages        = "1--35",
+  url          = "http://www.jstatsoft.org/v57/i03/",
+
+  textVersion  =
+  paste("Terrance D. Savitsky, Susan M. Paddock (2014).",
+        "Bayesian Semi- and Non-Parametric Models for Longitudinal Data with Multiple Membership Effects in R.",
+        "Journal of Statistical Software, 57(3), 1-35.",
+        "URL http://www.jstatsoft.org/v57/i03/.")
+)
+

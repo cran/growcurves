@@ -6,8 +6,8 @@
 \title{Bayesian semi and nonparametric growth curve models with employment of multiple membership random effects for longitudinal data.}
 \description{
 \tabular{ll}{ Package: \tab growcurves\cr Type: \tab
-Package\cr Version: \tab 0.2.3.7\cr Date: \tab
-2014-01-07\cr License: \tab GPL (>= 2) \cr LazyLoad: \tab
+Package\cr Version: \tab 0.2.3.8\cr Date: \tab
+2014-02-19\cr License: \tab GPL (>= 3) \cr LazyLoad: \tab
 yes\cr }
 }
 \details{
@@ -214,15 +214,19 @@ Terrance Savitsky \email{tds151@gmail.com} Susan Paddock
 S. M. Paddock and T. D. Savitsky (2013) Bayesian
 Hierarchical Semiparametric Modeling of Longitudinal
 Post-treatment Outcomes from Open-enrollment Therapy
-Groups, To Appear: JRSS Series A (Statistics in Society).
+Groups., JRSS Series A (Statistics in Society), 2013,
+Volume 176, Part 2, pp. 797 - 808.
 
 T. D. Savitsky and S. M. Paddock (2013) Bayesian
 Non-Parametric Hierarchical Modeling for Multiple
-Membership Data, To Appear: Annals of Applied Statistics.
+Membership Data, Annals of Applied Statistics, Volume 7,
+Number 2, pp. 1074 - 1094.
 
-T. D. Savitsky and S. M. Paddock (2013) Visual Sufficient
-Statistics for Repeated Measures data with growcurves for
-R, submitted to: Journal of Statistical Software.
+T. D. Savitsky and S. M. Paddock (2014) {B}ayesian Semi-
+and Non-Parametric Models for Longitudinal Data with
+Multiple Membership Effects in {R}, Journal of Statistical
+Software, Volume 57, Number 3, pp. 1 -- 35,
+http://www.jstatsoft.org/v57/i03/
 }
 \keyword{package}
 

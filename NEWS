@@ -1,4 +1,4 @@
-Version 0.2.3.7
+Version 0.2.3.8
 -------------------------------------------------------------------------
 
 FEATURES
@@ -79,3 +79,8 @@ decomposition of precision matrix.
 *    ustarj = ustar.row(s(j));
 * use this:
 *     ustarj = ustar(s(j));
+
+2/19/2014
+---------
+* Updated references, in particular for the upcoming paper in Journal of Statistical Software.
+
