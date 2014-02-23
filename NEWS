@@ -1,4 +1,4 @@
-Version 0.2.3.8
+Version 0.2.3.9
 -------------------------------------------------------------------------
 
 FEATURES
@@ -84,3 +84,6 @@ decomposition of precision matrix.
 ---------
 * Updated references, in particular for the upcoming paper in Journal of Statistical Software.
 
+2/23/2014
+---------
+* Changed test syntax when using "match" to conform to testthat 0.8.1.

@@ -33,12 +33,12 @@ test_that("Correct dimensions and labels returned for X and Z", {
 
 	out <- n.fix.nn(2)
 
-	expect_that(colnames(out$X[3]), matches("trt_1")) ## Smallest numeric trt value used as baseline for X
+	expect_that(colnames(out$X)[3], matches("trt")) ## Smallest numeric trt value used as baseline for X
 	expect_that(is.null(out$X.n), is_true()) ## nuisance covariate matrix is null
 	expect_that(ncol(out$X), equals(5))
 	expect_that(ncol(out$Z), equals(3))
 	expect_that(is.null(out$Z.n), is_true())
-	expect_that(colnames(out$Z[2]), matches("time^1"))
+	expect_that(colnames(out$Z)[2], matches("time"))
 	expect_that(is.null(out$y), is_true()) ## no response input to XZcov
 
 })

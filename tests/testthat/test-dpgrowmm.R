@@ -39,7 +39,7 @@ test_that("mmcar option of dpgrowmm returns expected objects", {
 	expect_that(srm$bmat.summary, is_a("list"))
 	expect_that(names(srm)[16], matches("lpml"))
 	expect_that(ncol(srm$X),equals(5))
-	expect_that(names(srm$X),matches("time"))
+	expect_that(colnames(srm$X),matches("time"))
 	## evaluating MCMC sample results
 	expect_that(nrow(parms$M),is_equivalent_to((niter-nburn)/nthin))
 	expect_that(ncol(parms$B),is_equivalent_to(num.subj*nrandom))
@@ -71,7 +71,7 @@ test_that("mmigrp option of dpgrowmm returns expect objects", {
 	expect_that(srm$bmat.summary, is_a("list"))
 	expect_that(names(srm)[16], matches("lpml"))
 	expect_that(ncol(srm$X),equals(5))
-	expect_that(names(srm$X),matches("time"))
+	expect_that(colnames(srm$X),matches("time"))
 	## evaluating MCMC sample results
 	expect_that(nrow(parms$M),is_equivalent_to((niter-nburn)/nthin))
 	expect_that(ncol(parms$B),is_equivalent_to(num.subj*nrandom))
@@ -104,7 +104,7 @@ test_that("mmi option of dpgrowmm returns expect objects", {
 	expect_that(srm$bmat.summary, is_a("list"))
 	expect_that(names(srm)[16], matches("lpml"))
 	expect_that(ncol(srm$X),equals(5))
-	expect_that(names(srm$X),matches("time"))
+	expect_that(colnames(srm$X),matches("time"))
 	## evaluating MCMC sample results
 	expect_that(nrow(parms$M),is_equivalent_to((niter-nburn)/nthin))
 	expect_that(ncol(parms$B),is_equivalent_to(num.subj*nrandom))
