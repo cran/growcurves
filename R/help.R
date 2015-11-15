@@ -1,10 +1,11 @@
-#' Bayesian semi and nonparametric growth curve models with employment of multiple membership random effects for longitudinal data.
+#' Bayesian Semi and Nonparametric Growth Curve Models with Employment 
+#' of Multiple Membership Random Effects for Longitudinal Data
 #'
 #' \tabular{ll}{
 #' Package: \tab growcurves\cr
 #' Type: \tab Package\cr
-#' Version: \tab 0.2.3.9\cr
-#' Date: \tab 2014-02-23\cr
+#' Version: \tab 0.2.4.0\cr
+#' Date: \tab 2015-11-13\cr
 #' License: \tab GPL (>= 3) \cr
 #' LazyLoad: \tab yes\cr
 #' }

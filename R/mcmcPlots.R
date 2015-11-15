@@ -30,7 +30,7 @@
 #' @param Deviance \code{iter.keep x 1} matrix of posterior samples for the model deviance.
 #' @return A list of plot objects of class \code{ggplot2} including:
 #'     \item{p.U}{by group plot of session effects, u[1:Nsession]. Plot is faceted for more than one set of effect terms.}
-#'     \item{p.Umm}{plot of "mm = W.subj.aff %*% u" for those clients attending assessions.}
+#'     \item{p.Umm}{plot of "mm = W.subj.aff \%*\% u" for those clients attending assessions.}
 #'     \item{p.Ub0}{plot of " mm + b0", the total random intercept, for those clients attending sessions.} 
 #'     \item{p.Ub}{plot of "mm + b" for multivariate MM effects with order equal to "Nrandom".}
 #'     \item{p.b}{stacked plots of b0,...,b(q-1) - vertical lines for each client span 2.5\% - 97.5\% values with mean noted.} 

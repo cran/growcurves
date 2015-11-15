@@ -46,7 +46,7 @@ test_that("ddp function returns correct objects under car prior construction", {
 	## checking plot output
 	expect_that("p.tcar" %in% names(pr), is_true())
 	## checking supplemental plot
-	psupp	<- ddpEffectsplot(DDP, trts.plot = "num_of_sessions")
+	psupp	<- ddpEffectsplot(DDP)
 	expect_that(length(psupp), equals(4))
 })
 

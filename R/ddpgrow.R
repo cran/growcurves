@@ -129,7 +129,6 @@ NULL
 #' @references
 #' 	T. D. Savitsky and S. M. Paddock (2011) Visual Sufficient Statistics for Repeated Measures data with growcurves for R, submitted to: Journal of Statistical Software.
 #' @export ddpgrow 
-#' @S3method ddpgrow default
 ddpgrow			<- function(y, subject, trt, time, n.random, n.fix_degree, formula, random.only, data, dosemat, numdose, typetreat,
 					labt, Omega, n.iter, n.burn, n.thin, shape.dp, rate.dp, M.init, plot.out)
 					UseMethod("ddpgrow")
@@ -515,7 +514,7 @@ ddpPost = function(y,X,Z,subject,dosemat,numt,typet,Omega,omegaplus,n.iter,n.bur
 #'
 #' @param object A \code{ddpgrow} object
 #' @param ... Ignored
-#' @S3method summary ddpgrow 
+#' @export 
 #' @method summary ddpgrow
 #' @aliases summary.ddpgrow
 summary.ddpgrow <- function(object,...)
@@ -532,7 +531,7 @@ summary.ddpgrow <- function(object,...)
 #'
 #' @param x A \code{ddpgrow} object
 #' @param ... Ignored
-#' @S3method print summary.ddpgrow
+#' @export 
 #' @method print summary.ddpgrow
 #' @noRd
 print.summary.ddpgrow <- function(x,...)
@@ -550,7 +549,7 @@ print.summary.ddpgrow <- function(x,...)
 #'
 #' @param object A \code{ddpgrow} object
 #' @param ... Ignored
-#' @S3method samples ddpgrow
+#' @export samples ddpgrow
 #' @aliases samples.ddpgrow
 #' @method samples ddpgrow
 #' @aliases samples.ddpgrow
@@ -591,7 +590,7 @@ samples.ddpgrow <- function(object,...)
 #' @param x A \code{dpgrow} object
 #' @param plot.out A \code{boolean} object.  If \code{TRUE}, plots are rendered.  In either case, plots are stored
 #' @param ... Ignored
-#' @S3method plot ddpgrow
+#' @export 
 #' @return res a list object of class \code{plot.dpgrow} of two items:
 #'	\item{plot.results}{	\code{ggplot2} plot objects.  See \code{\link{ddpMCMCplots}}. }
 #'	\item{dat.growcurve}{	A \code{data.frame} containing fields \code{c("fit","time","subject","trt")}

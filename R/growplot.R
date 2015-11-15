@@ -39,14 +39,18 @@ growplot <- function(object, compare.objects = NULL, subjects.plot = NULL, group
 			main.label = "Main_Model", title.lab = NULL)
 {
   ## check inputs
-  L = length(compare.objects)
-  for( l in 1:L )
+  if( !is.null(compare.objects) ) ## ensure class of compare.objects within allowed set
   {
-	if(class(compare.objects[[l]]) != "dpgrow" & class(compare.objects[[l]]) != "dpgrowmm" & class(compare.objects[[l]]) != "dpgrowmult" & class(compare.objects[[l]]) != "ddpgrow") 
-	{
-		stop("Class of each element of 'compare.objects' must be either 'dpgrow', 'dpgrowmm', 'dpgrowmult' or 'ddpgrow'.")
-	}
-  }
+       L = length(compare.objects)
+       for( l in 1:L )
+       {
+            if(class(compare.objects[[l]]) != "dpgrow" & class(compare.objects[[l]]) != "dpgrowmm" & class(compare.objects[[l]]) != "dpgrowmult" & class(compare.objects[[l]]) != "ddpgrow") 
+            {
+                 stop("Class of each element of 'compare.objects' must be either 'dpgrow', 'dpgrowmm', 'dpgrowmult' or 'ddpgrow'.")
+            }
+       } ## end loop l over elements in compare.objects[[l]]
+  } ## end conditional statement on whether is.null(compare.objects)
+ 
   if(class(object) != "dpgrow" & class(object) != "dpgrowmm" & class(object) != "dpgrowmult" & class(object) != "ddpgrow") stop("Class of 'object' must be either 'dpgrow', 'dpgrowmm', 'dpgrowmult' or 'ddpgrow'.")
   if( !is.null(groups.plot) & !is.null(subjects.plot) )
   {
@@ -67,20 +71,25 @@ growplot <- function(object, compare.objects = NULL, subjects.plot = NULL, group
   	if( length(setdiff(subjects.plot,subjects.input)) > 0 ) stop("\nSubjects to plot must be a subset of those used in model.\n")
   }
 
-  ## check that same set of subjects modeled in 'objects' are modeled in 'compare.objects'
-  num.objects = length(compare.objects)
-  for( m in 1:num.objects )
+  if( !is.null(compare.objects) )
   {
-	map.subject 		= summary(compare.objects[[m]])$summary.results$map.subject ## data.frame
-  	map.subject		= unique(map.subject)
-  	subjects.input 		= map.subject$label.input
-	if( length(setdiff(subjects.plot,subjects.input)) > 0 ) stop("\nObjects in 'compare.objects' must employ the same subjects as the main 'object'.\n")
-  }
+       ## check that same set of subjects modeled in 'object' are modeled in 'compare.objects'
+       num.objects = length(compare.objects)
+       for( m in 1:num.objects )
+       {
+            map.subject 		= summary(compare.objects[[m]])$summary.results$map.subject ## data.frame
+            map.subject		= unique(map.subject)
+            subjects.input 		= map.subject$label.input
+            if( length(setdiff(subjects.plot,subjects.input)) > 0 ) stop("\nObjects in 'compare.objects' must employ the same subjects as the main 'object'.\n")
+       }  
+  } ## end statements on to ensure same subjects in both object and compare.objects
+  
 
   ## check if subjects.subset are in subjects.plot
   if( !is.null(subjects.subset) )
   {
-	if( length(setdiff(subjects.subset,subjects.plot)) > 0 ) stop("\nsubjects.subset must be a subset of subjects.plot.\n")
+	if( length(setdiff(subjects.subset,subjects.plot)) > 0 ) 
+          stop("\nsubjects.subset must be a subset of subjects.plot.\n")
   }
 
   ## check if labels input properly
@@ -111,9 +120,9 @@ growplot <- function(object, compare.objects = NULL, subjects.plot = NULL, group
       	names(map.group)		<- c("subject","trt")
 	map.group			<- unique(map.group) ## in the case duplicate values were entered
   	## merge map.group with dat.pred to get new "trt" field to aggregate subjects in plots	
-     	dat.gc$trt 			<- NULL
-	dat.data$trt			<- NULL
-    	dat.gc				<- merge(dat.gc, map.group, by = "subject", all.x = T, sort = FALSE)
+     dat.gc$trt 		<- NULL
+	dat.data$trt		<- NULL
+    	dat.gc			<- merge(dat.gc, map.group, by = "subject", all.x = T, sort = FALSE)
 	dat.data			<- merge(dat.data, map.group, by = "subject", all.x = T, sort = FALSE)
   }
   
@@ -122,9 +131,9 @@ growplot <- function(object, compare.objects = NULL, subjects.plot = NULL, group
   ##
   p				= ggplot(data=dat.gc,aes(x=time, y = fit, group = subject)) ## no individual subject visibility
   l				= geom_line(linetype=5,colour = "slategray")
-  ## l				= geom_line(colour = alpha("black",1/5),aes(linetype=5))
-  l.2				= geom_smooth(aes(group=1),method = "loess", size = 1.1, colour = "black")
-  axis	 			= labs(x = x.lab, y = y.lab)
+  ## l			= geom_line(colour = alpha("black",1/5),aes(linetype=5))
+  l.2			= geom_smooth(aes(group=1),method = "loess", size = 1.1, colour = "black")
+  axis	 		= labs(x = x.lab, y = y.lab)
   f				= facet_wrap(~trt, scales="fixed")
   if( !is.null(title.lab) )
   { 
@@ -133,7 +142,7 @@ growplot <- function(object, compare.objects = NULL, subjects.plot = NULL, group
 	options				= NULL
   }
   dev.new()
-  p.gctrt		= p + l + l.2 + f + axis + options
+  p.gctrt		     = p + l + l.2 + f + axis + options
   print(p.gctrt)
 
 
@@ -142,72 +151,73 @@ growplot <- function(object, compare.objects = NULL, subjects.plot = NULL, group
   ##
   
   ## prepare data.frame that combines in comparison models
-  dat.igcdata					<- dat.data
+  dat.igcdata     				<- dat.data
   if( !is.null(compare.objects) )
   {
-	## set first entry to main model from object
-  	dat.igc					<- vector("list",(L+1))
-  	dat.igc[[1]]				<- dat.gc
-  	dat.igc[[1]]$model			<- main.label
-	dat.igcdata$model			<- main.label
-
-  	for( l in 2:(L+1)  )
-  	{
-  		plot.cobject 		<- plot(compare.objects[[l-1]],plot.out = FALSE)
-  		dat.igc[[l]]		<- subset(plot.cobject$dat.growcurve, subject %in% subjects.plot) 
-
-		if( !is.null(groups.plot) )
-		{
-        		## reset treatment variable to main model
-      			dat.igc[[l]]$trt 		<- NULL
-    			dat.igc[[l]]			<- merge(dat.igc[[l]], map.group, by = "subject", all.x = T, sort = FALSE)
-		}
-
-        	## adding model id variable
-        	if( !is.null(names(compare.objects)) )
-  		{
-  			dat.igc[[l]]$model		<- names(compare.objects)[[l-1]]
-  		}else{
-			dat.igc[[l]]$model		<- paste("Comp_Model_",l-1,sep="")
-  		}
-  	}
-  	dat.igc		<- do.call("rbind", dat.igc)
+       ## set first entry to main model from object
+       dat.igc					<- vector("list",(L+1))
+       dat.igc[[1]]				<- dat.gc
+       dat.igc[[1]]$model		<- main.label
+       dat.igcdata$model			<- main.label
+       
+       for( l in 2:(L+1)  )
+       {
+            plot.cobject 		<- plot(compare.objects[[l-1]],plot.out = FALSE)
+            dat.igc[[l]]		<- subset(plot.cobject$dat.growcurve, subject %in% subjects.plot) 
+            
+            if( !is.null(groups.plot) )
+            {
+                 ## reset treatment variable to main model
+                 dat.igc[[l]]$trt 		<- NULL
+                 dat.igc[[l]]			<- merge(dat.igc[[l]], map.group, by = "subject", all.x = T, sort = FALSE)
+            }
+            
+            ## adding model id variable
+            if( !is.null(names(compare.objects)) )
+            {
+                 dat.igc[[l]]$model		<- names(compare.objects)[[l-1]]
+            }else{
+                 dat.igc[[l]]$model		<- paste("Comp_Model_",l-1,sep="")
+            }
+       }
+       dat.igc		<- do.call("rbind", dat.igc)
   }else{ ## no comparison models
-	dat.igc		<- dat.gc
+       dat.igc		     <- dat.gc
+       dat.igc$model     <- eval( main.label )
   } ## end conditional statement on !is.null(compare.objects)
-
+  
   ## reorder model such that main.label is first
   dat.igc$model		<- factor(dat.igc$model)
   dat.igc$model		<- relevel(dat.igc$model, ref = main.label)
   
   if( !is.null(subjects.subset) | subjects.random == TRUE )
   {
-	if( is.null(subjects.subset) )
-	{
-		## sample from each treatment group roughly equally, but make total sampled add to 12
-		trt.u		= unique(dat.igc$trt)
-		num.trt		= length(trt.u)
-		if( num.trt >= 12)
-		{
-			subj.per.trt = 1
-		}else{
-			subj.per.trt = floor(12/num.trt)
-		}
-		subjects.subset	= vector("list", num.trt)
-		for( i in 1:num.trt )
-		{
-			tmp			= subset(dat.igc, trt %in% trt.u[i])
-			subj.trt		= tmp$subject
-			subjects.subset[[i]]	= sample(subj.trt, subj.per.trt, replace = FALSE)
-		}
-		subjects.subset		= unlist(subjects.subset)
-		subj.sampled		= subj.per.trt*num.trt
-		if(subj.sampled < 12) add.subj = sample(setdiff(subjects.plot, subjects.subset),(12-subj.sampled), replace = FALSE)
-		else add.subj = NULL
-		subjects.subset		= c(subjects.subset, add.subj)
-	}
-	dat.igc 			<- subset(dat.igc, subject %in% subjects.subset)  ## predicted growth curve data
-  	dat.igcdata			<- subset(dat.igcdata, subject %in% subjects.subset) ## real data
+       if( is.null(subjects.subset) )
+       {
+            ## sample from each treatment group roughly equally, but make total sampled add to 12
+            trt.u		= unique(dat.igc$trt)
+            num.trt		= length(trt.u)
+            if( num.trt >= 12)
+            {
+                 subj.per.trt = 1
+            }else{
+                 subj.per.trt = floor(12/num.trt)
+            }
+            subjects.subset	= vector("list", num.trt)
+            for( i in 1:num.trt )
+            {
+                 tmp			= subset(dat.igc, trt %in% trt.u[i])
+                 subj.trt		= tmp$subject
+                 subjects.subset[[i]]	= sample(subj.trt, subj.per.trt, replace = FALSE)
+            }
+            subjects.subset		= unlist(subjects.subset)
+            subj.sampled		= subj.per.trt*num.trt
+            if(subj.sampled < 12) add.subj = sample(setdiff(subjects.plot, subjects.subset),(12-subj.sampled), replace = FALSE)
+            else add.subj = NULL
+            subjects.subset		= c(subjects.subset, add.subj)
+       }
+       dat.igc 			<- subset(dat.igc, subject %in% subjects.subset)  ## predicted growth curve data
+       dat.igcdata			<- subset(dat.igcdata, subject %in% subjects.subset) ## real data
   }
   
   p				= ggplot(data=dat.igc,aes(x=time, y = fit) )
@@ -217,18 +227,18 @@ growplot <- function(object, compare.objects = NULL, subjects.plot = NULL, group
   f				= facet_wrap(trt~subject, scales="fixed")
   if( !is.null(title.lab) )
   { 
-  	options		 		= labs(title = title.lab[2])
+       options		 		= labs(title = title.lab[2])
   }else{
-	options				= NULL
+       options				= NULL
   }
   dev.new()
   p.gcsub			= p + l + f + axis + l.2 + options + scale_linetype_discrete(name = "Model")
   print(p.gcsub)
-
- return(invisible(list(dat.gc = dat.gc, dat.data = dat.data, dat.igc = dat.igc, p.gctrt = p.gctrt, p.gcsub = p.gcsub)))
-
- time <- fit <- trt <- subject <- model <- NULL; rm(time); rm(fit); rm(subject); rm(tmp)
-
+  
+  return(invisible(list(dat.gc = dat.gc, dat.data = dat.data, dat.igc = dat.igc, p.gctrt = p.gctrt, p.gcsub = p.gcsub)))
+  
+  time <- fit <- trt <- subject <- model <- NULL; rm(time); rm(fit); rm(subject); rm(tmp)
+  
   gc()
 
 } ## end of function growplot

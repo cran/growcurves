@@ -429,11 +429,11 @@ growthCurve	= function(y.case, B, Alpha, Beta, U = NULL, aff.clients = NULL, W.s
   dat.gc$trt		= factor(dat.gc$trt,labels = labs)
   dat.gc$subject	= factor(dat.gc$subject,labels = slabs) ## NOTE: the user-input labels, not the modeling labels, are returned in dat.gc and dat.data
   p			= ggplot(data=dat.gc,aes(x=time, y = fit, group = subject)) ## no individual subject visibility
-  l			= geom_line(colour = alpha("black",1/5), linetype=5)
-  ## l			= geom_line(colour = "black", alpha = 0.2, aes(linetype=5))
+  ## l			= geom_line(colour = alpha("black",1/5), linetype=5)
+  l			  = geom_line(colour = "black", alpha = 1/5, linetype=5)
   l.2			= geom_smooth(aes(group=1),method = "loess", size = 1.1, colour = "black")
-  axis	 		= labs(x = "Time", y = "Model Fit", type = "Cluster")
-  f			= facet_wrap(~trt, scales="fixed") 
+  axis	 	= labs(x = "Time", y = "Model Fit", type = "Cluster")
+  f			  = facet_wrap(~trt, scales="fixed") 
   p.gcall		= p + l + l.2 + f + axis
 
   ##

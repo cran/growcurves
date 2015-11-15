@@ -63,7 +63,7 @@ BEGIN_RCPP
 
     // Set random number generator state
     RNGScope scope; /* Rcpp */
-    srand ( time(NULL) ); /* arma */
+    //arma_rng::set_seed_random(); /* arma */
 
     // Armadillo structures to capture results
     // Will be wrapped into a list element on return

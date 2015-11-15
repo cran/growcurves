@@ -153,7 +153,6 @@ NULL
 #' @references
 #' 	T. D. Savitsky and S. M. Paddock (2012) Visual Sufficient Statistics for Repeated Measures data with growcurves for R, submitted to: Journal of Statistical Software.
 #' @export dpgrowmm 
-#' @S3method dpgrowmm default
 dpgrowmm			<- function(y, subject, trt, time, n.random, n.fix_degree, formula, random.only, data, Omega, group, subj.aff, W.subj.aff, multi, n.iter, 
 					n.burn, n.thin, strength.mm, shape.dp, rate.dp, plot.out, option)
 					UseMethod("dpgrowmm")
@@ -774,7 +773,7 @@ mmCmvplusDpPost = function (y, X, Z, H, Wcase, Wsubject, Omega, omegaplus, group
 #'
 #' @param object A \code{dpgrowmm} object
 #' @param ... Ignored
-#' @S3method summary dpgrowmm
+#' @export 
 #' @method summary dpgrowmm
 #' @aliases summary.dpgrowmm 
 summary.dpgrowmm <- function(object,...)
@@ -791,7 +790,7 @@ summary.dpgrowmm <- function(object,...)
 #'
 #' @param x A \code{dpgrowmm} object
 #' @param ... Ignored
-#' @S3method print summary.dpgrowmm
+#' @export 
 #' @method print summary.dpgrowmm
 #' @noRd
 print.summary.dpgrowmm <- function(x,...)
@@ -809,7 +808,7 @@ print.summary.dpgrowmm <- function(x,...)
 #'
 #' @param object A \code{dpgrowmm} object
 #' @param ... Ignored
-#' @S3method samples dpgrowmm
+#' @export samples dpgrowmm
 #' @return res list object of class \code{samples.dpgrowmm}, \code{samples.dpgrowmult}, or \code{samples.dpgrow}
 #' @export samples 
 #' @method samples dpgrowmm
@@ -869,7 +868,7 @@ samples.dpgrowmm <- function(object,...)
 #' @param x A \code{dpgrowmm} object
 #' @param plot.out A \code{boolean} object.  If \code{TRUE}, plots are rendered.  In either case, plots are stored
 #' @param ... Ignored
-#' @S3method plot dpgrowmm
+#' @export 
 #' @method plot dpgrowmm
 #' @return res a list object of class \code{plot.dpgrowmm} of 3 items:
 #'	\item{plot.results}{	\code{ggplot2} plot objects; see \code{\link{mcmcPlots}}. }

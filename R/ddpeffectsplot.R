@@ -56,28 +56,28 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
   subjects.input 	= map.subject$label.input
   if( is.null(subjects.plot) ) ## is.null(subjects.plot) = TRUE, randomly sample subject set
   {
-	subjects.num	= sample(1:nrow(map.subject), n.plot, replace = FALSE)
-	subjects.plot	= subjects.num ## labels are same as numerical count of subjects used to model
+	  subjects.num	= sample(1:nrow(map.subject), n.plot, replace = FALSE)
+	  subjects.plot	= subjects.num ## labels are same as numerical count of subjects used to model
   }else{ ## check that subjects.plot is a strict subset of subjects.input
   	if( length(setdiff(subjects.plot,subjects.input)) > 0 ) stop("\nSubjects to plot must be a subset of those used in model.\n")
-	tmp		= subset(map.subject, label.input %in% subjects.plot)
-	subjects.num	= tmp$label.new ## user inputs names, we extract numerical equivalent used in modeling
-	rm(tmp)
+	    tmp		= subset(map.subject, label.input %in% subjects.plot)
+	  subjects.num	= tmp$label.new ## user inputs names, we extract numerical equivalent used in modeling
+	  rm(tmp)
   }
   ## if( !is.null(map.group) ), check that subjects mapped are in subjects modeled
   if( !is.null(map.group) )
   {
- 	map.group		<- as.data.frame(map.group)
-	names(map.group)	<- c("label.input","cluster")
-	if( length(setdiff(map.group$label.input,subjects.input)) > 0 ) stop("\nSubjects to group for plotting must be those used to model.  Please check that first column of 'map.group' contains
+ 	  map.group		<- as.data.frame(map.group)
+	  names(map.group)	<- c("label.input","cluster")
+	  if( length(setdiff(map.group$label.input,subjects.input)) > 0 ) stop("\nSubjects to group for plotting must be those used to model.  Please check that first column of 'map.group' contains
 										subjects and second contains group membership.\n")
-	## replace label.input in map.group with numerical label.new
-	tmp			<- merge(map.group, map.subject, by="label.input", all.x = TRUE, sort = FALSE)
-	map.newgroup		<- data.frame(tmp$label.new,tmp$cluster)
-	names(map.newgroup)	<- c("subjects.num","cluster")
-	## capture number of clusters
-	clusters		<- unique(map.newgroup$cluster)
-	num.clust		<- length(clusters)
+	  ## replace label.input in map.group with numerical label.new
+	  tmp			<- merge(map.group, map.subject, by="label.input", all.x = TRUE, sort = FALSE)
+	  map.newgroup		<- data.frame(tmp$label.new,tmp$cluster)
+	  names(map.newgroup)	<- c("subjects.num","cluster")
+	  ## capture number of clusters
+	  clusters		<- unique(map.newgroup$cluster)
+	  num.clust		<- length(clusters)
   }
   ## look for conflicts on re-ordering instructions
   if( re.order == TRUE & !is.null(orderto) ) warning("\nSince re.order is set to TRUE, the orderto input will be ignored.  If want to use orderto, then set re.order to FALSE.\n")
@@ -89,14 +89,14 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
  if( !is.null(trts.plot) )
  {
 	if( length(setdiff(map.trtcov$label.input,trts.plot)) > 0) stop("\nTreatments selected for plotting must be those used to model.\n")
-  	tmp			= subset(map.trtcov, label.input %in% trts.plot)
+  	tmp			    = subset(map.trtcov, label.input %in% trts.plot)
   	trt.num			= tmp$label.new
   	rm(tmp)
   }else{ ## is.null(trts.plot), so randomly select a set of treatments
-	typet			= summary(object)$summary.results$typet
-	samp.treat		= min(length(typet),2)
-	trt.num			= sample(1:length(typet),samp.treat,replace=FALSE)
-	trts.plot		= unique(map.trtcov$label.input)[trt.num]
+	  typet			  = summary(object)$summary.results$typet
+	  samp.treat	= min(length(typet),2)
+	  trt.num			= sample(1:length(typet),samp.treat,replace=FALSE)
+	  trts.plot		= unique(map.trtcov$label.input)[trt.num]
   }
 
   ## create plot data.frame
@@ -162,26 +162,26 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
   ## point geom 
   if( cred.intervals == FALSE )
   {
-	if( re.order == TRUE )
-	{
-		## first create variable, dose_trtsubject, that confines reordering to within trt-subject.
-		dat			<- transform( dat, dose_trtsubject = factor(paste(dose,trt,subject,sep=".")) )
-		## although plotting dose_trtsubject, set x-axis tick labels to dose (within trt-subject)
-		options 		<- scale_x_discrete(labels=dat$dose, breaks=dat$dose_trtsubject)
+	  if( re.order == TRUE )
+	  {
+		  ## first create variable, dose_trtsubject, that confines reordering to within trt-subject.
+		  dat			<- transform( dat, dose_trtsubject = factor(paste(dose,trt,subject,sep=".")) )
+		  ## although plotting dose_trtsubject, set x-axis tick labels to dose (within trt-subject)
+		  options 		<- scale_x_discrete(labels=dat$dose, breaks=dat$dose_trtsubject)
   		p.p			= ggplot(data=dat,aes(x=reorder(dose_trtsubject,mean.effects), y = mean.effects, colour = factor(order), shape = factor(order))) + options
-	}else{
-		p.p			= ggplot(data=dat,aes(x=dose, y = mean.effects, colour = factor(order), shape = factor(order)))
-	}
-  	l			= geom_point()
-  	l.2			= geom_smooth(aes(group=factor(order)), method = "loess", span = 1.0, alpha = 0.1, se = FALSE)##, colour = "pink")
+	  }else{
+		  p.p			= ggplot(data=dat,aes(x=dose, y = mean.effects, colour = factor(order), shape = factor(order)))
+	  }
+  	l			      = geom_point()
+  	l.2			    = geom_smooth(aes(group=factor(order)), method = "loess", span = 1.0, alpha = 0.1, se = FALSE)##, colour = "pink")
   	yaxis 			= ylab("Effect Values")
   	options			= labs(colour = "Order", shape="Order")
   	f			= facet_wrap(trt~subject, scales="free", nrow=min(nt,n.plot) )
   }else{
-	dat.ci			= melt(dat, id = c("order","dose","trt","subject"))
-        dat.ci$quantile		= dat.ci$variable
-	dat.ci$effects		= dat.ci$value
-	dat.ci$variable <- dat.ci$value <- NULL
+	  dat.ci			      = melt(dat, id = c("order","dose","trt","subject","dose_trtsubject"))
+    dat.ci$quantile		= dat.ci$variable
+	  dat.ci$effects		= as.numeric(dat.ci$value)
+	  dat.ci$variable   <- dat.ci$value <- NULL
 
 	if( re.order == TRUE )
 	{
@@ -193,8 +193,10 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
 	}else{
 		p.p			= ggplot(data=dat.ci,aes(x=dose, y = effects, colour = factor(order), shape = factor(order)))
 	}
-  	l			= geom_line()
-  	l.2			= geom_smooth(aes(group=factor(order)), method = "loess", span = 1.0, alpha = 0.1, se = FALSE)##, colour = "pink")
+  	l			= geom_point(na.rm=TRUE)
+  	## l = geom_line
+  	l.2			= geom_smooth(aes(group=factor(order)), method = "loess", span = 1.0, alpha = 0.1, 
+  	                    se = FALSE, na.rm=TRUE)##, colour = "pink")
   	yaxis 			= ylab("Effect Values")
   	options			= labs(colour = "Order", shape="Order")
   	f			= facet_wrap(trt~subject, scales="free", nrow=min(nt,n.plot) )
@@ -282,7 +284,7 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
 	}else{
 		pc.m			= ggplot(data=dat.clust,aes(x = dose, y = mean.effects, colour = factor(order), shape = factor(order)))
 	}
-  	l				= geom_point()
+  	l				  = geom_point()
   	l.2				= geom_smooth(aes(linetype = factor(order), group=factor(order)), method = "loess", span = 1.0, alpha = 0.1, se = FALSE)##, colour = "pink")
   	yaxis 			= ylab("Effect Values")
   	options			= labs(colour = "Order", shape="Order",linetype = "Order")
@@ -311,7 +313,7 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
 	}else{
 		## of credible intervals, by cluster
 		datclust.ci					= melt(dat.clust, id = c("order","dose","trt","cluster"))
-      		datclust.ci$quantile				= datclust.ci$variable
+    datclust.ci$quantile				= datclust.ci$variable
 		datclust.ci$effects				= datclust.ci$value
 		datclust.ci$variable <- datclust.ci$value <- NULL
 
@@ -434,6 +436,6 @@ ddpEffectsplot <- function(object, subjects.plot = NULL, n.plot = 3, trts.plot =
 	}
   }
 
-  subject <- subjects.num <- label.input <- mean.effects <- dose <- cluster <- fit <- trt  <- dose_trtsubject <- dose_trtclust <- NULL  
+  subject <- subjects.num <- label.input <- mean.effects <- dose <- cluster <- fit <- trt  <- dose_trtsubject <- dose_trtclust <- effects <- quantile <- NULL  
 
 } ## end function ddpEffectsplot

@@ -50,7 +50,7 @@ XZcov = function(time = NULL , trt = NULL, trt.lab = NULL, subject = NULL, n.ran
     Z.c		= matrix(0, Ncase, n.random)
     for(j in 1:n.random)
     {
-	Z.c[,j]		= time^(j-1)
+	      Z.c[,j]		= time^(j-1)
     }
     colnames(Z.c) 	= paste("time^",0:(n.random-1),sep="")
     colnames(Z.c)[1]	= 1
@@ -73,9 +73,9 @@ XZcov = function(time = NULL , trt = NULL, trt.lab = NULL, subject = NULL, n.ran
     	{
     		for( i in 1:(Nlevel-1) ) ## trt defined to start at 0, so the first level is the baseline hold-out
     		{
-			this.trt	= as.integer( trt == i )
-			X.c		= cbind(X.c,this.trt*Xc.trt_gen)
-			names.x		= c(  names.x, paste("trt",trt.lab[i+1],"*time^",0:n.fix_degree,sep="_") )  ## trt.lab[2] corresponds to i = 1
+			      this.trt	= as.integer( trt == i )
+			      X.c		= cbind(X.c,this.trt*Xc.trt_gen)
+			      names.x		= c(  names.x, paste("trt",trt.lab[i+1],"*time^",0:n.fix_degree,sep="_") )  ## trt.lab[2] corresponds to i = 1
     		}
     	} ## end conditional statement on whether trt is a treatment vector
     	colnames(X.c)		= names.x

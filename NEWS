@@ -1,4 +1,4 @@
-Version 0.2.3.9
+Version 0.2.4.0
 -------------------------------------------------------------------------
 
 FEATURES
@@ -84,6 +84,12 @@ decomposition of precision matrix.
 ---------
 * Updated references, in particular for the upcoming paper in Journal of Statistical Software.
 
-2/23/2014
+4/02/2014
 ---------
-* Changed test syntax when using "match" to conform to testthat 0.8.1.
+* Fixed error in growplot() that prevented plots when user leaves compare.objects blank.  
+-- Reported by Travis Porco.
+
+10/16/2015
+---------
+* NAMESPACE suggests, rather than imports ggplot2 and testthat. 
+

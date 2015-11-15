@@ -73,7 +73,7 @@ BEGIN_RCPP
 
     // Set random number generator state
     RNGScope scope; /* Rcpp */
-    srand ( time(NULL) ); /* arma */
+    //arma_rng::set_seed_random(); /* arma */
 
     // Armadillo structures to capture results
     // Will be wrapped into a list element on return
@@ -400,7 +400,8 @@ END_RCPP
             for(m = 0; m < M; m++)
             {
                 cstarmats(m,k) = dstarmats(m,0).cols(startcol,endcol);
-                cstarvecs(m,k) = reshape(cstarmats(m,k),nr*dim,1,1); /* by row to get set of dosages */
+                //cstarvecs(m,k) = reshape(cstarmats(m,k),nr*dim,1,1); /* by row to get set of dosages */
+                cstarvecs(m,k) = reshape(cstarmats(m,k).t(),nr*dim,1);
             }
             startcol += dim;   
         }

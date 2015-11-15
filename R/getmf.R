@@ -30,14 +30,15 @@ getmf <- function(formula, random.only, data, na.action)
 
 	f	<- Formula(formula)
       	mf[[1]] <- as.name("model.frame")
-	mf$formula <- f
-	mf <- eval(mf, parent.frame())
+	      mf$formula <- f
+	      mf <- eval(mf, parent.frame())
 
      	y <- model.response(mf)
 	if(length(f)[2] == 2) ## fixed + random
 	{
      		X <- model.matrix(f,data = mf, rhs = 1)
-     		Z <- model.matrix(f, data = mf, rhs = 2) ## includes an intercept, unless formula includes -1
+     		Z <- model.matrix(f, data = mf, rhs = 2) ## includes an intercept, unless formula 
+     		                                                  ## includes -1
       	}else{
 		if(random.only == FALSE)
 		{

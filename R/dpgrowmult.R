@@ -146,7 +146,6 @@ NULL
 #' @references
 #' 	T. D. Savitsky and S. M. Paddock (2012) Visual Sufficient Statistics for Repeated Measures data with growcurves for R, submitted to: Journal of Statistical Software.
 #' @export dpgrowmult 
-#' @S3method dpgrowmult default
 dpgrowmult			<- function(y, subject, trt, time, n.random, n.fix_degree, formula, random.only, data, Omega, group, subj.aff, W.subj.aff, n.iter, 
 					n.burn, n.thin, strength.mm, shape.dp, rate.dp, plot.out, option, ulabs)
 					UseMethod("dpgrowmult")
@@ -726,7 +725,7 @@ mmmultPost = function (y, X, Z, Wcases, Mmats, Omegas, omegapluses, ngs, subject
 #'
 #' @param object A \code{dpgrowmult} object
 #' @param ... Ignored
-#' @S3method summary dpgrowmult
+#' @export 
 #' @method summary dpgrowmult
 #' @aliases summary.dpgrowmult 
 summary.dpgrowmult <- function(object,...)
@@ -743,7 +742,7 @@ summary.dpgrowmult <- function(object,...)
 #'
 #' @param x A \code{dpgrowmult} object
 #' @param ... Ignored
-#' @S3method print summary.dpgrowmult
+#' @export 
 #' @method print summary.dpgrowmult
 #' @noRd
 print.summary.dpgrowmult <- function(x,...)
@@ -761,7 +760,7 @@ print.summary.dpgrowmult <- function(x,...)
 #'
 #' @param object A \code{dpgrowmult} object
 #' @param ... Ignored
-#' @S3method samples dpgrowmult
+#' @export samples dpgrowmult
 #' @aliases samples.dpgrowmult
 #' @method samples dpgrowmult
 #' @aliases samples.dpgrowmult
@@ -800,7 +799,7 @@ samples.dpgrowmult <- function(object,...)
 #' @param x A \code{dpgrowmult} object
 #' @param plot.out A \code{boolean} object.  If \code{TRUE}, plots are rendered.  In either case, plots are stored
 #' @param ... Ignored
-#' @S3method plot dpgrowmult
+#' @export 
 #' @method plot dpgrowmult
 #' @return res a list object of class \code{plot.dpgrowmm} of 3 items:
 #'	\item{plot.results}{	\code{ggplot2} plot objects; see \code{\link{mcmcPlots}}. }

@@ -27,17 +27,26 @@
 #' @param Taue \code{iter.keep x 1} matrix of posterior samples capturing the precision parameter for the model error term.
 #' @param Deviance \code{iter.keep x 1} matrix of posterior samples for the model deviance.
 #' @return A list of plot objects of class \code{ggplot2} including:
-#'     	\item{p.theta}{stacked plots of b0,...,b(q-1) - vertical lines for each client span 2.5% - 97.5% values with mean noted.} 
+#'     	\item{p.theta}{stacked plots of b0,...,b(q-1) - vertical lines for 
+#'     	each client span 2.5\% - 97.5\% values with mean noted.} 
 #'     	\item{p.M}{MCMC trace plot of M, number of clusters.} 
-#'     	\item{p.acar}{MCMC trace plots of alphacar, the CAR strength parameter. Plot is faceted for more than one set of treatments under \code{"car"}.} 
-#'     	\item{p.tcar}{MCMC trace plots of alphacar, the CAR precision parameter. Plot is faceted for more than one set of treatments under \code{"car"}.} 
+#'     	\item{p.acar}{MCMC trace plots of alphacar, the CAR strength parameter. 
+#'     	Plot is faceted for more than one set of treatments under \code{"car"}.} 
+#'     	\item{p.tcar}{MCMC trace plots of alphacar, the CAR precision parameter. 
+#'     	Plot is faceted for more than one set of treatments under \code{"car"}.} 
 #'     	\item{p.taue}{MCMC trace plots of tau.e.} 
 #'     	\item{p.dev}{MCMC trace plots of deviance.} 
-#'	\item{p.lam}{Heatmap (tiled) plot of posterior mean covariance, Lambda, of polynomial orders of random effects, Delta_i.}
-#'	\item{p.mvn}{Heatmap plots of posterior mean covariance, Pmvn, of treatment dosages under \code{"mvn"} base distribution.  Plots are faceted by treatment.}
-#'	\item{p.aband}{95\% credible bands for alphacar CAR strength parameters associated to treatments under \code{"car"} base distribution.}
-#'	\item{p.tband}{95\% credible bands for taucar CAR precision parameters associated to treatments under \code{"car"} base distribution.}
-#'	\item{p.iband}{95\% credible bands for tauind dose precision parameters for \code{"ind"} base distribution, faceted by treatment (if more than one).}
+#'	    \item{p.lam}{Heatmap (tiled) plot of posterior mean covariance, 
+#'	    Lambda, of polynomial orders of random effects, Delta_i.}
+#'	    \item{p.mvn}{Heatmap plots of posterior mean covariance, 
+#'	    Pmvn, of treatment dosages under \code{"mvn"} base distribution. 
+#'	    Plots are faceted by treatment.}
+#'	    \item{p.aband}{95\% credible bands for alphacar CAR strength parameters 
+#'	    associated to treatments under \code{"car"} base distribution.}
+#'	    \item{p.tband}{95\% credible bands for taucar CAR precision parameters 
+#'	    associated to treatments under \code{"car"} base distribution.}
+#'	    \item{p.iband}{95\% credible bands for tauind dose precision parameters 
+#'	    for \code{"ind"} base distribution, faceted by treatment (if more than one).}
 #' @seealso \code{\link{ddpgrow}}, \code{\link{dpgrowmm}}, \code{\link{dpgrow}}, \code{\link{dpgrowmult}}
 #' @author Terrance Savitsky \email{tds151@@gmail.com}
 #' @note Intended as an internal function for \code{\link{ddpgrow}}
@@ -287,6 +296,7 @@ ddpMCMCplots = function(subjecti.u, labt = NULL, typet, numt, theta.summary, lam
    res		<- res[!sapply(res, is.null)]
    return(res)
 
-   value <- iteration <- subject <- dose <- column <- trt <- treatment <- NULL; rm(value); rm(iteration);
+   value <- iteration <- subject <- dose <- column <- trt <- treatment <- effects <- NULL; 
+   rm(value); rm(iteration);
 
 } ## end function ddpMCMCplots
