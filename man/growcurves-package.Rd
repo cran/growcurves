@@ -11,8 +11,8 @@ of Multiple Membership Random Effects for Longitudinal Data}
 \tabular{ll}{
 Package: \tab growcurves\cr
 Type: \tab Package\cr
-Version: \tab 0.2.4.0\cr
-Date: \tab 2015-11-13\cr
+Version: \tab 0.2.4.1\cr
+Date: \tab 2016-04-13\cr
 License: \tab GPL (>= 3) \cr
 LazyLoad: \tab yes\cr
 }
@@ -163,7 +163,7 @@ plot.results		= plot(res.mm)
 
 }
 \author{
-Terrance Savitsky \email{tds151@gmail.com} Susan Paddock \email{paddock@rand.org}
+Terrance Savitsky \email{tds151@gmail.com}
 }
 \references{
 S. M. Paddock and T. D. Savitsky (2013) Bayesian Hierarchical Semiparametric Modeling of Longitudinal

@@ -42,7 +42,7 @@ BEGIN_RCPP
     // Compute np, number of unique persons
     /* algorithm assumes cases clustered by unique client */ 
     IntegerVector dpr = diff(pr);
-    icolvec diffpersons(dpr.begin(), nc - 1, false);
+    Col<int32_t> diffpersons(dpr.begin(), nc - 1, false);
     int np = accu(diffpersons) + 1;
     
     // Create armadillo structures we will use for our computations
@@ -53,9 +53,9 @@ BEGIN_RCPP
     mat zmat(Zr.begin(), nc, nr, false);
     mat dosemat(Dr.begin(), np, ntr, false);
     colvec y(yr.begin(), nc, false);
-    icolvec persons(pr.begin(), nc, false);
-    icolvec numt(numT.begin(), nty, false); /* used nty since numT excludes intercept */
-    icolvec typet(typeT.begin(), nty, false);
+    Col<int32_t> persons(pr.begin(), nc, false);
+    Col<int32_t> numt(numT.begin(), nty, false); /* used nty since numT excludes intercept */
+    Col<int32_t> typet(typeT.begin(), nty, false);
     field<mat> doseperson(np,1); /* nr x (nr*ntr) dosage matrix, by person */
     buildD(doseperson, dosemat, nr); /* build doseperson, nr x (nr*ntr) matrices for each of np persons */
     // set up data objects indexed by clustering/subject unit
@@ -130,7 +130,7 @@ BEGIN_RCPP
         for(i = 0; i < nummvn; i++)
         {
             int dosei = numt(posmvn(i)); /* number of treatments for type i */
-	    Pmvn(i,0).set_size(nkeep,(dosei * dosei));
+	          Pmvn(i,0).set_size(nkeep,(dosei * dosei));
             // Pmvn(i,0).set_size(nkeep,pow(dosei,2));
             pmvn = 0.1*eye<mat>(dosei,dosei);
             pmatsmvn(i,0) = pmvn;    /* initialize sampling object */
@@ -155,7 +155,7 @@ BEGIN_RCPP
         Alphacar.set_size(nkeep,numcar); /*return object */
         Taucar.set_size(nkeep,numcar); /*return object */
 	// Initialize log probability for Metropolis sampling alphacar
-	logf.set_size(numcar);
+	      logf.set_size(numcar);
         qmats.set_size(numcar,1);
     }
     
@@ -208,8 +208,8 @@ BEGIN_RCPP
     icolvec num(M);
     for(int i = 0; i < M; i++)
     {
-	uvec pos	= find(s == i);
-	num(i)          = pos.n_elem;
+    	uvec pos	= find(s == i);
+    	num(i)          = pos.n_elem;
     }  
     // set locations for matrix of vectorized delta parameters, each nr*ntr
     mat    dstarmat(M,(nr*ntr)); rowvec mu(nr*ntr); mu.zeros(); rmvnrnd(Pdelt,dstarmat,mu);

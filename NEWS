@@ -1,4 +1,4 @@
-Version 0.2.4.0
+Version 0.2.4.1
 -------------------------------------------------------------------------
 
 FEATURES
@@ -92,4 +92,10 @@ decomposition of precision matrix.
 10/16/2015
 ---------
 * NAMESPACE suggests, rather than imports ggplot2 and testthat. 
+
+04/13/2016
+----------
+* Under C++11/14, Armadillo uses 64-bit integer (long long) definitions for initiating uword and sword typedefs used for uvec and
+  ivec, respectively.  The long long type is forbidden in R, so check if_defined(ARMA_32BIT_WORD) and, if so, un_def ARMA_64BIT_WORD.
+* add roxygen2 @export tag to default methods for dpgrow, dpgrowmm, dpgrowmult, ddpgrow to fix a bug on methods dispatch.
 

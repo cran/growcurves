@@ -136,6 +136,7 @@ ddpgrow			<- function(y, subject, trt, time, n.random, n.fix_degree, formula, ra
 ################################################
 ## default dispatch method for mm-session models
 ################################################
+#' @export
 ddpgrow.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.random = NULL, n.fix_degree = NULL, formula = NULL, random.only = FALSE, data = NULL,
 					dosemat, numdose, typetreat = NULL, labt = NULL, Omega = NULL, n.iter, n.burn, n.thin = 1,
 					shape.dp = 1, rate.dp = 1, M.init = NULL, plot.out = TRUE)

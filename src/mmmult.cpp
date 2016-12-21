@@ -38,7 +38,7 @@ BEGIN_RCPP
     // Compute np, number of unique persons
     /* algorithm assumes cases clustered by unique client */ 
     IntegerVector dpr = diff(pr);
-    icolvec diffpersons(dpr.begin(), nc - 1, false);
+    Col<int32_t> diffpersons(dpr.begin(), nc - 1, false);
     int np = accu(diffpersons) + 1;
     
     // Create armadillo structures we will use for our computations
@@ -48,7 +48,7 @@ BEGIN_RCPP
     mat xmat(Xr.begin(), nc, nf, false);
     mat zmat(Zr.begin(), nc, nr, false);
     colvec y(yr.begin(), nc, false);
-    icolvec persons(pr.begin(), nc, false);
+    Col<int32_t> persons(pr.begin(), nc, false);
     /* use for transferring by-subject objects from clustering to sampling locations for DP(subjects) */
     field<mat> zsplit(np,1); field<mat> ztzsplit(np,1);
     field<mat> xsplit(np,1);

@@ -8,6 +8,10 @@
 #ifndef MMC_H
 #define	MMC_H
 
+#if defined(ARMA_32BIT_WORD)
+#undef ARMA_64BIT_WORD
+#endif
+
 #include <RcppArmadillo.h>
 #include <time.h>
 

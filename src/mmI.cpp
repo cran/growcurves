@@ -35,7 +35,7 @@ BEGIN_RCPP
     // Compute np, number of unique clients
     // algorithm assumes cases clustered by unique client
     IntegerVector dpr = diff(pr);
-    icolvec diffpersons(dpr.begin(), nc - 1, false);
+    Col<int32_t> diffpersons(dpr.begin(), nc - 1, false);
     int np = accu(diffpersons) + 1;
     /* int np = accumulate(dpr.begin,dpr.end,1); */
 
@@ -49,7 +49,7 @@ BEGIN_RCPP
     mat wcase(Wcr.begin(),nc, ns, false);
     mat wpers(Wp.begin(),npcbt, ns, false); /* mmwt */
     colvec y(yr.begin(), nc, false);
-    icolvec persons(pr.begin(), nc, false);
+    Col<int32_t> persons(pr.begin(), nc, false);
 
     // pre-compute quadratic product of design matrix for use in sampling
     field<mat> zsplit(np,1); field<mat> ztzsplit(np,1);

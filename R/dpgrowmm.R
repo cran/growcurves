@@ -160,6 +160,7 @@ dpgrowmm			<- function(y, subject, trt, time, n.random, n.fix_degree, formula, r
 ################################################
 ## default dispatch method for mm-session models
 ################################################
+#' @export
 dpgrowmm.default		<- function(y = NULL, subject, trt = NULL, time = NULL, n.random = NULL, n.fix_degree = NULL, formula = NULL, 
 						random.only = FALSE, data = NULL, Omega = NULL, group = NULL, subj.aff = NULL, W.subj.aff, multi = FALSE,
 					 	n.iter, n.burn, n.thin = 1, strength.mm = 0.1, shape.dp = 1, rate.dp = 1, plot.out = TRUE, option = "mmi")

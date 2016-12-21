@@ -43,13 +43,13 @@ BEGIN_RCPP
     // Compute np, number of unique clients
     // algorithm assumes cases clustered by unique client
     IntegerVector dpr = diff(pr);
-    icolvec diffpersons(dpr.begin(), nc - 1, false);
+    Col<int32_t> diffpersons(dpr.begin(), nc - 1, false);
     int np = accu(diffpersons) + 1;
     /* int np = accumulate(dpr.begin,dpr.end,1); */
 
     // compute ng, number of session groups
     IntegerVector dgr = diff(gr);
-    icolvec diffgroups(dgr.begin(),ns - 1, false);
+    Col<int32_t> diffgroups(dgr.begin(),ns - 1, false);
     ng = accu(diffgroups) + 1;
 
     // Create armadillo structures we will use for our computations
@@ -63,7 +63,7 @@ BEGIN_RCPP
     mat omega(Or.begin(), ns, ns, false);
     colvec y(yr.begin(), nc, false);
     colvec omegaplus(opr.begin(), ns, false);
-    icolvec persons(pr.begin(), nc, false);
+    Col<int32_t> persons(pr.begin(), nc, false);
     // set up data objects indexed by clustering unit
     field<mat> zsplit(np,1); field<mat> ztzsplit(np,1);
     field<mat> xsplit(np,1); field<mat> wsplit(np,1);
